@@ -74,76 +74,79 @@ struct MapViewRepresentable: UIViewRepresentable {
         
     
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-                guard !(annotation is MKUserLocation) else { return nil }
+            guard !(annotation is MKUserLocation) else { return nil }
+            
+            let identifier = "StopPin"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+            
+            if annotationView == nil {
+                annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
                 
-                let identifier = "StopPin"
-                var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
-                
-                if annotationView == nil {
-                    annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-                    annotationView?.canShowCallout = true
-                    
-                    let button = UIButton(type: .detailDisclosure)
-                    annotationView?.rightCalloutAccessoryView = button
-                } else {
-                    annotationView?.annotation = annotation
-                }
-                
-                // Extract direction from subtitle
-                if let subtitle = annotation.subtitle,
-                   let direction = subtitle?.components(separatedBy: " - ").last {
-                    
-                    // Set the marker image based on direction
-                    let markerImage: UIImage?
-                    switch direction.lowercased() {
-                    case "southbound":
-                        markerImage = UIImage(named: "GreenBall")?.withTintColor(.systemGreen, renderingMode: .alwaysTemplate)
-                    case "northbound":
-                        markerImage = UIImage(named: "OrangeBall")?.withTintColor(.systemOrange, renderingMode: .alwaysTemplate)
-                    case "eastbound":
-                        markerImage = UIImage(named: "PinkBall")?.withTintColor(.systemRed, renderingMode: .alwaysTemplate)
-                    case "westbound":
-                        markerImage = UIImage(named: "BlueBall")?.withTintColor(.systemBlue, renderingMode: .alwaysTemplate)
-                    default:
-                        markerImage = UIImage(named: "DefaultBall")?.withTintColor(.systemGray, renderingMode: .alwaysTemplate)
-                    }
-                    
-                    if let image = markerImage {
-                        let size = CGSize(width: 32, height: 32)
-                        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-                        defer { UIGraphicsEndImageContext() }
-                        
-                        guard let context = UIGraphicsGetCurrentContext() else {
-                            annotationView?.image = image
-                            annotationView?.frame.size = size
-                            return annotationView
-                        }
-                        
-                        image.draw(in: CGRect(origin: .zero, size: size))
-                        context.setBlendMode(.plusLighter)
-                        
-                        
-                        let brightSpotPath = UIBezierPath(ovalIn: CGRect(x: size.width * 0.35,
-                                                                       y: size.height * 0.1,
-                                                                       width: size.width * 0.1,
-                                                                       height: size.height * 0.1))
-                        context.setFillColor(UIColor.white.withAlphaComponent(0.9).cgColor)
-                        brightSpotPath.fill()
-                        
-                        let glossyImage = UIGraphicsGetImageFromCurrentImageContext()
-                        annotationView?.image = glossyImage
-                        annotationView?.frame.size = size
-                    }
-                }
-                
-                annotationView?.layer.shadowColor = UIColor.black.cgColor
-                annotationView?.layer.shadowOffset = CGSize(width: 0, height: 1)
-                annotationView?.layer.shadowOpacity = 0.3
-                annotationView?.layer.shadowRadius = 1
-                annotationView?.displayPriority = .required
-                
-                return annotationView
+                let button = UIButton(type: .detailDisclosure)
+                annotationView?.rightCalloutAccessoryView = button
+            } else {
+                annotationView?.annotation = annotation
             }
+            
+            // Extract direction from subtitle
+            if let subtitle = annotation.subtitle,
+               let direction = subtitle?.components(separatedBy: " - ").last {
+                
+                // Set the marker image based on direction
+                let markerImage: UIImage?
+                switch direction.lowercased() {
+                case "southbound":
+                    markerImage = UIImage(named: "GreenBall")?.withTintColor(.systemGreen, renderingMode: .alwaysTemplate)
+                case "northbound":
+                    markerImage = UIImage(named: "OrangeBall")?.withTintColor(.systemOrange, renderingMode: .alwaysTemplate)
+                case "eastbound":
+                    markerImage = UIImage(named: "PinkBall")?.withTintColor(.systemRed, renderingMode: .alwaysTemplate)
+                case "westbound":
+                    markerImage = UIImage(named: "BlueBall")?.withTintColor(.systemBlue, renderingMode: .alwaysTemplate)
+                default:
+                    markerImage = UIImage(named: "DefaultBall")?.withTintColor(.systemGray, renderingMode: .alwaysTemplate)
+                }
+                
+                if let image = markerImage {
+                    let size = CGSize(width: 32, height: 32)
+                    UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+                    defer { UIGraphicsEndImageContext() }
+                    
+                    guard let context = UIGraphicsGetCurrentContext() else {
+                        annotationView?.image = image
+                        annotationView?.frame.size = size
+                        return annotationView
+                    }
+                    
+                    image.draw(in: CGRect(origin: .zero, size: size))
+                    context.setBlendMode(.plusLighter)
+                    
+                    let brightSpotPath = UIBezierPath(ovalIn: CGRect(x: size.width * 0.35,
+                                                                     y: size.height * 0.1,
+                                                                     width: size.width * 0.1,
+                                                                     height: size.height * 0.1))
+                    context.setFillColor(UIColor.white.withAlphaComponent(0.9).cgColor)
+                    brightSpotPath.fill()
+                    
+                    let glossyImage = UIGraphicsGetImageFromCurrentImageContext()
+                    annotationView?.image = glossyImage
+                    annotationView?.frame.size = size
+                    
+                    // Increase the hitbox size
+                    annotationView?.bounds = CGRect(x: 0, y: 0, width: 44, height: 44)
+                    annotationView?.centerOffset = CGPoint(x: 0, y: -16)
+                }
+            }
+            
+            annotationView?.layer.shadowColor = UIColor.black.cgColor
+            annotationView?.layer.shadowOffset = CGSize(width: 0, height: 1)
+            annotationView?.layer.shadowOpacity = 0.3
+            annotationView?.layer.shadowRadius = 1
+            annotationView?.displayPriority = .required
+            
+            return annotationView
+        }
         
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let circleOverlay = overlay as? MKCircle {

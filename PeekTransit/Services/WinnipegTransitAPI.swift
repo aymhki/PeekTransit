@@ -244,6 +244,7 @@ class TransitAPI {
                             let estimatedTime = arrival["estimated"] as? String
                             let scheduledTime = arrival["scheduled"] as? String
                             var finalArrivalText = ""
+                            var arrivalState = "Ok"
 
                             if let estimatedTimeStr = estimatedTime,
                                let scheduledTimeStr = scheduledTime {
@@ -261,23 +262,35 @@ class TransitAPI {
                                 let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: currentDate)
                                 let currentTotalMinutes = (currentDateComponents.year! * 525600) + (currentDateComponents.month! * 43800) + (currentDateComponents.day! * 1440) + (currentDateComponents.hour! * 60) + currentDateComponents.minute!
                                 
-                                let timeDifference = estimatedTotalMinutes - currentTotalMinutes
-                                let delay = estimatedTotalMinutes - scheduledTotalMinutes
-
+                                var timeDifference = 0.0
+                                
+                                if ( (estimatedTotalMinutes - currentTotalMinutes) < 0 ) {
+                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
+                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0 ) {
+                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
+                                }
+                                
+                                var delay = 0.0
+                                
+                                if ( (estimatedTotalMinutes - scheduledTotalMinutes) < 0 ) {
+                                    delay = floor(Double(estimatedTotalMinutes - scheduledTotalMinutes))
+                                } else if ( (estimatedTotalMinutes - scheduledTotalMinutes) > 0 ) {
+                                    delay = ceil(Double(estimatedTotalMinutes - scheduledTotalMinutes))
+                                }
 
                                 if timeDifference < -1 {
                                     continue
                                 }
                                 
                                 if cancelled == "true" {
-                                    finalArrivalText = "Cancelled"
+                                    arrivalState = "Cancelled"
+                                    finalArrivalText = ""
                                 } else {
                                     if timeDifference < 0 {
                                         finalArrivalText = "\(Int(-timeDifference)) min. ago"
                                     } else if timeDifference < 15 {
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else {
-
                                         var finalHour = Int(estimatedTimeParsedTime[0])!
                                         var am = false
 
@@ -294,17 +307,22 @@ class TransitAPI {
                                             finalArrivalText += " AM"
                                         } else {
                                             finalArrivalText += " PM"
-                                            }
+                                        }
                                     }
                                     
-                                    if delay > 1 {
-                                        finalArrivalText = "Late \(Int(timeDifference)) min."
-                                    } else if delay < -1 {
-                                        finalArrivalText = "Early \(Int(-timeDifference)) min."
+                                    if delay > 0 && timeDifference < 15 {
+                                        arrivalState = "Late"
+                                        finalArrivalText = "\(Int(timeDifference)) min."
+                                    } else if delay < 0 && timeDifference < 15 {
+                                        arrivalState = "Early"
+                                        finalArrivalText = "\(Int(timeDifference)) min."
                                     } else {
-                                        finalArrivalText = "Ok \(String(finalArrivalText))"
+                                        arrivalState = "Ok"
                                     }
-                                
+                                    
+                                    if (timeDifference == 0.0 || (timeDifference > 1 && timeDifference < -1)) {
+                                        finalArrivalText = "Due"
+                                    }
                                 }
                             } else {
                                 finalArrivalText = "Time Unavailable"
@@ -314,13 +332,90 @@ class TransitAPI {
                                 variantKey = String(firstPart)
                             }
                             
-                            busScheduleList.append("\(variantKey) ---- \(variantName) ---- \(finalArrivalText)")
+                            busScheduleList.append("\(variantKey) ---- \(variantName) ---- \(arrivalState) ---- \(finalArrivalText)")
                         }
                     }
                 }
             }
         }
         
-        return busScheduleList
+        // Sort the bus schedule list according to the specified priority
+        return busScheduleList.sorted(by: { (str1: String, str2: String) -> Bool in
+            let componentsA = str1.components(separatedBy: " ---- ")
+            let componentsB = str2.components(separatedBy: " ---- ")
+            
+            let timeA = componentsA[3]
+            let timeB = componentsB[3]
+            let stateA = componentsA[2]
+            let stateB = componentsB[2]
+            
+            // Priority 1: "Due" entries come first
+            if timeA == "Due" && timeB != "Due" {
+                return true
+            }
+            if timeB == "Due" && timeA != "Due" {
+                return false
+            }
+            if timeA == "Due" && timeB == "Due" {
+                return true
+            }
+            
+            // Priority 2: Handle minute-based entries
+            let isMinutesA = timeA.hasSuffix("min.")
+            let isMinutesB = timeB.hasSuffix("min.")
+            
+            if isMinutesA && isMinutesB {
+                // Extract the minute values
+                let minutesA = Int(timeA.components(separatedBy: " ")[0]) ?? 0
+                let minutesB = Int(timeB.components(separatedBy: " ")[0]) ?? 0
+                
+                // Sort by state priority first
+                if stateA != stateB {
+                    if stateA == "Early" { return true }
+                    if stateB == "Early" { return false }
+                    if stateA == "Late" { return true }
+                    if stateB == "Late" { return false }
+                }
+                
+                // If states are the same, sort by minutes
+                return minutesA < minutesB
+            }
+            
+            // If one is minutes and other is time
+            if isMinutesA { return true }
+            if isMinutesB { return false }
+            
+            // Priority 3: Handle time format (HH:MM AM/PM)
+            let timeComponentsA = timeA.components(separatedBy: " ")
+            let timeComponentsB = timeB.components(separatedBy: " ")
+            
+            if timeComponentsA.count == 2 && timeComponentsB.count == 2 {
+                let hourMinA = timeComponentsA[0].components(separatedBy: ":")
+                let hourMinB = timeComponentsB[0].components(separatedBy: ":")
+                
+                let hourA = Int(hourMinA[0]) ?? 0
+                let hourB = Int(hourMinB[0]) ?? 0
+                let minuteA = Int(hourMinA[1]) ?? 0
+                let minuteB = Int(hourMinB[1]) ?? 0
+                let isAMA = timeComponentsA[1] == "AM"
+                let isAMB = timeComponentsB[1] == "AM"
+                
+                // Compare AM/PM first
+                if isAMA != isAMB {
+                    return isAMA
+                }
+                
+                // Compare hours
+                if hourA != hourB {
+                    return hourA < hourB
+                }
+                
+                // Compare minutes
+                return minuteA < minuteB
+            }
+            
+            // Handle any other cases (like "Time Unavailable")
+            return false
+        })
     }
 }
