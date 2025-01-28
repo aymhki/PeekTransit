@@ -170,7 +170,7 @@ class TransitAPI {
         let currentComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: currentDate)
 
         var twelveHoursLaterComponents = currentComponents
-        twelveHoursLaterComponents.hour! += 12
+        twelveHoursLaterComponents.hour! += 24
 
         if twelveHoursLaterComponents.hour! >= 24 {
             twelveHoursLaterComponents.hour! -= 24
@@ -185,7 +185,7 @@ class TransitAPI {
 
         let twelveHoursLater = calendar.date(from: twelveHoursLaterComponents)!
         let startOfNextDay = calendar.date(from: startOfNextDayComponents)!
-        let endDate = twelveHoursLater < startOfNextDay ? twelveHoursLater : startOfNextDay
+        let endDate = twelveHoursLater //twelveHoursLater < startOfNextDay ? twelveHoursLater : startOfNextDay
 
         func formatToISO8601String(from components: DateComponents) -> String {
             let year = String(format: "%04d", components.year!)
@@ -194,7 +194,7 @@ class TransitAPI {
             let hour = String(format: "%02d", components.hour!)
             let minute = String(format: "%02d", components.minute!)
             let second = String(format: "%02d", components.second!)
-            return "\(year)-\(month)-\(day)T\(hour):\(minute):\(second)Z"
+            return "\(year)-\(month)-\(day)T\(hour):\(minute):\(second)"
         }
 
         let startTime = formatToISO8601String(from: currentComponents)
