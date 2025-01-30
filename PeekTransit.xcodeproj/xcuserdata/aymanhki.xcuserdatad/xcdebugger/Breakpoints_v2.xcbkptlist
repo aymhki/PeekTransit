@@ -238,8 +238,8 @@
             filePath = "PeekTransit/Services/WinnipegTransitAPI.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "235"
-            endingLineNumber = "235"
+            startingLineNumber = "211"
+            endingLineNumber = "211"
             landmarkName = "cleanStopSchedule(schedule:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -254,8 +254,8 @@
             filePath = "PeekTransit/Services/WinnipegTransitAPI.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "204"
-            endingLineNumber = "204"
+            startingLineNumber = "180"
+            endingLineNumber = "180"
             landmarkName = "getStopSchedule(stopNumber:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -270,10 +270,26 @@
             filePath = "PeekTransit/Services/WinnipegTransitAPI.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "197"
-            endingLineNumber = "197"
+            startingLineNumber = "173"
+            endingLineNumber = "173"
             landmarkName = "formatToISO8601String(from:)"
             landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8EF85EDA-6287-4977-A05B-00868D1E77EC"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PeekTransit/Services/WinnipegTransitAPI.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "210"
+            endingLineNumber = "210"
+            landmarkName = "cleanStopSchedule(schedule:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

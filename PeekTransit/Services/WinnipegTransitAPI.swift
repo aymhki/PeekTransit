@@ -1,34 +1,7 @@
 import Foundation
 import CoreLocation
 
-enum TransitError: LocalizedError {
-    case invalidURL
-    case networkError(Error)
-    case invalidResponse
-    case invalidData
-    case serviceDown
-    case parseError(String)
-    case batchProcessingError(String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Invalid URL configuration"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
-        case .invalidResponse:
-            return "Invalid response from server"
-        case .invalidData:
-            return "Invalid data received"
-        case .serviceDown:
-            return "Transit service is currently unavailable"
-        case .parseError(let message):
-            return "Data parsing error: \(message)"
-        case .batchProcessingError(let message):
-            return "Error processing stops: \(message)"
-        }
-    }
-}
+
 
 class TransitAPI {
     private let apiKey = "uoYzaq2iEyZK1opS6zqo"
@@ -36,9 +9,9 @@ class TransitAPI {
     static let shared = TransitAPI()
     @Published private(set) var isLoading = false
     
-    private init() {}
+    init() {}
     
-    private func createURL(path: String, parameters: [String: String] = [:]) -> URL? {
+    func createURL(path: String, parameters: [String: String] = [:]) -> URL? {
         var components = URLComponents(string: "\(baseURL)/\(path)")
         var queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
         queryItems.append(URLQueryItem(name: "api-key", value: apiKey))
@@ -46,7 +19,7 @@ class TransitAPI {
         return components?.url
     }
     
-    private func fetchData(from url: URL) async throws -> Data {
+    func fetchData(from url: URL) async throws -> Data {
         isLoading = true
         defer { isLoading = false }
         
@@ -71,6 +44,7 @@ class TransitAPI {
                 "lon": String(userLocation.coordinate.longitude),
                 "distance": "500",
                 "walking": "false"
+//                "usage": "short"
             ]
         ) else {
             throw TransitError.invalidURL
@@ -148,8 +122,10 @@ class TransitAPI {
                     return ["route": route, "variant": variant]
                 }
                 
-                stop["variants"] = variants
-                enrichedStops.append(stop)
+                if !variants.isEmpty {
+                    stop["variants"] = variants
+                    enrichedStops.append(stop)
+                }
                 
             } catch {
                 print("Error processing stop \(stop["number"] ?? "unknown"): \(error.localizedDescription)")
@@ -170,7 +146,7 @@ class TransitAPI {
         let currentComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: currentDate)
 
         var twelveHoursLaterComponents = currentComponents
-        twelveHoursLaterComponents.hour! += 24
+        twelveHoursLaterComponents.hour! += 12
 
         if twelveHoursLaterComponents.hour! >= 24 {
             twelveHoursLaterComponents.hour! -= 24
@@ -185,7 +161,7 @@ class TransitAPI {
 
         let twelveHoursLater = calendar.date(from: twelveHoursLaterComponents)!
         let startOfNextDay = calendar.date(from: startOfNextDayComponents)!
-        let endDate = twelveHoursLater //twelveHoursLater < startOfNextDay ? twelveHoursLater : startOfNextDay
+        let endDate = twelveHoursLater // twelveHoursLater < startOfNextDay ? twelveHoursLater : startOfNextDay
 
         func formatToISO8601String(from components: DateComponents) -> String {
             let year = String(format: "%04d", components.year!)
@@ -236,10 +212,10 @@ class TransitAPI {
                     for stop in scheduledStops {
                         if let variant = stop["variant"] as? [String: Any],
                            var variantKey = variant["key"] as? String,
-                           let variantName = variant["name"] as? String,
+                           var variantName = variant["name"] as? String,
                            let cancelled = stop["cancelled"] as? String,
                            let times = stop["times"] as? [String: Any],
-                           let arrival = times["arrival"] as? [String: Any] {
+                           let arrival = times["departure"] as? [String: Any] {
                             
                             let estimatedTime = arrival["estimated"] as? String
                             let scheduledTime = arrival["scheduled"] as? String
@@ -262,7 +238,7 @@ class TransitAPI {
                                 let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: currentDate)
                                 let currentTotalMinutes = (currentDateComponents.year! * 525600) + (currentDateComponents.month! * 43800) + (currentDateComponents.day! * 1440) + (currentDateComponents.hour! * 60) + currentDateComponents.minute!
                                 
-                                var timeDifference = 0.0
+                                var timeDifference = 0.0 //estimatedTotalMinutes - currentTotalMinutes
                                 
                                 if ( (estimatedTotalMinutes - currentTotalMinutes) < 0 ) {
                                     timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
@@ -270,13 +246,13 @@ class TransitAPI {
                                     timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
                                 }
                                 
-                                var delay = 0.0
+                                var delay = estimatedTotalMinutes - scheduledTotalMinutes
                                 
-                                if ( (estimatedTotalMinutes - scheduledTotalMinutes) < 0 ) {
-                                    delay = floor(Double(estimatedTotalMinutes - scheduledTotalMinutes))
-                                } else if ( (estimatedTotalMinutes - scheduledTotalMinutes) > 0 ) {
-                                    delay = ceil(Double(estimatedTotalMinutes - scheduledTotalMinutes))
-                                }
+//                                if ( (estimatedTotalMinutes - scheduledTotalMinutes) < 0 ) {
+//                                    delay = floor(Double(estimatedTotalMinutes - scheduledTotalMinutes))
+//                                } else if ( (estimatedTotalMinutes - scheduledTotalMinutes) > 0 ) {
+//                                    delay = ceil(Double(estimatedTotalMinutes - scheduledTotalMinutes))
+//                                }
 
                                 if timeDifference < -1 {
                                     continue
@@ -292,13 +268,12 @@ class TransitAPI {
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else {
                                         var finalHour = Int(estimatedTimeParsedTime[0])!
-                                        var am = false
-
-                                        if finalHour > 12 {
+                                        var am = finalHour < 12
+                                                    
+                                        if finalHour == 0 {
+                                            finalHour = 12
+                                        } else if finalHour > 12 {
                                             finalHour -= 12
-                                            am = false
-                                        } else {
-                                            am = true
                                         }
 
                                         finalArrivalText = "\(finalHour):\(estimatedTimeParsedTime[1])"
@@ -320,7 +295,7 @@ class TransitAPI {
                                         arrivalState = "Ok"
                                     }
                                     
-                                    if (timeDifference == 0.0 || (timeDifference > 1 && timeDifference < -1)) {
+                                    if (timeDifference == 0 || (timeDifference > 1 && timeDifference < -1)) {
                                         finalArrivalText = "Due"
                                     }
                                 }
@@ -332,6 +307,116 @@ class TransitAPI {
                                 variantKey = String(firstPart)
                             }
                             
+                            
+                            if (variantKey.contains("BLUE")) {
+                                
+                                variantKey = "B"
+                            }
+                            
+                            if (variantName.contains("University of Manitoba")) {
+                                variantName = "U of M"
+                            } else if (variantName.contains("Prairie Pointe")) {
+                                variantName = "Prairie P."
+                            } else if (variantName.contains("Kildonan Place")) {
+                                variantName = "Kildonan P."
+                            } else if (variantName.contains("Markham Station")) {
+                                variantName = "Markham S."
+                            } else if (variantName.lowercased().contains("Via Kildare".lowercased())) {
+                                variantName = "V. Kildare"
+                            } else if (variantName.lowercased().contains("Via Regent".lowercased())) {
+                                variantName = "V. Regent"
+                            } else if (variantName.contains("Beaumont Station")) {
+                                variantName = "Beaumont S."
+                            } else if (variantName.contains("Garden City Centre")) {
+                                variantName = "Garden City C."
+                            } else if (variantName.contains("Outlet Collection")) {
+                                variantName = "Outlet"
+                            } else if (variantName.contains("Bridgwater Forest")) {
+                                variantName = "Bridgwater F."
+                            } else if (variantName.contains("Fort Garry Industrial")) {
+                                variantName = "Fort Garry I."
+                            } else if (variantName.contains("Misericordia Health Centre")) {
+                                variantName = "Misericordia HC"
+                            } else if (variantName.contains("Health Sciences Centre")) {
+                                variantName = "Health Sci."
+                            } else if (variantName.contains("Harkness Station")) {
+                                variantName = "Harkness S."
+                            } else if (variantName.contains("Industrial Park")) {
+                                variantName = "Industrial P."
+                            } else if (variantName.contains("South St. Vital")) {
+                                variantName = "S. St. Vital"
+                            } else if (variantName.contains("North Kildonan")) {
+                                variantName = "N. Kildonan"
+                            } else if (variantName.contains("Balmoral Station")) {
+                                variantName = "Balmoral S."
+                            } else if (variantName.contains("Crossroads Station")) {
+                                variantName = "Crossroads S."
+                            } else if (variantName.contains("Southdale Centre")) {
+                                variantName = "Southdale C."
+                            } else if (variantName.contains("St. Vital Centre")) {
+                                variantName = "St. Vital C."
+                            } else if (variantName.contains("Red River College")) {
+                                variantName = "Red River C."
+                            } else if (variantName.contains("Grace Hospital")) {
+                                variantName = "Grace Hosp."
+                            } else if (variantName.contains("Seven Oaks Hospital")) {
+                                variantName = "Seven Oaks"
+                            } else if (variantName.contains("Assiniboine Park")) {
+                                variantName = "Assiniboine Park"
+                            } else if (variantName.contains("North Transcona")) {
+                                variantName = "N. Transcona"
+                            } else if (variantName.contains("South Transcona")) {
+                                variantName = "S. Transcona"
+                            } else if (variantName.contains("Lakeside Meadows")) {
+                                variantName = "Lakeside M."
+                            } else if (variantName.contains("Castlebury Meadows")) {
+                                variantName = "Castlebury M."
+                            } else if (variantName.contains("Garden City Shopping Centre")) {
+                                variantName = "Garden City S. C."
+                            } else if (variantName.contains("Waterford Green Common")) {
+                                variantName = "Waterford G."
+                            } else if (variantName.contains("Birds Hill Provincial Park")) {
+                                variantName = "Birds Hill P. P."
+                            } else if (variantName.contains("Manitoba Institute of Trades")) {
+                                variantName = "MITT"
+                            } else if (variantName.contains("RRC Polytech")) {
+                                variantName = "RRC P."
+                            } else if (variantName.contains("Assiniboine Park Zoo")) {
+                                variantName = "Assiniboine Zoo"
+                            } else if (variantName.contains("Gordon Bell High School")) {
+                                variantName = "Gordon Bell"
+                            } else if (variantName.contains("Tuxedo Business Park")) {
+                                variantName = "Tuxedo B.P."
+                            } else if (variantName.contains("Fort Garry Industrial")) {
+                                variantName = "Fort Garry I."
+                            } else if (variantName.contains("South St. Vital")) {
+                                variantName = "S. St. Vital"
+                            } else if (variantName.contains("Prairie Point")) {
+                                variantName = "Prairie P."
+                            } else if (variantName.contains("South Pointe West")) {
+                                variantName = "S. Pointe W."
+                            } else if (variantName.contains("North Inkster Industrial")) {
+                                variantName = "N. Inkster I."
+                            } else if (variantName.contains("St. Boniface Industrial")) {
+                                variantName = "St. Boniface I."
+                            } else if (variantName.contains("North St. Boniface")) {
+                                variantName = "N. St. Boniface"
+                            } else if (variantName.contains("Windermere Terminal")) {
+                                variantName = "Windermere T."
+                            } else if (variantName.contains("Fort Rouge Station")) {
+                                variantName = "Fort Rouge S."
+                            } else if (variantName.contains("Jubilee Station")) {
+                                variantName = "Jubilee S."
+                            } else if (variantName.contains("Main Street/Cathedral")) {
+                                variantName = "Main/Cathedral"
+                            } else if (variantName.contains("Outlet Collection Mall")) {
+                                variantName = "Outlet Mall"
+                            } else if (variantName.contains("Unicity Mall")) {
+                                variantName = "Unicity M."
+                            } else if (variantName.contains("Crosstown East to Speers")) {
+                                variantName = "Crosstown\nE. S. E."
+                            }
+                            
                             busScheduleList.append("\(variantKey) ---- \(variantName) ---- \(arrivalState) ---- \(finalArrivalText)")
                         }
                     }
@@ -339,7 +424,6 @@ class TransitAPI {
             }
         }
         
-        // Sort the bus schedule list according to the specified priority
         return busScheduleList.sorted(by: { (str1: String, str2: String) -> Bool in
             let componentsA = str1.components(separatedBy: " ---- ")
             let componentsB = str2.components(separatedBy: " ---- ")
@@ -349,7 +433,6 @@ class TransitAPI {
             let stateA = componentsA[2]
             let stateB = componentsB[2]
             
-            // Priority 1: "Due" entries come first
             if timeA == "Due" && timeB != "Due" {
                 return true
             }
@@ -360,16 +443,13 @@ class TransitAPI {
                 return true
             }
             
-            // Priority 2: Handle minute-based entries
             let isMinutesA = timeA.hasSuffix("min.")
             let isMinutesB = timeB.hasSuffix("min.")
             
             if isMinutesA && isMinutesB {
-                // Extract the minute values
                 let minutesA = Int(timeA.components(separatedBy: " ")[0]) ?? 0
                 let minutesB = Int(timeB.components(separatedBy: " ")[0]) ?? 0
                 
-                // Sort by state priority first
                 if stateA != stateB {
                     if stateA == "Early" { return true }
                     if stateB == "Early" { return false }
@@ -377,15 +457,12 @@ class TransitAPI {
                     if stateB == "Late" { return false }
                 }
                 
-                // If states are the same, sort by minutes
                 return minutesA < minutesB
             }
             
-            // If one is minutes and other is time
             if isMinutesA { return true }
             if isMinutesB { return false }
             
-            // Priority 3: Handle time format (HH:MM AM/PM)
             let timeComponentsA = timeA.components(separatedBy: " ")
             let timeComponentsB = timeB.components(separatedBy: " ")
             
@@ -393,29 +470,59 @@ class TransitAPI {
                 let hourMinA = timeComponentsA[0].components(separatedBy: ":")
                 let hourMinB = timeComponentsB[0].components(separatedBy: ":")
                 
-                let hourA = Int(hourMinA[0]) ?? 0
-                let hourB = Int(hourMinB[0]) ?? 0
+                var hourA = Int(hourMinA[0]) ?? 0
+                var hourB = Int(hourMinB[0]) ?? 0
                 let minuteA = Int(hourMinA[1]) ?? 0
                 let minuteB = Int(hourMinB[1]) ?? 0
                 let isAMA = timeComponentsA[1] == "AM"
                 let isAMB = timeComponentsB[1] == "AM"
                 
-                // Compare AM/PM first
-                if isAMA != isAMB {
-                    return isAMA
+                if !isAMA && hourA != 12 { hourA += 12 }
+                if isAMA && hourA == 12 { hourA = 0 }
+                if !isAMB && hourB != 12 { hourB += 12 }
+                if isAMB && hourB == 12 { hourB = 0 }
+                
+                let totalMinutesA = hourA * 60 + minuteA
+                let totalMinutesB = hourB * 60 + minuteB
+                
+                if abs(totalMinutesA - totalMinutesB) > 18 * 60 {
+                    return totalMinutesA > totalMinutesB
                 }
                 
-                // Compare hours
-                if hourA != hourB {
-                    return hourA < hourB
-                }
-                
-                // Compare minutes
-                return minuteA < minuteB
+                return totalMinutesA < totalMinutesB
             }
             
-            // Handle any other cases (like "Time Unavailable")
             return false
         })
+    }
+}
+
+
+enum TransitError: LocalizedError {
+    case invalidURL
+    case networkError(Error)
+    case invalidResponse
+    case invalidData
+    case serviceDown
+    case parseError(String)
+    case batchProcessingError(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "Invalid URL configuration"
+        case .networkError(let error):
+            return "Network error: \(error.localizedDescription)"
+        case .invalidResponse:
+            return "Invalid response from server"
+        case .invalidData:
+            return "Invalid data received"
+        case .serviceDown:
+            return "Transit service is currently unavailable"
+        case .parseError(let message):
+            return "Data parsing error: \(message)"
+        case .batchProcessingError(let message):
+            return "Error processing stops: \(message)"
+        }
     }
 }

@@ -1,171 +1,6 @@
 import SwiftUI
 import MapKit
 
-struct MapViewRepresentable: UIViewRepresentable {
-    @Binding var region: MKCoordinateRegion
-    let stops: [[String: Any]]
-    let userLocation: CLLocation?
-    let onAnnotationTapped: (MKAnnotation) -> Void
-    
-    func makeUIView(context: Context) -> MKMapView {
-        let mapView = MKMapView()
-        mapView.delegate = context.coordinator
-        mapView.showsUserLocation = true
-        return mapView
-    }
-    
-    func updateUIView(_ mapView: MKMapView, context: Context) {
-        mapView.setRegion(region, animated: true)
-        
-        mapView.removeAnnotations(mapView.annotations)
-        mapView.removeOverlays(mapView.overlays)
-        
-        for stop in stops {
-            if let centre = stop["centre"] as? [String: Any],
-               let geographic = centre["geographic"] as? [String: Any],
-               let lat = Double(geographic["latitude"] as? String ?? ""),
-               let lon = Double(geographic["longitude"] as? String ?? "") {
-                let annotation = MKPointAnnotation()
-                annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                annotation.title = stop["name"] as? String
-                annotation.subtitle = "#\(stop["number"] as? Int ?? 0)"
-                
-                var variantsString = ""
-                
-                if let variants = stop["variants"] as? [[String: Any]] {
-                    for (index, variant) in variants.enumerated() {
-                        if let route = variant["route"] as? [String: Any],
-                           let variantDict = variant["variant"] as? [String: Any],
-                           let key = variantDict["key"] as? String {
-                            // Add the key split and append a comma unless it's the last variant
-                            variantsString += key.split(separator: "-")[0].description
-                            if index < variants.count - 1 { // Not the last variant
-                                variantsString += ", "
-                            }
-                        }
-                    }
-                }
-                
-                annotation.subtitle = annotation.subtitle! + ": " + variantsString
-                
-                annotation.subtitle = annotation.subtitle! + " - " + (stop["direction"] as? String ?? "Unknown Direction")
-                
-                
-                mapView.addAnnotation(annotation)
-            }
-        }
-        
-        if let userLocation = userLocation {
-            let circle = MKCircle(center: userLocation.coordinate, radius: 600)
-            mapView.addOverlay(circle)
-        }
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, MKMapViewDelegate {
-        var parent: MapViewRepresentable
-        
-        init(_ parent: MapViewRepresentable) {
-            self.parent = parent
-        }
-        
-    
-        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            guard !(annotation is MKUserLocation) else { return nil }
-            
-            let identifier = "StopPin"
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
-            
-            if annotationView == nil {
-                annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-                annotationView?.canShowCallout = true
-                
-                let button = UIButton(type: .detailDisclosure)
-                annotationView?.rightCalloutAccessoryView = button
-            } else {
-                annotationView?.annotation = annotation
-            }
-            
-            // Extract direction from subtitle
-            if let subtitle = annotation.subtitle,
-               let direction = subtitle?.components(separatedBy: " - ").last {
-                
-                // Set the marker image based on direction
-                let markerImage: UIImage?
-                switch direction.lowercased() {
-                case "southbound":
-                    markerImage = UIImage(named: "GreenBall")?.withTintColor(.systemGreen, renderingMode: .alwaysTemplate)
-                case "northbound":
-                    markerImage = UIImage(named: "OrangeBall")?.withTintColor(.systemOrange, renderingMode: .alwaysTemplate)
-                case "eastbound":
-                    markerImage = UIImage(named: "PinkBall")?.withTintColor(.systemRed, renderingMode: .alwaysTemplate)
-                case "westbound":
-                    markerImage = UIImage(named: "BlueBall")?.withTintColor(.systemBlue, renderingMode: .alwaysTemplate)
-                default:
-                    markerImage = UIImage(named: "DefaultBall")?.withTintColor(.systemGray, renderingMode: .alwaysTemplate)
-                }
-                
-                if let image = markerImage {
-                    let size = CGSize(width: 32, height: 32)
-                    UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-                    defer { UIGraphicsEndImageContext() }
-                    
-                    guard let context = UIGraphicsGetCurrentContext() else {
-                        annotationView?.image = image
-                        annotationView?.frame.size = size
-                        return annotationView
-                    }
-                    
-                    image.draw(in: CGRect(origin: .zero, size: size))
-                    context.setBlendMode(.plusLighter)
-                    
-                    let brightSpotPath = UIBezierPath(ovalIn: CGRect(x: size.width * 0.35,
-                                                                     y: size.height * 0.1,
-                                                                     width: size.width * 0.1,
-                                                                     height: size.height * 0.1))
-                    context.setFillColor(UIColor.white.withAlphaComponent(0.9).cgColor)
-                    brightSpotPath.fill()
-                    
-                    let glossyImage = UIGraphicsGetImageFromCurrentImageContext()
-                    annotationView?.image = glossyImage
-                    annotationView?.frame.size = size
-                    
-                    // Increase the hitbox size
-                    annotationView?.bounds = CGRect(x: 0, y: 0, width: 44, height: 44)
-                    annotationView?.centerOffset = CGPoint(x: 0, y: -16)
-                }
-            }
-            
-            annotationView?.layer.shadowColor = UIColor.black.cgColor
-            annotationView?.layer.shadowOffset = CGSize(width: 0, height: 1)
-            annotationView?.layer.shadowOpacity = 0.3
-            annotationView?.layer.shadowRadius = 1
-            annotationView?.displayPriority = .required
-            
-            return annotationView
-        }
-        
-        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            if let circleOverlay = overlay as? MKCircle {
-                let renderer = MKCircleRenderer(circle: circleOverlay)
-                renderer.fillColor = .clear
-                renderer.strokeColor = .accent
-                renderer.lineWidth = 2
-                return renderer
-            }
-            return MKOverlayRenderer()
-        }
-        
-        func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-            if let annotation = view.annotation {
-                parent.onAnnotationTapped(annotation)
-            }
-        }
-    }
-}
 
 struct MapView: View {
     @StateObject private var locationManager = LocationManager()
@@ -173,8 +8,8 @@ struct MapView: View {
     @State private var region = MKCoordinateRegion()
     @State private var selectedStop: [String: Any]?
     @State private var forceRefresh = UUID()
+
     
-    // Define standard zoom levels
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
     private let closeSpan = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
     
@@ -195,7 +30,6 @@ struct MapView: View {
                 .id(forceRefresh)
                 .edgesIgnoringSafeArea(.top)
                 
-                // Add refresh location button
                 VStack {
                     Spacer()
                     HStack {
@@ -256,13 +90,14 @@ struct MapView: View {
             }
         }
         .onAppear {
-            locationManager.requestLocation()
+            refreshLocation()
+            
         }
         .onChange(of: locationManager.location) { newLocation in
             if let location = newLocation {
                 region = MKCoordinateRegion(
                     center: location.coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
                 )
                 
                 if locationManager.shouldRefresh(for: location) {
@@ -275,15 +110,11 @@ struct MapView: View {
     }
     
     private func refreshLocation() {
-        // Request a fresh location update
         locationManager.manager.requestLocation()
         
-        // If we have a current location, always center and zoom
         if let location = locationManager.location {
-            // Generate new UUID to force refresh
             forceRefresh = UUID()
             
-            // Create new region
             let newRegion = MKCoordinateRegion(
                 center: location.coordinate,
                 span: closeSpan
@@ -304,3 +135,165 @@ struct MapView: View {
 
 
 
+struct MapViewRepresentable: UIViewRepresentable {
+    @Binding var region: MKCoordinateRegion
+    let stops: [[String: Any]]
+    let userLocation: CLLocation?
+    let onAnnotationTapped: (MKAnnotation) -> Void
+    
+    func makeUIView(context: Context) -> MKMapView {
+        let mapView = MKMapView()
+        mapView.delegate = context.coordinator
+        mapView.showsUserLocation = true
+        return mapView
+    }
+    
+    func updateUIView(_ mapView: MKMapView, context: Context) {
+        mapView.setRegion(region, animated: true)
+        
+        mapView.removeAnnotations(mapView.annotations)
+        mapView.removeOverlays(mapView.overlays)
+        
+        for stop in stops {
+            if let centre = stop["centre"] as? [String: Any],
+               let geographic = centre["geographic"] as? [String: Any],
+               let lat = Double(geographic["latitude"] as? String ?? ""),
+               let lon = Double(geographic["longitude"] as? String ?? "") {
+                let annotation = MKPointAnnotation()
+                annotation.coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                annotation.title = stop["name"] as? String
+                annotation.subtitle = "#\(stop["number"] as? Int ?? 0)"
+                
+                var variantsString = ""
+                
+                if let variants = stop["variants"] as? [[String: Any]] {
+                    for (index, variant) in variants.enumerated() {
+                        if let route = variant["route"] as? [String: Any],
+                           let variantDict = variant["variant"] as? [String: Any],
+                           let key = variantDict["key"] as? String {
+                            
+                            variantsString += key.split(separator: "-")[0].description
+                            
+                            if index < variants.count - 1 {
+                                variantsString += ", "
+                            }
+                        }
+                    }
+                }
+                
+                annotation.subtitle = annotation.subtitle! + ": " + variantsString
+                
+                annotation.subtitle = annotation.subtitle! + " - " + (stop["direction"] as? String ?? "Unknown Direction")
+                
+                
+                mapView.addAnnotation(annotation)
+            }
+        }
+        
+        if let userLocation = userLocation {
+            let circle = MKCircle(center: userLocation.coordinate, radius: 600)
+            mapView.addOverlay(circle)
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, MKMapViewDelegate {
+        var parent: MapViewRepresentable
+        
+        init(_ parent: MapViewRepresentable) {
+            self.parent = parent
+        }
+        
+    
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            guard !(annotation is MKUserLocation) else { return nil }
+            
+            let identifier = "StopPin"
+            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier)
+            
+            if annotationView == nil {
+                annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                annotationView?.canShowCallout = true
+                
+                let button = UIButton(type: .detailDisclosure)
+                annotationView?.rightCalloutAccessoryView = button
+            } else {
+                annotationView?.annotation = annotation
+            }
+            
+            if let subtitle = annotation.subtitle,
+               let direction = subtitle?.components(separatedBy: " - ").last {
+                
+                let markerImage: UIImage?
+                switch direction.lowercased() {
+                case "southbound":
+                    markerImage = UIImage(named: "GreenBall")//?.withTintColor(.systemGreen, renderingMode: .alwaysTemplate)
+                case "northbound":
+                    markerImage = UIImage(named: "OrangeBall")//?.withTintColor(.systemOrange, renderingMode: .alwaysTemplate)
+                case "eastbound":
+                    markerImage = UIImage(named: "PinkBall")//?.withTintColor(.systemRed, renderingMode: .alwaysTemplate)
+                case "westbound":
+                    markerImage = UIImage(named: "BlueBall")//?.withTintColor(.systemBlue, renderingMode: .alwaysTemplate)
+                default:
+                    markerImage = UIImage(named: "DefaultBall")//?.withTintColor(.systemGray, renderingMode: .alwaysTemplate)
+                }
+                
+                if let image = markerImage {
+                    let size = CGSize(width: 32, height: 32)
+                    UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+                    defer { UIGraphicsEndImageContext() }
+                    
+                    guard let context = UIGraphicsGetCurrentContext() else {
+                        annotationView?.image = image
+                        annotationView?.frame.size = size
+                        return annotationView
+                    }
+                    
+                    image.draw(in: CGRect(origin: .zero, size: size))
+                    context.setBlendMode(.plusLighter)
+                    
+                    let brightSpotPath = UIBezierPath(ovalIn: CGRect(x: size.width * 0.35,
+                                                                     y: size.height * 0.1,
+                                                                     width: size.width * 0.1,
+                                                                     height: size.height * 0.1))
+                    context.setFillColor(UIColor.white.withAlphaComponent(0.9).cgColor)
+                    brightSpotPath.fill()
+                    
+                    let glossyImage = UIGraphicsGetImageFromCurrentImageContext()
+                    annotationView?.image = glossyImage
+                    annotationView?.frame.size = size
+                    annotationView?.bounds = CGRect(x: 0, y: 0, width: 44, height: 44)
+                    annotationView?.centerOffset = CGPoint(x: 0, y: -16)
+                }
+            }
+            
+            annotationView?.layer.shadowColor = UIColor.black.cgColor
+            annotationView?.layer.shadowOffset = CGSize(width: 0, height: 1)
+            annotationView?.layer.shadowOpacity = 0.3
+            annotationView?.layer.shadowRadius = 1
+            annotationView?.displayPriority = .required
+            
+            return annotationView
+        }
+        
+        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            if let circleOverlay = overlay as? MKCircle {
+                let renderer = MKCircleRenderer(circle: circleOverlay)
+                renderer.fillColor = .clear
+                renderer.strokeColor = .accent
+                renderer.lineWidth = 2
+                return renderer
+            }
+            return MKOverlayRenderer()
+        }
+        
+        func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+            if let annotation = view.annotation {
+                parent.onAnnotationTapped(annotation)
+            }
+        }
+    }
+}

@@ -14,7 +14,7 @@ struct ContentView: View {
 
             ListView()
                 .tabItem {
-                    Label("List", systemImage: "list.bullet")
+                    Label("Stops", systemImage: "list.bullet")
                 }
                 .tag(1)
             
@@ -23,6 +23,12 @@ struct ContentView: View {
                     Label("Saved", systemImage: "star.fill")
                 }
                 .tag(2)
+            
+            WidgetsView()
+                .tabItem {
+                    Label("Widgets", systemImage: "note.text")
+                }
+                .tag(3)
         }
     }
 }

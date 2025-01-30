@@ -45,9 +45,7 @@ struct SavedStopsView: View {
                 } else {
                     List {
                         ForEach(filteredStops) { savedStop in
-                            if let variants = savedStop.stopData["variants"] as? [[String: Any]] {
-                                StopRow(stop: savedStop.stopData, variants: variants, inSaved: true)
-                            }
+                            SavedStopRowView(savedStop: savedStop, savedStopsManager: savedStopsManager)
                         }
                     }
                     .searchable(text: $searchText, prompt: "Search saved stops...")
@@ -60,3 +58,6 @@ struct SavedStopsView: View {
         }
     }
 } 
+
+
+

@@ -8,7 +8,7 @@ class StopsDataStore: ObservableObject {
     @Published var isLoading = false
     @Published var error: Error?
     
-    private let batchSize = 25 // Reduced batch size
+    private let batchSize = 25
     private var isProcessing = false
     
     private init() {}
@@ -26,7 +26,6 @@ class StopsDataStore: ObservableObject {
             isProcessing = true
             let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation)
             
-            // Process stops in smaller batches with delay between batches
             for batch in stride(from: 0, to: nearbyStops.count, by: batchSize) {
                 let endIndex = min(batch + batchSize, nearbyStops.count)
                 let currentBatch = Array(nearbyStops[batch..<endIndex])
@@ -38,11 +37,10 @@ class StopsDataStore: ObservableObject {
                         self.stops.append(contentsOf: enrichedBatch)
                     }
                     
-                    // Add a small delay between batches to prevent overwhelming the API
-                    try await Task.sleep(nanoseconds: 200_000_000) // 0.5 second delay
+                    try await Task.sleep(nanoseconds: 200_000_000)
                 } catch {
                     print("Error processing batch: \(error.localizedDescription)")
-                    continue // Continue with next batch even if one fails
+                    continue
                 }
             }
             

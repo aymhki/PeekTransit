@@ -2,7 +2,7 @@ import CoreLocation
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     let manager: CLLocationManager
-    private let minimumDistanceThreshold: CLLocationDistance = 250 // meters
+    private let minimumDistanceThreshold: CLLocationDistance = 10 
     
     @Published var location: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus?
