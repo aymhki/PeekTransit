@@ -1,6 +1,8 @@
 import SwiftUI
 import CoreLocation
 import Foundation
+import WidgetKit
+
 
 class SavedWidgetsManager: ObservableObject {
     static let shared = SavedWidgetsManager()
@@ -18,15 +20,19 @@ class SavedWidgetsManager: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+        if let sharedDefaults = SharedDefaults.userDefaults,
+           let data = sharedDefaults.data(forKey: SharedDefaults.widgetsKey),
            let widgets = try? JSONDecoder().decode([WidgetModel].self, from: data) {
             savedWidgets = widgets
         }
     }
     
     private func saveToDisk() {
-        if let encoded = try? JSONEncoder().encode(savedWidgets) {
-            UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+        if let encoded = try? JSONEncoder().encode(savedWidgets),
+           let sharedDefaults = SharedDefaults.userDefaults {
+            sharedDefaults.set(encoded, forKey: SharedDefaults.widgetsKey)
+            WidgetCenter.shared.reloadAllTimelines()
+            
         }
     }
     
