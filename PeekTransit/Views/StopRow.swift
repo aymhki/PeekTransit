@@ -30,7 +30,7 @@ struct StopRow: View {
                     HStack {
                         Text(stop["name"] as? String ?? "Unknown Stop")
                             .font(.headline)
-                            .lineLimit(5)
+                            .lineLimit(nil)
                         Spacer()
                         Text("#\(stop["number"] as? Int ?? 0)".replacingOccurrences(of: ",", with: ""))
                             .font(.subheadline)
