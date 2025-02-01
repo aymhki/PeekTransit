@@ -32,7 +32,12 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func requestLocation() {
-        manager.requestWhenInUseAuthorization()
+        let status = manager.authorizationStatus
+            if status == .notDetermined {
+                manager.requestWhenInUseAuthorization()
+            } else if status == .authorizedWhenInUse || status == .authorizedAlways {
+                manager.requestLocation()
+            }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

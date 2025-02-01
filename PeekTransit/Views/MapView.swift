@@ -90,8 +90,8 @@ struct MapView: View {
             }
         }
         .onAppear {
+            locationManager.requestLocation()
             refreshLocation()
-            
         }
         .onChange(of: locationManager.location) { newLocation in
             if let location = newLocation {

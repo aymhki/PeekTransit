@@ -24,6 +24,12 @@ struct ContentView: View {
                 }
                 .tag(2)
             
+            WidgetsView()
+                .tabItem {
+                    Label("Widgets", systemImage: "note.text")
+                }
+                .tag(3)
+            
         }
     }
 }
