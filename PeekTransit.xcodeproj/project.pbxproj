@@ -6,6 +6,31 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2FBB709C2D500E0C008998C8 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FBB709B2D500E0C008998C8 /* WidgetKit.framework */; };
+		2FBB709E2D500E0C008998C8 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FBB709D2D500E0C008998C8 /* SwiftUI.framework */; };
+		2FBB70AC2D500E0D008998C8 /* PeekTransitWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2FBB71232D501CC0008998C8 /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FBB71222D501CC0008998C8 /* Intents.framework */; };
+		2FBB712A2D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2FBB70AA2D500E0D008998C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2F570C0A2D45D5EE00C01563 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2FBB70982D500E0C008998C8;
+			remoteInfo = PeekTransitWidgetExtension;
+		};
+		2FBB71282D501CC0008998C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2F570C0A2D45D5EE00C01563 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2FBB71202D501CC0008998C8;
+			remoteInfo = PeekTransitWidgetIntentHelper;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		2F2010AC2D4EF93A009E18AE /* Embed ExtensionKit Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -23,6 +48,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				2FBB70AC2D500E0D008998C8 /* PeekTransitWidgetExtension.appex in Embed Foundation Extensions */,
+				2FBB712A2D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -31,6 +58,11 @@
 
 /* Begin PBXFileReference section */
 		2F570C122D45D5EE00C01563 /* PeekTransit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PeekTransit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PeekTransitWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FBB709B2D500E0C008998C8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
+		2FBB709D2D500E0C008998C8 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
+		2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PeekTransitWidgetIntentHelper.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FBB71222D501CC0008998C8 /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -38,6 +70,48 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+			);
+			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
+		};
+		2FBB70B02D500E0D008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
+		};
+		2FBB711C2D50131A008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				PeekTransitWidget.intentdefinition,
+			);
+			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
+		};
+		2FBB712E2D501CC0008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransitWidgetIntentHelper" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
+		};
+		2FBB71302D501CF1008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetIntentHelper" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				PeekTransitWidget.intentdefinition,
+			);
+			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
+		};
+		2FBB71322D501F09008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransitWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				IntentHandler.swift,
+			);
+			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
+		};
+		2FBB71342D501F90008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				IntentHandler.swift,
 			);
 			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
 		};
@@ -57,6 +131,26 @@
 			path = PeekTransit;
 			sourceTree = "<group>";
 		};
+		2FBB709F2D500E0C008998C8 /* PeekTransitWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2FBB711C2D50131A008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransit" target */,
+				2FBB70B02D500E0D008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetExtension" target */,
+				2FBB71302D501CF1008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetIntentHelper" target */,
+			);
+			path = PeekTransitWidget;
+			sourceTree = "<group>";
+		};
+		2FBB71242D501CC0008998C8 /* PeekTransitWidgetIntentHelper */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2FBB71342D501F90008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransit" target */,
+				2FBB71322D501F09008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransitWidgetExtension" target */,
+				2FBB712E2D501CC0008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransitWidgetIntentHelper" target */,
+			);
+			path = PeekTransitWidgetIntentHelper;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +158,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2FBB70962D500E0C008998C8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2FBB709E2D500E0C008998C8 /* SwiftUI.framework in Frameworks */,
+				2FBB709C2D500E0C008998C8 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2FBB711E2D501CC0008998C8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2FBB71232D501CC0008998C8 /* Intents.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +186,9 @@
 			children = (
 				2F200FCD2D4EBCEE009E18AE /* Shared */,
 				2F570C142D45D5EE00C01563 /* PeekTransit */,
+				2FBB709F2D500E0C008998C8 /* PeekTransitWidget */,
+				2FBB71242D501CC0008998C8 /* PeekTransitWidgetIntentHelper */,
+				2FBB709A2D500E0C008998C8 /* Frameworks */,
 				2F570C132D45D5EE00C01563 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -83,8 +197,20 @@
 			isa = PBXGroup;
 			children = (
 				2F570C122D45D5EE00C01563 /* PeekTransit.app */,
+				2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */,
+				2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2FBB709A2D500E0C008998C8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				2FBB709B2D500E0C008998C8 /* WidgetKit.framework */,
+				2FBB709D2D500E0C008998C8 /* SwiftUI.framework */,
+				2FBB71222D501CC0008998C8 /* Intents.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -103,6 +229,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				2FBB70AB2D500E0D008998C8 /* PBXTargetDependency */,
+				2FBB71292D501CC0008998C8 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				2F200FCD2D4EBCEE009E18AE /* Shared */,
@@ -115,6 +243,50 @@
 			productReference = 2F570C122D45D5EE00C01563 /* PeekTransit.app */;
 			productType = "com.apple.product-type.application";
 		};
+		2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2FBB70AF2D500E0D008998C8 /* Build configuration list for PBXNativeTarget "PeekTransitWidgetExtension" */;
+			buildPhases = (
+				2FBB70952D500E0C008998C8 /* Sources */,
+				2FBB70962D500E0C008998C8 /* Frameworks */,
+				2FBB70972D500E0C008998C8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2FBB709F2D500E0C008998C8 /* PeekTransitWidget */,
+			);
+			name = PeekTransitWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = PeekTransitWidgetExtension;
+			productReference = 2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2FBB712B2D501CC0008998C8 /* Build configuration list for PBXNativeTarget "PeekTransitWidgetIntentHelper" */;
+			buildPhases = (
+				2FBB711D2D501CC0008998C8 /* Sources */,
+				2FBB711E2D501CC0008998C8 /* Frameworks */,
+				2FBB711F2D501CC0008998C8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2FBB71242D501CC0008998C8 /* PeekTransitWidgetIntentHelper */,
+			);
+			name = PeekTransitWidgetIntentHelper;
+			packageProductDependencies = (
+			);
+			productName = PeekTransitWidgetIntentHelper;
+			productReference = 2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -126,6 +298,12 @@
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					2F570C112D45D5EE00C01563 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					2FBB70982D500E0C008998C8 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					2FBB71202D501CC0008998C8 = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -145,12 +323,28 @@
 			projectRoot = "";
 			targets = (
 				2F570C112D45D5EE00C01563 /* PeekTransit */,
+				2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */,
+				2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		2F570C102D45D5EE00C01563 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2FBB70972D500E0C008998C8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2FBB711F2D501CC0008998C8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -167,7 +361,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2FBB70952D500E0C008998C8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2FBB711D2D501CC0008998C8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2FBB70AB2D500E0D008998C8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
+			targetProxy = 2FBB70AA2D500E0D008998C8 /* PBXContainerItemProxy */;
+		};
+		2FBB71292D501CC0008998C8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
+			targetProxy = 2FBB71282D501CC0008998C8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		2F570C242D45D5EF00C01563 /* Debug */ = {
@@ -359,6 +580,138 @@
 			};
 			name = Release;
 		};
+		2FBB70AD2D500E0D008998C8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q4RWJ7728F;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PeekTransitWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PeekTransitWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 1.3;
+			};
+			name = Debug;
+		};
+		2FBB70AE2D500E0D008998C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q4RWJ7728F;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PeekTransitWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PeekTransitWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 1.3;
+			};
+			name = Release;
+		};
+		2FBB712C2D501CC0008998C8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q4RWJ7728F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PeekTransitWidgetIntentHelper;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2FBB712D2D501CC0008998C8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q4RWJ7728F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PeekTransitWidgetIntentHelper;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -376,6 +729,24 @@
 			buildConfigurations = (
 				2F570C242D45D5EF00C01563 /* Debug */,
 				2F570C252D45D5EF00C01563 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2FBB70AF2D500E0D008998C8 /* Build configuration list for PBXNativeTarget "PeekTransitWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2FBB70AD2D500E0D008998C8 /* Debug */,
+				2FBB70AE2D500E0D008998C8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2FBB712B2D501CC0008998C8 /* Build configuration list for PBXNativeTarget "PeekTransitWidgetIntentHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2FBB712C2D501CC0008998C8 /* Debug */,
+				2FBB712D2D501CC0008998C8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
