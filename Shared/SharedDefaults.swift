@@ -5,6 +5,8 @@ struct SharedDefaults {
     static let widgetsKey = "savedWidgets"
     
     static var userDefaults: UserDefaults? {
-        UserDefaults(suiteName: suiteName)
+        let defaults = UserDefaults(suiteName: suiteName)
+        print("Accessing SharedDefaults with suite name: \(suiteName), success: \(defaults != nil)") // Debug log
+        return defaults
     }
 }

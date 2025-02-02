@@ -1,6 +1,9 @@
 import SwiftUI
 import Foundation
 import CoreLocation
+import AppIntents
+import WidgetKit
+
 
 struct WidgetSetupView: View {
     @Environment(\.dismiss) private var dismiss
@@ -38,9 +41,9 @@ struct WidgetSetupView: View {
     
     private func createWidgetData() -> [String: Any] {
         var widgetData: [String: Any] = [
+            "size": widgetSize,
             "id": UUID().uuidString,
             "createdAt": ISO8601DateFormatter().string(from: Date()),
-            "size": widgetSize,
             "isClosestStop": isClosestStop,
             "name": widgetName.isEmpty ? generateDefaultWidgetName() : widgetName
         ]
@@ -67,7 +70,6 @@ struct WidgetSetupView: View {
     }
     
     private func handleSave() {
-        // Ensure widget name is not empty
         if widgetName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             widgetName = generateDefaultWidgetName()
         }
@@ -85,13 +87,11 @@ struct WidgetSetupView: View {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            // Validate and adjust selections based on size constraints
             if currentStep == 1 {
-                // When moving from size selection to stop selection
                 if selectedStops.count > maxStopsAllowed {
                     selectedStops = Array(selectedStops.prefix(maxStopsAllowed))
                 }
-                selectedVariants = [:] // Reset variants when size changes
+                selectedVariants = [:] 
             }
             
             currentStep += 1
@@ -111,13 +111,10 @@ struct WidgetSetupView: View {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            // Reset relevant state when going back
             switch currentStep {
             case 3:
-                // Reset variants when going back to stop selection
                 selectedVariants = [:]
             case 2:
-                // Reset stops when going back to size selection
                 selectedStops = []
                 selectedVariants = [:]
                 isClosestStop = false

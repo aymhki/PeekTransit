@@ -7,10 +7,7 @@ struct WidgetRowView: View {
     
     var body: some View {
         Group {
-            
                 Text("\(widgetData["name"])")
-    
-            
         }
     }
     

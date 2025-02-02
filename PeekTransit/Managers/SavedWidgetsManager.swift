@@ -4,6 +4,7 @@ import Foundation
 import WidgetKit
 
 
+
 class SavedWidgetsManager: ObservableObject {
     static let shared = SavedWidgetsManager()
     
@@ -28,12 +29,18 @@ class SavedWidgetsManager: ObservableObject {
     }
     
     private func saveToDisk() {
+        print("Attempting to save widgets to disk")
         if let encoded = try? JSONEncoder().encode(savedWidgets),
            let sharedDefaults = SharedDefaults.userDefaults {
+            print("Successfully encoded widgets")
             sharedDefaults.set(encoded, forKey: SharedDefaults.widgetsKey)
-            WidgetCenter.shared.reloadAllTimelines()
-            
+            print("Saved \(savedWidgets.count) widgets to SharedDefaults")
+        } else {
+            print("Failed to access SharedDefaults for saving") // Debug log
         }
+        
+        //WidgetCenter.shared.reloadAllTimelines()
+        
     }
     
     func deleteWidget(for widgetData: [String: Any]) {
@@ -52,4 +59,6 @@ class SavedWidgetsManager: ObservableObject {
         savedWidgets.append(widget)
         saveToDisk()
     }
+    
+
 }

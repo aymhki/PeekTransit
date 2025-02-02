@@ -7,6 +7,11 @@ struct WidgetModel: Codable, Identifiable  {
     init(widgetData: [String: Any]) {
         self.id = "\(widgetData["id"] as? String ?? "No Id Found")"
         self.widgetData = widgetData
+        
+    }
+    
+    var name: String {
+        return widgetData["name"] as? String ?? "Unnamed Widget" // Provide a default
     }
     
     enum CodingKeys: String, CodingKey {
