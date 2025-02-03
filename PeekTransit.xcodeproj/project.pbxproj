@@ -115,11 +115,65 @@
 			);
 			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
 		};
+		2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				BusScheduleRow.swift,
+				LargeWidgetView.swift,
+				LockScreenWidgetView.swift,
+				MediumWidgetView.swift,
+				SharedDefaults.swift,
+				SmallWidgetView.swift,
+				WidgetKind.swift,
+				WidgetSize.swift,
+			);
+			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
+		};
+		2FBB714F2D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Managers/SavedWidgetsManager.swift,
+				Models/AnyCodable.swift,
+				Models/WidgetModel.swift,
+				Services/StopsDataStore.swift,
+				Services/WinnipegTransitAPI.swift,
+			);
+			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
+		};
+		2FBB71502D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetIntentHelper" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Managers/SavedWidgetsManager.swift,
+				Models/AnyCodable.swift,
+				Models/WidgetModel.swift,
+				Services/StopsDataStore.swift,
+				Services/WinnipegTransitAPI.swift,
+			);
+			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
+		};
+		2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				BusScheduleRow.swift,
+				LargeWidgetView.swift,
+				LockScreenWidgetView.swift,
+				MediumWidgetView.swift,
+				SharedDefaults.swift,
+				SmallWidgetView.swift,
+				WidgetKind.swift,
+				WidgetSize.swift,
+			);
+			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2F200FCD2D4EBCEE009E18AE /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */,
+				2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */,
+			);
 			path = Shared;
 			sourceTree = "<group>";
 		};
@@ -127,6 +181,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "PeekTransit" target */,
+				2FBB714F2D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetExtension" target */,
+				2FBB71502D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
 			path = PeekTransit;
 			sourceTree = "<group>";

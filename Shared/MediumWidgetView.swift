@@ -18,7 +18,7 @@ struct MediumWidgetView: View {
                         }
                     }
                 } else if let stops = widgetData["stops"] as? [[String: Any]] {
-                    ForEach(Array(stops.prefix(2)).indices, id: \.self) { index in
+                    ForEach(Array(stops).indices, id: \.self) { index in
                         let stop = stops[index]
                         VStack(alignment: .leading) {
                             Text(stop["name"] as? String ?? "")

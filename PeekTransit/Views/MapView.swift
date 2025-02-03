@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import WidgetKit
 
 
 struct MapView: View {
@@ -92,6 +93,7 @@ struct MapView: View {
         .onAppear {
             locationManager.requestLocation()
             refreshLocation()
+            WidgetCenter.shared.reloadAllTimelines()
         }
         .onChange(of: locationManager.location) { newLocation in
             if let location = newLocation {

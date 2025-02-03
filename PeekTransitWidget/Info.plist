@@ -7,5 +7,16 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
+    
+    <key>NSExtensionAttributes</key>
+        <dict>
+            <key>IntentsSupported</key>
+            <array>
+                <string>ConfigurationLargeIntent</string>
+                <string>ConfigurationLockscreenIntent</string>
+                <string>ConfigurationMediumIntent</string>
+                <string>ConfigurationSmallIntent</string>
+            </array>
+        </dict>
 </dict>
 </plist>

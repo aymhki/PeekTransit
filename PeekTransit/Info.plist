@@ -6,7 +6,10 @@
 	<string></string>
 	<key>NSUserActivityTypes</key>
 	<array>
-		<string>ConfigurationIntent</string>
+		<string>ConfigurationLargeIntent</string>
+		<string>ConfigurationLockscreenIntent</string>
+		<string>ConfigurationMediumIntent</string>
+		<string>ConfigurationSmallIntent</string>
 	</array>
 </dict>
 </plist>

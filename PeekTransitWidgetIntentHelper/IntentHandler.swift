@@ -1,22 +1,58 @@
 import Intents
+import os
 
-class IntentHandler: INExtension, ConfigurationIntentHandling {
+
+class IntentHandler: INExtension, ConfigurationLargeIntentHandling, ConfigurationSmallIntentHandling, ConfigurationLockscreenIntentHandling, ConfigurationMediumIntentHandling {
     
-    func provideWidgetConfigOptionsCollection(for intent: ConfigurationIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
+    func getCollection(sizeGiven: String) -> INObjectCollection<WidgetConfig>{
         
-        let widgetConfigs: [WidgetConfig] = [
-            WidgetConfig(identifier: "id1", display: "name1"),
-            WidgetConfig(identifier: "id2", display: "name2")
-        ]
+        if let sharedDefaults = SharedDefaults.userDefaults,
+           let data = sharedDefaults.data(forKey: SharedDefaults.widgetsKey),
+           let savedWidgets = try? JSONDecoder().decode([WidgetModel].self, from: data) {
+            
+            let widgetConfigs = savedWidgets.compactMap { widget -> WidgetConfig? in
+                guard let id = widget.widgetData["id"] as? String,
+                      let name = widget.widgetData["name"] as? String,
+                      let size = widget.widgetData["size"] as? String,
+                      sizeGiven == size
+                      else {
+                        return nil
+                      }
+                
+                return WidgetConfig(identifier: id, display: name)
+            }
+            
+            let collection = INObjectCollection(items: widgetConfigs)
+            return collection
+            
+        } else {
+            
+            return INObjectCollection(items: [])
+        }
+    }
+    
+    func provideWidgetConfigOptionsCollection(for intent: ConfigurationLargeIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
         
+        completion(getCollection(sizeGiven: "large"), nil)
+    }
+    
+    
+    func provideWidgetConfigOptionsCollection(for intent: ConfigurationMediumIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
         
-        let collection = INObjectCollection<WidgetConfig>(items: widgetConfigs)
+        completion(getCollection(sizeGiven: "medium"), nil)
+    }
+    
+    
+    func provideWidgetConfigOptionsCollection(for intent: ConfigurationSmallIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
         
-        
-        completion(collection, nil)
-        
+        completion(getCollection(sizeGiven: "small"), nil)
         
     }
     
+    
+    func provideWidgetConfigOptionsCollection(for intent: ConfigurationLockscreenIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
+        completion(getCollection(sizeGiven: "lockscreen"), nil)
+        
+    }
     
 }

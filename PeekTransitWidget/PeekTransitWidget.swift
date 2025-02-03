@@ -4,64 +4,368 @@ import Intents
 import Combine
 import Foundation
 
-struct Provider: IntentTimelineProvider {
+protocol BaseEntry: TimelineEntry {
+    var widgetData: [String: Any]? { get }
+    var scheduleData: [String]? { get }
+}
 
-    typealias Entry = SimpleEntry
-    
-    typealias Intent = ConfigurationIntent
-    
-    
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationIntent())
+struct SimpleEntrySmall: BaseEntry {
+    let date: Date
+    let configuration: ConfigurationSmallIntent
+    var widgetData: [String: Any]?
+    var scheduleData: [String]?
+}
+
+struct SimpleEntryMedium: BaseEntry {
+    let date: Date
+    let configuration: ConfigurationMediumIntent
+    var widgetData: [String: Any]?
+    var scheduleData: [String]?
+}
+
+struct SimpleEntryLarge: BaseEntry {
+    let date: Date
+    let configuration: ConfigurationLargeIntent
+    var widgetData: [String: Any]?
+    var scheduleData: [String]?
+}
+
+struct SimpleEntryLockscreen: BaseEntry {
+    let date: Date
+    let configuration: ConfigurationLockscreenIntent
+    var widgetData: [String: Any]?
+    var scheduleData: [String]?
+}
+
+enum WidgetHelper {
+    static func getWidgetFromDefaults(withId id: String) -> WidgetModel? {
+        guard let sharedDefaults = SharedDefaults.userDefaults,
+              let data = sharedDefaults.data(forKey: SharedDefaults.widgetsKey),
+              let savedWidgets = try? JSONDecoder().decode([WidgetModel].self, from: data) else {
+            return nil
+        }
+        
+        return savedWidgets.first { $0.id == id }
     }
     
-    func getSnapshot(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (SimpleEntry) -> Void) {
-        let entry = SimpleEntry(date: Date(), configuration: configuration)
-        completion(entry)
+    static func getScheduleForWidget(_ widgetData: [String: Any]) async -> [String]? {
+        guard let stops = widgetData["stops"] as? [[String: Any]] else {
+            return nil
+        }
+        
+        var schedulesDict: [String: String] = [:] // Key: "variantKey-variantName", Value: first schedule string for that combination
+        
+        for stop in stops {
+            guard let stopNumber = stop["number"] as? Int else { continue }
+            
+            do {
+                let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(schedule: schedule)
+                
+                if let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
+                    let variantKeys = selectedVariants.compactMap { $0["key"] as? String }
+                    
+                    for scheduleString in cleanedSchedule {
+                        let components = scheduleString.components(separatedBy: " ---- ")
+                        guard components.count >= 2,
+                              let variantKey = components.first,
+                              variantKeys.contains(variantKey) else { continue }
+                        
+                        let variantName = components[1]
+                        let compositeKey = "\(variantKey)-\(variantName)"
+                        
+                        // Only store the first occurrence of each unique variant key + name combination
+                        if schedulesDict[compositeKey] == nil {
+                            schedulesDict[compositeKey] = scheduleString
+                        }
+                    }
+                }
+            } catch {
+                print("Error fetching schedule for stop \(stopNumber): \(error)")
+            }
+        }
+        
+        return schedulesDict.isEmpty ? nil : Array(schedulesDict.values)
     }
     
-    func getTimeline(for configuration: ConfigurationIntent, in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
-            var entries: [SimpleEntry] = []
+    static func createTimeline<T: BaseEntry>(
+        currentDate: Date,
+        configuration: Any,
+        widgetData: [String: Any]?,
+        createEntry: @escaping (Date, Any, [String: Any]?, [String]?) -> T
+    ) async -> Timeline<T> {
+        guard let widgetData = widgetData else {
+            // If no widget data, return a timeline with just the current time
+            let entry = createEntry(currentDate, configuration, nil, nil)
+            return Timeline(entries: [entry], policy: .after(currentDate.addingTimeInterval(60)))
+        }
+        
+        // Get current schedule
+        let schedule = await getScheduleForWidget(widgetData)
+        
+        // Create entry for current time
+        let entry = createEntry(currentDate, configuration, widgetData, schedule)
+        
+        // Set next update for 1 minute from now
+        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 1, to: currentDate)!
+        
+        return Timeline(entries: [entry], policy: .after(nextUpdate))
+    }
+}
 
-            // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-            let currentDate = Date()
-            for hourOffset in 0 ..< 5 {
-                let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-                let entry = SimpleEntry(date: entryDate, configuration: configuration)
-                entries.append(entry)
+
+struct ProviderSmall: IntentTimelineProvider {
+    typealias Entry = SimpleEntrySmall
+    
+    func placeholder(in context: Context) -> SimpleEntrySmall {
+        SimpleEntrySmall(date: Date(), configuration: ConfigurationSmallIntent())
+    }
+    
+    func getSnapshot(for configuration: ConfigurationSmallIntent, in context: Context, completion: @escaping (SimpleEntrySmall) -> Void) {
+        Task {
+            if let widgetId = configuration.widgetConfig?.identifier,
+               let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
+                let schedule = await WidgetHelper.getScheduleForWidget(widget.widgetData)
+                completion(SimpleEntrySmall(date: Date(), configuration: configuration, widgetData: widget.widgetData, scheduleData: schedule))
+            } else {
+                completion(SimpleEntrySmall(date: Date(), configuration: configuration))
+            }
+        }
+    }
+    
+    func getTimeline(for configuration: ConfigurationSmallIntent, in context: Context, completion: @escaping (Timeline<SimpleEntrySmall>) -> Void) {
+        Task {
+            let widgetId = configuration.widgetConfig?.identifier
+            let widget = widgetId.flatMap { WidgetHelper.getWidgetFromDefaults(withId: $0) }
+            
+            let timeline = await WidgetHelper.createTimeline(
+                currentDate: Date(),
+                configuration: configuration,
+                widgetData: widget?.widgetData
+            ) { date, config, data, schedule in
+                SimpleEntrySmall(
+                    date: date,
+                    configuration: config as! ConfigurationSmallIntent,
+                    widgetData: data,
+                    scheduleData: schedule
+                )
             }
             
-        let timeLineEntry = Timeline(entries: entries, policy: .never)
-            completion(timeLineEntry)
+            completion(timeline)
         }
-    
-}
-
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let configuration: ConfigurationIntent
-}
-
-struct PeekTransitWidgetEntryView : View {
-    var entry: Provider.Entry
-
-    var body: some View {
-        Text(entry.date, style: .time)
-        //Text (entry.configuration.widgetName ?? "No Value Entered")
     }
 }
 
-@main
-struct PeekTransitWidget: Widget {
-    let kind: String = "PeekTransitWidget"
+struct ProviderMedium: IntentTimelineProvider {
+    typealias Entry = SimpleEntryMedium
+    
+    func placeholder(in context: Context) -> SimpleEntryMedium {
+        SimpleEntryMedium(date: Date(), configuration: ConfigurationMediumIntent())
+    }
+    
+    func getSnapshot(for configuration: ConfigurationMediumIntent, in context: Context, completion: @escaping (SimpleEntryMedium) -> Void) {
+        Task {
+            if let widgetId = configuration.widgetConfig?.identifier,
+               let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
+                let schedule = await WidgetHelper.getScheduleForWidget(widget.widgetData)
+                completion(SimpleEntryMedium(date: Date(), configuration: configuration, widgetData: widget.widgetData, scheduleData: schedule))
+            } else {
+                completion(SimpleEntryMedium(date: Date(), configuration: configuration))
+            }
+        }
+    }
+    
+    func getTimeline(for configuration: ConfigurationMediumIntent, in context: Context, completion: @escaping (Timeline<SimpleEntryMedium>) -> Void) {
+        Task {
+            let widgetId = configuration.widgetConfig?.identifier
+            let widget = widgetId.flatMap { WidgetHelper.getWidgetFromDefaults(withId: $0) }
+            
+            let timeline = await WidgetHelper.createTimeline(
+                currentDate: Date(),
+                configuration: configuration,
+                widgetData: widget?.widgetData
+            ) { date, config, data, schedule in
+                SimpleEntryMedium(
+                    date: date,
+                    configuration: config as! ConfigurationMediumIntent,
+                    widgetData: data,
+                    scheduleData: schedule
+                )
+            }
+            
+            completion(timeline)
+        }
+    }
+}
 
+struct ProviderLarge: IntentTimelineProvider {
+    typealias Entry = SimpleEntryLarge
+    
+    func placeholder(in context: Context) -> SimpleEntryLarge {
+        SimpleEntryLarge(date: Date(), configuration: ConfigurationLargeIntent())
+    }
+    
+    func getSnapshot(for configuration: ConfigurationLargeIntent, in context: Context, completion: @escaping (SimpleEntryLarge) -> Void) {
+        Task {
+            if let widgetId = configuration.widgetConfig?.identifier,
+               let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
+                let schedule = await WidgetHelper.getScheduleForWidget(widget.widgetData)
+                completion(SimpleEntryLarge(date: Date(), configuration: configuration, widgetData: widget.widgetData, scheduleData: schedule))
+            } else {
+                completion(SimpleEntryLarge(date: Date(), configuration: configuration))
+            }
+        }
+    }
+    
+    func getTimeline(for configuration: ConfigurationLargeIntent, in context: Context, completion: @escaping (Timeline<SimpleEntryLarge>) -> Void) {
+        Task {
+            let widgetId = configuration.widgetConfig?.identifier
+            let widget = widgetId.flatMap { WidgetHelper.getWidgetFromDefaults(withId: $0) }
+            
+            let timeline = await WidgetHelper.createTimeline(
+                currentDate: Date(),
+                configuration: configuration,
+                widgetData: widget?.widgetData
+            ) { date, config, data, schedule in
+                SimpleEntryLarge(
+                    date: date,
+                    configuration: config as! ConfigurationLargeIntent,
+                    widgetData: data,
+                    scheduleData: schedule
+                )
+            }
+            
+            completion(timeline)
+        }
+    }
+}
+
+struct ProviderLockscreen: IntentTimelineProvider {
+    typealias Entry = SimpleEntryLockscreen
+    
+    func placeholder(in context: Context) -> SimpleEntryLockscreen {
+        SimpleEntryLockscreen(date: Date(), configuration: ConfigurationLockscreenIntent())
+    }
+    
+    func getSnapshot(for configuration: ConfigurationLockscreenIntent, in context: Context, completion: @escaping (SimpleEntryLockscreen) -> Void) {
+        Task {
+            if let widgetId = configuration.widgetConfig?.identifier,
+               let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
+                let schedule = await WidgetHelper.getScheduleForWidget(widget.widgetData)
+                completion(SimpleEntryLockscreen(date: Date(), configuration: configuration, widgetData: widget.widgetData, scheduleData: schedule))
+            } else {
+                completion(SimpleEntryLockscreen(date: Date(), configuration: configuration))
+            }
+        }
+    }
+    
+    func getTimeline(for configuration: ConfigurationLockscreenIntent, in context: Context, completion: @escaping (Timeline<SimpleEntryLockscreen>) -> Void) {
+        Task {
+            let widgetId = configuration.widgetConfig?.identifier
+            let widget = widgetId.flatMap { WidgetHelper.getWidgetFromDefaults(withId: $0) }
+            
+            let timeline = await WidgetHelper.createTimeline(
+                currentDate: Date(),
+                configuration: configuration,
+                widgetData: widget?.widgetData
+            ) { date, config, data, schedule in
+                SimpleEntryLockscreen(
+                    date: date,
+                    configuration: config as! ConfigurationLockscreenIntent,
+                    widgetData: data,
+                    scheduleData: schedule
+                )
+            }
+            
+            completion(timeline)
+        }
+    }
+}
+
+struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
+    var entry: T
+    @Environment(\.widgetFamily) var family
+    
+    
+    var body: some View {
+        if let widgetData = entry.widgetData {
+            switch family {
+            case .systemSmall:
+                SmallWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
+            case .systemMedium:
+                MediumWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
+            case .systemLarge:
+                LargeWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
+            case .accessoryRectangular:
+                LockScreenWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
+            default:
+                Text("Unsupported widget size")
+            }
+            
+        } else {
+            Text("Select a widget configuration")
+        }
+    }
+}
+
+struct PeekTransitSmallWidget: Widget {
+    let kind: String = "PeekTransitSmallWidget"
+    
     var body: some WidgetConfiguration {
-        IntentConfiguration(kind: kind, intent: ConfigurationIntent.self, provider: Provider()) { entry in
+        IntentConfiguration(kind: kind, intent: ConfigurationSmallIntent.self, provider: ProviderSmall()) { entry in
             PeekTransitWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Example 1")
-        .description("Example 2")
+        .configurationDisplayName("Transit Widget - Small")
+        .description("Shows transit schedules in small size")
+        .supportedFamilies([.systemSmall])
+    }
+}
+
+struct PeekTransitMediumWidget: Widget {
+    let kind: String = "PeekTransitMediumWidget"
+    
+    var body: some WidgetConfiguration {
+        IntentConfiguration(kind: kind, intent: ConfigurationMediumIntent.self, provider: ProviderMedium()) { entry in
+            PeekTransitWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Transit Widget - Medium")
+        .description("Shows transit schedules in medium size")
         .supportedFamilies([.systemMedium])
     }
 }
 
+struct PeekTransitLargeWidget: Widget {
+    let kind: String = "PeekTransitLargeWidget"
+    
+    var body: some WidgetConfiguration {
+        IntentConfiguration(kind: kind, intent: ConfigurationLargeIntent.self, provider: ProviderLarge()) { entry in
+            PeekTransitWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Transit Widget - Large")
+        .description("Shows transit schedules in large size")
+        .supportedFamilies([.systemLarge])
+    }
+}
+
+struct PeekTransitLockscreenWidget: Widget {
+    let kind: String = "PeekTransitLockscreenWidget"
+    
+    var body: some WidgetConfiguration {
+        IntentConfiguration(kind: kind, intent: ConfigurationLockscreenIntent.self, provider: ProviderLockscreen()) { entry in
+            PeekTransitWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Transit Widget - Lock Screen")
+        .description("Shows transit schedules on lock screen")
+        .supportedFamilies([.accessoryRectangular])
+    }
+}
+
+@main
+struct PeekTransitWidgetBundle: WidgetBundle {
+    var body: some Widget {
+        PeekTransitSmallWidget()
+        PeekTransitMediumWidget()
+        PeekTransitLargeWidget()
+        PeekTransitLockscreenWidget()
+    }
+}
