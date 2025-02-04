@@ -45,6 +45,10 @@ enum WidgetHelper {
             return nil
         }
         
+        Task {
+            try? await Task.sleep(for: .seconds(60))
+            WidgetCenter.shared.reloadAllTimelines()
+        }
         return savedWidgets.first { $0.id == id }
     }
     
@@ -53,31 +57,34 @@ enum WidgetHelper {
             return nil
         }
         
-        var schedulesDict: [String: String] = [:] // Key: "variantKey-variantName", Value: first schedule string for that combination
+        var schedulesDict: [String: String] = [:]
         
         for stop in stops {
-            guard let stopNumber = stop["number"] as? Int else { continue }
+            guard let stopNumber = stop["number"] as? Int,
+                  let selectedVariants = stop["selectedVariants"] as? [[String: Any]] else {
+                continue
+            }
             
             do {
                 let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
                 let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(schedule: schedule)
                 
-                if let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
-                    let variantKeys = selectedVariants.compactMap { $0["key"] as? String }
+                for variant in selectedVariants {
+                    guard let variantKey = variant["key"] as? String,
+                          let variantName = variant["name"] as? String else {
+                        continue
+                    }
                     
-                    for scheduleString in cleanedSchedule {
-                        let components = scheduleString.components(separatedBy: " ---- ")
-                        guard components.count >= 2,
-                              let variantKey = components.first,
-                              variantKeys.contains(variantKey) else { continue }
-                        
-                        let variantName = components[1]
-                        let compositeKey = "\(variantKey)-\(variantName)"
-                        
-                        // Only store the first occurrence of each unique variant key + name combination
-                        if schedulesDict[compositeKey] == nil {
-                            schedulesDict[compositeKey] = scheduleString
-                        }
+                    let compositeKey = "\(variantKey)-\(variantName)"
+                    
+                    if !schedulesDict.keys.contains(compositeKey),
+                       let firstMatchingSchedule = cleanedSchedule.first(where: { scheduleString in
+                           let components = scheduleString.components(separatedBy: " ---- ")
+                           return components.count >= 2 &&
+                                  components[0] == variantKey &&
+                                  components[1] == variantName
+                       }) {
+                        schedulesDict[compositeKey] = firstMatchingSchedule
                     }
                 }
             } catch {
@@ -85,6 +92,7 @@ enum WidgetHelper {
             }
         }
         
+
         return schedulesDict.isEmpty ? nil : Array(schedulesDict.values)
     }
     
@@ -94,21 +102,16 @@ enum WidgetHelper {
         widgetData: [String: Any]?,
         createEntry: @escaping (Date, Any, [String: Any]?, [String]?) -> T
     ) async -> Timeline<T> {
+
+        
         guard let widgetData = widgetData else {
-            // If no widget data, return a timeline with just the current time
             let entry = createEntry(currentDate, configuration, nil, nil)
-            return Timeline(entries: [entry], policy: .after(currentDate.addingTimeInterval(60)))
+            return Timeline(entries: [entry], policy: .atEnd)
         }
         
-        // Get current schedule
         let schedule = await getScheduleForWidget(widgetData)
-        
-        // Create entry for current time
         let entry = createEntry(currentDate, configuration, widgetData, schedule)
-        
-        // Set next update for 1 minute from now
         let nextUpdate = Calendar.current.date(byAdding: .minute, value: 1, to: currentDate)!
-        
         return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
 }
@@ -286,22 +289,14 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     var entry: T
     @Environment(\.widgetFamily) var family
     
-    
     var body: some View {
         if let widgetData = entry.widgetData {
-            switch family {
-            case .systemSmall:
-                SmallWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
-            case .systemMedium:
-                MediumWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
-            case .systemLarge:
-                LargeWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
-            case .accessoryRectangular:
-                LockScreenWidgetView(widgetData: widgetData, scheduleData: entry.scheduleData)
-            default:
-                Text("Unsupported widget size")
-            }
-            
+            DynamicWidgetView(
+                widgetData: widgetData,
+                scheduleData: entry.scheduleData,
+                size: family,
+                updatedAt: entry.date
+            )
         } else {
             Text("Select a widget configuration")
         }
@@ -369,3 +364,5 @@ struct PeekTransitWidgetBundle: WidgetBundle {
         PeekTransitLockscreenWidget()
     }
 }
+
+

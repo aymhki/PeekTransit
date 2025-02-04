@@ -29,17 +29,12 @@ class SavedWidgetsManager: ObservableObject {
     }
     
     private func saveToDisk() {
-        print("Attempting to save widgets to disk")
         if let encoded = try? JSONEncoder().encode(savedWidgets),
            let sharedDefaults = SharedDefaults.userDefaults {
-            print("Successfully encoded widgets")
             sharedDefaults.set(encoded, forKey: SharedDefaults.widgetsKey)
-            print("Saved \(savedWidgets.count) widgets to SharedDefaults")
-        } else {
-            print("Failed to access SharedDefaults for saving") // Debug log
         }
         
-        //WidgetCenter.shared.reloadAllTimelines()
+        WidgetCenter.shared.reloadAllTimelines()
         
     }
     

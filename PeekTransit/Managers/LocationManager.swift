@@ -51,12 +51,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        WidgetCenter.shared.reloadAllTimelines()
         authorizationStatus = status
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        WidgetCenter.shared.reloadAllTimelines()
         print("Location manager failed with error: \(error.localizedDescription)")
     }
 }

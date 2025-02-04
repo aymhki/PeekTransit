@@ -22,8 +22,9 @@ class TransitAPI {
     
     func fetchData(from url: URL) async throws -> Data {
         isLoading = true
-        WidgetCenter.shared.reloadAllTimelines()
         defer { isLoading = false }
+        // WidgetCenter.shared.reloadAllTimelines()
+
         
         let (data, response) = try await URLSession.shared.data(from: url)
         

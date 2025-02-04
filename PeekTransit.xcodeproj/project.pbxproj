@@ -84,6 +84,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				PeekTransitWidget.intentdefinition,
+				WidgetRefreshManager.swift,
 			);
 			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
 		};
@@ -119,11 +120,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				BusScheduleRow.swift,
-				LargeWidgetView.swift,
-				LockScreenWidgetView.swift,
-				MediumWidgetView.swift,
+				DynamicWidgetView.swift,
 				SharedDefaults.swift,
-				SmallWidgetView.swift,
 				WidgetKind.swift,
 				WidgetSize.swift,
 			);
@@ -155,11 +153,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				BusScheduleRow.swift,
-				LargeWidgetView.swift,
-				LockScreenWidgetView.swift,
-				MediumWidgetView.swift,
+				DynamicWidgetView.swift,
 				SharedDefaults.swift,
-				SmallWidgetView.swift,
 				WidgetKind.swift,
 				WidgetSize.swift,
 			);
