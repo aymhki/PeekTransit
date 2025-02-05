@@ -78,7 +78,7 @@ public func getMaxVariantsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetS
 }
 
 public func getStopsDistanceRadius() -> Double {
-    return 600
+    return 650
 }
 
 

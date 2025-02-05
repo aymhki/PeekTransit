@@ -35,30 +35,10 @@ struct DynamicWidgetView: View {
     
     @ViewBuilder
     private var content: some View {
-        if let isClosestStop = widgetData["isClosestStop"] as? Bool {
-            if isClosestStop {
-                closestStopView
-            } else {
-                selectedStopsView
-            }
-        }
+        selectedStopsView
     }
     
     
-    @ViewBuilder
-    private var closestStopView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("Closest Stop")
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundColor(.secondary)
-            
-            if let schedules = scheduleData {
-                ForEach(Array(schedules.prefix(maxSchedules)).indices, id: \.self) { index in
-                    BusScheduleRow(schedule: schedules[index], size: size)
-                }
-            }
-        }
-    }
     
     @ViewBuilder
     private var selectedStopsView: some View {

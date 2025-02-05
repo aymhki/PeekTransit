@@ -96,27 +96,9 @@ struct ListView: View {
             }
             .navigationTitle("Nearby Stops")
             .toolbar {
-                            
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                                Button(action: {
-//                                    guard let url = URL(string: "mailto:agamyahk@myumanitoba.ca") else { return }
-//                                    if UIApplication.shared.canOpenURL(url) {
-//                                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
-//                                    } else {
-//                                        
-//                                        showAlert = true
-//                                    }
-//                                }) {
-//                                    Image(systemName: "info.circle")
-//                                }
-//
-//                            }
+                        
                 }
-//                        .alert("Could not find an email client", isPresented: $showAlert) {
-//                            Button("OK", role: .cancel) { }
-//                        } message: {
-//                            Text("There does not seem to be an email client set for this device.")
-//                        }
+
         }
         .onAppear {
             locationManager.requestLocation()

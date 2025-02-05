@@ -18,5 +18,21 @@
                 <string>ConfigurationSmallIntent</string>
             </array>
         </dict>
+        
+    <key>NSLocationWhenInUseUsageDescription</key>
+        <string>We need your location to show nearby transit stops</string>
+        
+    <key>NSLocationUsageDescription</key>
+        <string>We need your location to show nearby transit stops</string>
+        
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+        <string>We need your location to show nearby transit stops</string>
+        
+    <key>NSWidgetWantsLocation</key>
+        <string>We need your location to show nearby transit stops</string>
+        
+        
+    <key>NSWidgetUsesLocationServices</key>
+        <true/>
 </dict>
 </plist>

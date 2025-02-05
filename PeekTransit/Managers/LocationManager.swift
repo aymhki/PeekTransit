@@ -19,7 +19,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func shouldRefresh(for newLocation: CLLocation) -> Bool {
-        WidgetCenter.shared.reloadAllTimelines()
+        
         
         guard let lastRefresh = lastRefreshLocation else {
             lastRefreshLocation = newLocation
@@ -29,6 +29,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         let distance = newLocation.distance(from: lastRefresh)
         if distance >= minimumDistanceThreshold {
             lastRefreshLocation = newLocation
+            WidgetCenter.shared.reloadAllTimelines()
             return true
         }
         
