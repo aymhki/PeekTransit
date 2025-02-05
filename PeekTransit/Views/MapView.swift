@@ -174,10 +174,13 @@ struct MapViewRepresentable: UIViewRepresentable {
                            let variantDict = variant["variant"] as? [String: Any],
                            let key = variantDict["key"] as? String {
                             
-                            variantsString += key.split(separator: "-")[0].description
-                            
-                            if index < variants.count - 1 {
-                                variantsString += ", "
+                            if ( !(variantsString.contains(key.split(separator: "-")[0].description)) ) {
+                                
+                                variantsString += key.split(separator: "-")[0].description
+                                
+                                if index < variants.count - 1 {
+                                    variantsString += ", "
+                                }
                             }
                         }
                     }
@@ -193,7 +196,7 @@ struct MapViewRepresentable: UIViewRepresentable {
         }
         
         if let userLocation = userLocation {
-            let circle = MKCircle(center: userLocation.coordinate, radius: 600)
+            let circle = MKCircle(center: userLocation.coordinate, radius: getStopsDistanceRadius())
             mapView.addOverlay(circle)
         }
     }

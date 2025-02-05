@@ -46,4 +46,11 @@ class SavedStopsManager: ObservableObject {
         
         saveToDisk()
     }
-} 
+    
+    func saveStop(for stop: [String: Any]) {
+        if !isStopSaved(stop) {
+            savedStops.append(SavedStop(stopData: stop))
+            saveToDisk()
+        }
+    }
+}

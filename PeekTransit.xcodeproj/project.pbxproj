@@ -130,7 +130,7 @@
 		2FBB714F2D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Helpers/MaxValuesAllowed.swift,
+				Helpers/AppConstants.swift,
 				Helpers/TimeFormat.swift,
 				Managers/SavedWidgetsManager.swift,
 				Models/AnyCodable.swift,
@@ -143,7 +143,7 @@
 		2FBB71502D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetIntentHelper" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Helpers/MaxValuesAllowed.swift,
+				Helpers/AppConstants.swift,
 				Helpers/TimeFormat.swift,
 				Managers/SavedWidgetsManager.swift,
 				Models/AnyCodable.swift,

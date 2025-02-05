@@ -12,9 +12,29 @@ class TransitAPI {
     
     init() {}
     
-    func createURL(path: String, parameters: [String: String] = [:]) -> URL? {
+    func createURL(path: String, parameters: [String: Any] = [:]) -> URL? {
         var components = URLComponents(string: "\(baseURL)/\(path)")
-        var queryItems = parameters.map { URLQueryItem(name: $0.key, value: $0.value) }
+        var queryItems = parameters.map { key, value in
+            let stringValue: String
+            switch value {
+            case let number as NSNumber:
+                stringValue = number.stringValue
+            case let string as String:
+                stringValue = string
+            case let bool as Bool:
+                stringValue = bool ? "true" : "false"
+            case let array as [Any]:
+                stringValue = array.map { String(describing: $0) }.joined(separator: ",")
+            case let date as Date:
+                // Use appropriate date formatter here
+                stringValue = ISO8601DateFormatter().string(from: date)
+            case is NSNull:
+                stringValue = ""
+            default:
+                stringValue = String(describing: value)
+            }
+            return URLQueryItem(name: key, value: stringValue)
+        }
         queryItems.append(URLQueryItem(name: "api-key", value: apiKey))
         components?.queryItems = queryItems
         return components?.url
@@ -45,7 +65,7 @@ class TransitAPI {
             parameters: [
                 "lat": String(userLocation.coordinate.latitude),
                 "lon": String(userLocation.coordinate.longitude),
-                "distance": "500",
+                "distance": "\(Int(getStopsDistanceRadius()))",
                 "walking": "false"
 //                "usage": "short"
             ]
@@ -102,31 +122,37 @@ class TransitAPI {
                     continue
                 }
                 
-                guard let url = createURL(path: "stops/\(stopNumber)/schedule.json", parameters: [ "start": startTime, "end": endTime]) else {
+                // Using the new URL format with variants.json
+                guard let url = createURL(path: "variants.json", parameters: [
+                    "start": startTime,
+                    "end": endTime,
+                    "stop": stopNumber
+                ]) else {
                     throw TransitError.invalidURL
                 }
                 
                 let data = try await fetchData(from: url)
                 
                 guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let schedule = json["stop-schedule"] as? [String: Any],
-                      let routeSchedules = schedule["route-schedules"] as? [[String: Any]] else {
-                    print("Invalid schedule data for stop \(stopNumber)")
+                      let variantsArray = json["variants"] as? [[String: Any]] else {
+                    print("Invalid variants data for stop \(stopNumber)")
                     continue
                 }
                 
-                let variants = routeSchedules.compactMap { routeSchedule -> [String: Any]? in
-                    guard let route = routeSchedule["route"] as? [String: Any],
-                          let scheduledStops = routeSchedule["scheduled-stops"] as? [[String: Any]],
-                          let firstStop = scheduledStops.first,
-                          let variant = firstStop["variant"] as? [String: Any] else {
-                        return nil
-                    }
+                // Transform the new variant format to match the old format
+                let transformedVariants = variantsArray.map { variant -> [String: Any] in
+                    // Create a dummy route object to maintain the same structure
+                    let route: [String: Any] = [
+                        "key": stopNumber, // Using stopNumber as a fallback key
+                        "number": stopNumber // Using stopNumber as a fallback number
+                        // Add other default route properties if needed
+                    ]
+                    
                     return ["route": route, "variant": variant]
                 }
                 
-                if !variants.isEmpty {
-                    stop["variants"] = variants
+                if !transformedVariants.isEmpty {
+                    stop["variants"] = transformedVariants
                     enrichedStops.append(stop)
                 }
                 

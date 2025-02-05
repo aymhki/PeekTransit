@@ -11,6 +11,21 @@ struct SelectableStopRow: View {
     let maxStops: Int
     let onSelect: () -> Void
     
+    private var uniqueVariants: [[String: Any]] {
+        var seenKeys = Set<String>()
+        return variants.filter { item in
+            guard let variant = item["variant"] as? [String: Any],
+                  let key = variant["key"] as? String else {
+                return false
+            }
+            if seenKeys.contains(key.split(separator: "-")[0].description) {
+                return false
+            }
+            seenKeys.insert(key.split(separator: "-")[0].description)
+            return true
+        }
+    }
+    
     private var coordinate: CLLocationCoordinate2D? {
         guard let centre = stop["centre"] as? [String: Any],
               let geographic = centre["geographic"] as? [String: Any],
@@ -57,9 +72,9 @@ struct SelectableStopRow: View {
                     
                     ScrollView {
                         FlowLayout(spacing: 2) {
-                            ForEach(variants.indices, id: \.self) { index in
-                                if let route = variants[index]["route"] as? [String: Any],
-                                   let variant = variants[index]["variant"] as? [String: Any] {
+                            ForEach(uniqueVariants.indices, id: \.self) { index in
+                                if let route = uniqueVariants[index]["route"] as? [String: Any],
+                                   let variant = uniqueVariants[index]["variant"] as? [String: Any] {
                                     VariantBadge(route: route, variant: variant)
                                 }
                             }
