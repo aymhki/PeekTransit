@@ -24,7 +24,7 @@ class StopsDataStore: ObservableObject {
         
         do {
             isProcessing = true
-            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation)
+            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation, forShort: false)
             
             for batch in stride(from: 0, to: nearbyStops.count, by: batchSize) {
                 let endIndex = min(batch + batchSize, nearbyStops.count)

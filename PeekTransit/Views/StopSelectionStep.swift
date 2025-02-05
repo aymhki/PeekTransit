@@ -17,7 +17,7 @@ struct StopSelectionStep: View {
         error = nil
         
         do {
-            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: location)
+            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: true)
             let enrichedStops = try await TransitAPI.shared.getVariantsForStops(stops: nearbyStops)
             
             await MainActor.run {

@@ -59,15 +59,15 @@ class TransitAPI {
         return data
     }
     
-    func getNearbyStops(userLocation: CLLocation) async throws -> [[String: Any]] {
+    func getNearbyStops(userLocation: CLLocation, forShort: Bool) async throws -> [[String: Any]] {
         guard let url = createURL(
             path: "stops.json",
             parameters: [
                 "lat": String(userLocation.coordinate.latitude),
                 "lon": String(userLocation.coordinate.longitude),
                 "distance": "\(Int(getStopsDistanceRadius()))",
-                "walking": "false"
-//                "usage": "short"
+                "walking": "false",
+                "usage": forShort ? "short" : "long"
             ]
         ) else {
             throw TransitError.invalidURL
@@ -80,8 +80,17 @@ class TransitAPI {
             throw TransitError.parseError("Invalid stops data format")
         }
         
+        var mutableStops = stops
+        if forShort {
+            for (index, var stop) in mutableStops.enumerated() {
+                if let name = stop["name"] as? String {
+                    stop["name"] = name.replacingOccurrences(of: "@", with: " @ ")
+                    mutableStops[index] = stop
+                }
+            }
+        }
         
-        return stops
+        return mutableStops
         
             .sorted { stop1, stop2 in
                 guard let distances1 = stop1["distances"] as? [String: Any],
@@ -98,7 +107,7 @@ class TransitAPI {
                 
                 return distanceValue1 < distanceValue2
             }
-        .prefix(25).map{$0}
+        .prefix(getMaxStopsAllowedToFetch()).map{$0}
 
 
     }
