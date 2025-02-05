@@ -107,7 +107,7 @@ struct BusStopView: View {
                             if components.count > 1 {
                                 GeometryReader { geometry in
                                     let totalWidth = geometry.size.width
-                                    let spacing: CGFloat = 2
+                                    let spacing: CGFloat = 0
                                     let baseWidth = totalWidth * 0.14
 
                                     let columnWidths = [
@@ -116,12 +116,12 @@ struct BusStopView: View {
                                         baseWidth,
                                         
                                         // Route Name
-                                        (components[2].contains("Late") || components[2].contains("Early") )  ? totalWidth * 0.36 :
-                                        totalWidth * 0.56,
+                                        (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled"))  ? totalWidth * 0.37 :
+                                        totalWidth * 0.61,
                                         
                                         // Arrival Status
-                                        components[2].contains("Cancelled") ? totalWidth * 0.3 :
-                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.18 :
+                                        components[2].contains("Cancelled") ? totalWidth * 0.36 :
+                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.24 :
                                         totalWidth * 0.11,
                                         
                                         // Arrival Time
@@ -137,9 +137,7 @@ struct BusStopView: View {
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[0], alignment: .leading)
 
-//                                        Text(components[1].count > 15 ? components[1].prefix(15) + "..." : components[1])
-                                        Text(components[1])
-//                                            .font(.system(size: 11, design: .monospaced).bold())
+                                        Text( ( components[1].count > 12 && (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled")) ) ? components[1].prefix(12) + "..." : components[1])
                                             .font(.system(.subheadline, design: .monospaced).bold())
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
@@ -168,7 +166,7 @@ struct BusStopView: View {
                                         }
                                     }
                                     .padding(.vertical, 12)
-                                    .padding(.horizontal, 8)
+                                    .padding(.horizontal, 1)
                                 }
                                 .frame(height: 50)
 
