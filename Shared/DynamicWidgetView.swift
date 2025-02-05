@@ -157,8 +157,8 @@ struct BusScheduleRow: View {
         case .systemLarge: return 16
         case .systemMedium: return 15
         case .systemSmall: return 14
-        case .accessoryRectangular: return 10
-        default: return 10
+        case .accessoryRectangular: return 12
+        default: return 12
         }
     }
 }
@@ -214,16 +214,18 @@ struct StopView: View {
                                 .padding(.horizontal, 8)
                             
                             
-                        } else if (size != .systemMedium) {
+                        } else if (size != .systemMedium && size != .accessoryRectangular) {
                             BusScheduleRow(schedule: matchingSchedule, size: size)
                                 .padding(.horizontal, 30)
-                        } else {
+                        } else if (size == .systemMedium) {
                             BusScheduleRow(schedule: matchingSchedule, size: size)
                                 .padding(.horizontal, 30)
                                 .padding(.bottom, variantIndex < variants.prefix(maxSchedules).count  - 1 ? 3 : 0)
+                        } else if (size == .accessoryRectangular) {
+                            BusScheduleRow(schedule: matchingSchedule, size: size)
                         }
                         
-                       if (size == .systemLarge || size == .systemSmall || ((scheduleData)?.count ?? 0 < 3)) {
+                        if (size == .systemLarge || size == .systemSmall || ( ((scheduleData)?.count ?? 0 < 3) && size != .accessoryRectangular )) {
                             Spacer()
                         }
                     }
@@ -240,7 +242,7 @@ struct LastUpdatedView: View {
     
     var body: some View {
         Text("Last updated at \(formattedTime)")
-            .font(.system(size:  size == "small" ? 10 : size == "lockscreen" ? 8 : 12))
+            .font(.system(size:  size == "small" ? 10 : size == "lockscreen" ? 10 : 12))
             
     }
     

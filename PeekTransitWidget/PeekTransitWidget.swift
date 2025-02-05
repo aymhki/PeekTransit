@@ -298,7 +298,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                 updatedAt: entry.date
             )
         } else {
-            Text("Select a widget configuration")
+            Text("Select the widget configuration to start")
         }
     }
 }

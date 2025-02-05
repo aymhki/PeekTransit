@@ -71,6 +71,6 @@ struct SelectableStopRow: View {
             .padding(.vertical, 8)
         }
         .buttonStyle(PlainButtonStyle())
-        .disabled(selectedStops.count > maxStops && !isSelected)
+        .disabled(selectedStops.count >= maxStops && !isSelected)
     }
 }

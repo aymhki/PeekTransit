@@ -34,7 +34,7 @@ struct WidgetSetupView: View {
                 variants.compactMap { $0["key"] as? String }
             }.joined(separator: ", ")
             
-            return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(selectedTimeFormat.rawValue)"
+            return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(selectedTimeFormat.rawValue) - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         }
     }
 
@@ -43,7 +43,7 @@ struct WidgetSetupView: View {
     private func createWidgetData() -> [String: Any] {
         var widgetData: [String: Any] = [
             "size": widgetSize,
-            "id": UUID().uuidString,
+            "id":  UUID().uuidString,
             "createdAt": ISO8601DateFormatter().string(from: Date()),
             "isClosestStop": isClosestStop,
             "name": widgetName.isEmpty ? generateDefaultWidgetName() : widgetName,
@@ -84,11 +84,11 @@ struct WidgetSetupView: View {
             return
         }
         
-        if widgetSize == "lockscreen" && SavedWidgetsManager.shared.countLockscreenWidgets() > 0 {
-            saveErrorMessage = "You can only have one lockscreen widget at a time."
-            showingSaveError = true
-            return
-        }
+//        if widgetSize == "lockscreen" && SavedWidgetsManager.shared.countLockscreenWidgets() > 0 {
+//            saveErrorMessage = "You can only have one lockscreen widget at a time."
+//            showingSaveError = true
+//            return
+//        }
         
         let widgetData = createWidgetData()
         let widget = WidgetModel(widgetData: widgetData)

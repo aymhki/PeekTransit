@@ -35,11 +35,14 @@ class SavedWidgetsManager: ObservableObject {
         }
         
         WidgetCenter.shared.reloadAllTimelines()
-        
     }
     
     func deleteWidget(for widgetData: [String: Any]) {
-        guard let widgetId = widgetData["id"] as? String else { return }
+        guard let widgetId = widgetData["id"] as? String else {
+            savedWidgets = []
+            saveToDisk()
+            return
+        }
         
         if let index = savedWidgets.firstIndex(where: {$0.id == widgetId }) {
             savedWidgets.remove(at: index)

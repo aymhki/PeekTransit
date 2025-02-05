@@ -3,7 +3,7 @@ enum TimeFormat: String, CaseIterable {
     case minutesRemaining = "X(X) Minutes remaining"
 
     static var `default`: TimeFormat {
-        return .clockTime  
+        return .minutesRemaining
     }
     
     var description: String {

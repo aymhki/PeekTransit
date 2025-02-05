@@ -34,27 +34,54 @@ class IntentHandler: INExtension, ConfigurationLargeIntentHandling, Configuratio
     }
     
     func provideWidgetConfigOptionsCollection(for intent: ConfigurationLargeIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
+            
+        let collection = getCollection(sizeGiven: "large")
         
-        completion(getCollection(sizeGiven: "large"), nil)
+        if collection.allItems.isEmpty {
+            let error = NSError(domain: "com.PeekTransit.PeekTransitWidget", code: 404, userInfo: [NSLocalizedDescriptionKey: "No widget configurations found for this size. Create one in the app, then come back here to try again."])
+            completion(nil, error)
+        } else {
+            completion(collection, nil)
+        }
     }
     
     
     func provideWidgetConfigOptionsCollection(for intent: ConfigurationMediumIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
         
-        completion(getCollection(sizeGiven: "medium"), nil)
+        let collection = getCollection(sizeGiven: "medium")
+        
+        if collection.allItems.isEmpty {
+            let error = NSError(domain: "com.PeekTransit.PeekTransitWidget", code: 404, userInfo: [NSLocalizedDescriptionKey: "No widget configurations found for this size. Create one in the app, then come back here to try again."])
+            completion(nil, error)
+        } else {
+            completion(collection, nil)
+        }
     }
     
     
     func provideWidgetConfigOptionsCollection(for intent: ConfigurationSmallIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
         
-        completion(getCollection(sizeGiven: "small"), nil)
+        let collection = getCollection(sizeGiven: "small")
+        
+        if collection.allItems.isEmpty {
+            let error = NSError(domain: "com.PeekTransit.PeekTransitWidget", code: 404, userInfo: [NSLocalizedDescriptionKey: "No widget configurations found for this size. Create one in the app, then come back here to try again."])
+            completion(nil, error)
+        } else {
+            completion(collection, nil)
+        }
         
     }
     
     
     func provideWidgetConfigOptionsCollection(for intent: ConfigurationLockscreenIntent, with completion: @escaping (INObjectCollection<WidgetConfig>?, Error?) -> Void) {
-        completion(getCollection(sizeGiven: "lockscreen"), nil)
+        let collection = getCollection(sizeGiven: "lockscreen")
         
+        if collection.allItems.isEmpty {
+            let error = NSError(domain: "com.PeekTransit.PeekTransitWidget", code: 404, userInfo: [NSLocalizedDescriptionKey: "No widget configurations found for this size. Create one in the app, then come back here to try again."])
+            completion(nil, error)
+        } else {
+            completion(collection, nil)
+        }
     }
     
 }
