@@ -13,12 +13,13 @@ struct WidgetSetupView: View {
     @State private var selectedVariants: [String: [[String: Any]]] = [:]
     @State private var widgetSize = "medium"
     @State private var isClosestStop = false
-    
+    @State private var selectedTimeFormat: TimeFormat = .default
     @State private var slideOffset: CGFloat = 0
     @State private var opacity: Double = 1
-    
-
+    @State private var showingSaveError = false
+    @State private var saveErrorMessage = ""
     @State private var widgetName: String = ""
+    @State private var showLastUpdatedStatus = true
 
     private func generateDefaultWidgetName() -> String {
         if isClosestStop {
@@ -33,7 +34,7 @@ struct WidgetSetupView: View {
                 variants.compactMap { $0["key"] as? String }
             }.joined(separator: ", ")
             
-            return "\(stopNumbers) - \(variantKeys) - \(widgetSize)"
+            return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(selectedTimeFormat.rawValue)"
         }
     }
 
@@ -45,7 +46,10 @@ struct WidgetSetupView: View {
             "id": UUID().uuidString,
             "createdAt": ISO8601DateFormatter().string(from: Date()),
             "isClosestStop": isClosestStop,
-            "name": widgetName.isEmpty ? generateDefaultWidgetName() : widgetName
+            "name": widgetName.isEmpty ? generateDefaultWidgetName() : widgetName,
+            "timeFormat": selectedTimeFormat.rawValue,
+            "showLastUpdatedStatus": showLastUpdatedStatus
+            
         ]
         
         if isClosestStop {
@@ -72,6 +76,18 @@ struct WidgetSetupView: View {
     private func handleSave() {
         if widgetName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             widgetName = generateDefaultWidgetName()
+        }
+        
+        if SavedWidgetsManager.shared.hasWidgetWithName(widgetName) {
+            saveErrorMessage = "A widget with this name already exists. Please choose a different name."
+            showingSaveError = true
+            return
+        }
+        
+        if widgetSize == "lockscreen" && SavedWidgetsManager.shared.countLockscreenWidgets() > 0 {
+            saveErrorMessage = "You can only have one lockscreen widget at a time."
+            showingSaveError = true
+            return
         }
         
         let widgetData = createWidgetData()
@@ -152,20 +168,12 @@ struct WidgetSetupView: View {
     }
     
     private var maxStopsAllowed: Int {
-        switch widgetSize {
-        case "large": return 3
-        case "medium": return 2
-        case "small": return 1
-        case "lockscreen": return 2
-        default: return 2
-        }
+        return getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
     }
     
-    private var maxVariantsPerStop: Int {
-        switch widgetSize {
-        case "lockscreen": return 1
-        default: return 2
-        }
+    private var maxVariantsPerStop: Int {        
+        return getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        
     }
     
     var body: some View {
@@ -175,7 +183,7 @@ struct WidgetSetupView: View {
                     switch currentStep {
                     case 1:
                         VStack {
-                            SizeSelectionStep(selectedSize: $widgetSize)
+                            SizeSelectionStep(selectedSize: $widgetSize, selectedTimeFormat: $selectedTimeFormat, showLastUpdatedStatus: $showLastUpdatedStatus)
                             
                             ContinueButton(
                                 title: "Continue",
@@ -261,6 +269,11 @@ struct WidgetSetupView: View {
                     }
                 }
             }
+        }
+        .alert("Cannot Save Widget", isPresented: $showingSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage)
         }
     }
 }

@@ -67,7 +67,7 @@ enum WidgetHelper {
             
             do {
                 let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
-                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(schedule: schedule)
+                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: widgetData["timeFormat"] as? String == TimeFormat.clockTime.rawValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining ?? TimeFormat.default)
                 
                 for variant in selectedVariants {
                     guard let variantKey = variant["key"] as? String,

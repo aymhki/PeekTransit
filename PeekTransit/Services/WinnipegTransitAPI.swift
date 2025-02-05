@@ -197,11 +197,11 @@ class TransitAPI {
             throw TransitError.parseError("Invalid schedule data format")
         }
 //        print(json)
-//        print(cleanStopSchedule(schedule: json))
+//        print(cleanStopSchedule(schedule: json, timeFormat: TimeFormat.minutesRemaining))
         return json
     }
     
-    func cleanStopSchedule(schedule: [String: Any]) -> [String] {
+    func cleanStopSchedule(schedule: [String: Any], timeFormat: TimeFormat) -> [String] {
         var busScheduleList: [String] = []
         let currentDate = Date()
         let dateFormatter = DateFormatter()
@@ -265,13 +265,13 @@ class TransitAPI {
                                     arrivalState = "Cancelled"
                                     finalArrivalText = ""
                                 } else {
-                                    if timeDifference < 0 {
+                                    if (timeDifference < 0 && timeFormat != TimeFormat.clockTime) {
                                         finalArrivalText = "\(Int(-timeDifference)) min. ago"
-                                    } else if timeDifference < 15 {
+                                    } else if (timeDifference < 15 && timeFormat != TimeFormat.clockTime) {
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else {
                                         var finalHour = Int(estimatedTimeParsedTime[0])!
-                                        var am = finalHour < 12
+                                        let am = finalHour < 12
                                                     
                                         if finalHour == 0 {
                                             finalHour = 12
@@ -288,7 +288,7 @@ class TransitAPI {
                                         }
                                     }
                                     
-                                    if delay > 0 && timeDifference < 15 {
+                                    if (delay > 0 && timeDifference < 15 && timeFormat != TimeFormat.clockTime) {
                                         arrivalState = "Late"
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else if delay < 0 && timeDifference < 15 {

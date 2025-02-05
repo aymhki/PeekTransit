@@ -55,5 +55,13 @@ class SavedWidgetsManager: ObservableObject {
         saveToDisk()
     }
     
+    func hasWidgetWithName(_ name: String) -> Bool {
+        return savedWidgets.contains { $0.name == name }
+    }
+    
+    func countLockscreenWidgets() -> Int {
+        return savedWidgets.filter { ($0.widgetData["size"] as? String) == "lockscreen" }.count
+    }
+    
 
 }

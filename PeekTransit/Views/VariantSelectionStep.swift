@@ -51,7 +51,7 @@ struct VariantSelectionStep: View {
                 guard let stopNumber = stop["number"] as? Int else { continue }
                 
                 let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
-                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(schedule: schedule)
+                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
                 let uniqueVariants = processSchedules(cleanedSchedule)
                 
                 await MainActor.run {
@@ -129,6 +129,10 @@ struct VariantSelectionStep: View {
             } else {
                 ScrollView {
                     VStack(spacing: 20) {
+                        Text("Select which bus variants you want to show on your widget")
+                            .font(.title3)
+                            .padding([.top, .horizontal])
+                        
                         Text("You can select up to \(maxVariantsPerStop) variant\(maxVariantsPerStop > 1 ? "s" : "") per stop")
                             .font(.subheadline)
                             .foregroundColor(.secondary)

@@ -6,7 +6,9 @@ import CoreLocation
 struct SelectableStopRow: View {
     let stop: [String: Any]
     let variants: [[String: Any]]
+    let selectedStops: [[String: Any]]
     let isSelected: Bool
+    let maxStops: Int
     let onSelect: () -> Void
     
     private var coordinate: CLLocationCoordinate2D? {
@@ -69,5 +71,6 @@ struct SelectableStopRow: View {
             .padding(.vertical, 8)
         }
         .buttonStyle(PlainButtonStyle())
+        .disabled(selectedStops.count > maxStops && !isSelected)
     }
 }

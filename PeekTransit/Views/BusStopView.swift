@@ -32,7 +32,7 @@ struct BusStopView: View {
         do {
             guard let stopNumber = stop["number"] as? Int else { return }
             let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
-            schedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule)
+            schedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
             errorFetchingSchedule = false
             errorText = ""
         } catch {
@@ -154,7 +154,7 @@ struct BusStopView: View {
                                                 .foregroundStyle(
                                                     components[2].contains("Late") ? .red :
                                                         components[2].contains("Cancelled") ? .red :
-                                                        components[2].contains("Early") ? .yellow :
+                                                        components[2].contains("Early") ? .blue :
                                                             .primary
                                                 )
                                         }

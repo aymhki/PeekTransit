@@ -46,6 +46,10 @@ struct StopSelectionStep: View {
     
     var body: some View {
         VStack(spacing: 16) {
+            Text("Select which bus stops you want to show on your widget")
+                .font(.title3)
+                .padding([.top, .horizontal])
+            
             Text("You can select up to \(maxStopsAllowed) stop\(maxStopsAllowed > 1 ? "s" : "") for this widget size")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -111,7 +115,9 @@ struct StopSelectionStep: View {
                                 SelectableStopRow(
                                     stop: stop,
                                     variants: variants,
+                                    selectedStops: selectedStops,
                                     isSelected: isStopSelected(stop),
+                                    maxStops: maxStopsAllowed,
                                     onSelect: {
                                         withAnimation {
                                             toggleStopSelection(stop)
