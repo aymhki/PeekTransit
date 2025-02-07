@@ -27,7 +27,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
     
-    // CLLocationManagerDelegate methods
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         WidgetCenter.shared.reloadAllTimelines()
     }

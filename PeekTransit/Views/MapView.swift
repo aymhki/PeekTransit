@@ -11,7 +11,7 @@ struct MapView: View {
     @State private var forceRefresh = UUID()
 
     
-    private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+    private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
     private let closeSpan = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
     
     var body: some View {

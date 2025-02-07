@@ -52,6 +52,43 @@ enum WidgetHelper {
         return savedWidgets.first { $0.id == id }
     }
     
+    static func getFilteredStopsForWidget(_ stops: [[String: Any]], maxStops: Int) -> [[String: Any]] {        
+        var filteredStops: [[String: Any]] = []
+        
+        var usedKeys = Set<String>()
+        
+        for stop in stops {
+            guard let direction = stop["direction"] as? String,
+                  let street = stop["street"] as? [String: Any],
+                    let streetName = street["name"] as? String
+            
+            
+            
+            else {
+                continue
+            }
+            
+            let compositeKey = "\(direction)-\(streetName)"
+            
+            if !usedKeys.contains(compositeKey) {
+                filteredStops.append(stop)
+                usedKeys.insert(compositeKey)
+            }
+            
+            if filteredStops.count >= maxStops {
+                break
+            }
+            
+        }
+        
+        if filteredStops.isEmpty {
+            filteredStops = Array(stops.prefix(maxStops))
+        }
+        
+        
+        return filteredStops
+    }
+    
     static func getScheduleForWidget(_ widgetData: [String: Any], isClosestStop: Bool? = false) async -> ([String]?, [String: Any]) {
         guard let stops = widgetData["stops"] as? [[String: Any]] else {
             return (nil, widgetData)
@@ -391,7 +428,7 @@ struct ProviderLarge: IntentTimelineProvider {
                                 widgetSizeSystemFormat: .systemLarge,
                                 widgetSizeStringFormat: nil
                             )
-                            finalWidgetData["stops"] = Array(stops.prefix(maxStops))
+                            finalWidgetData["stops"] = WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
                             let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData, isClosestStop: true)
                             finalWidgetData = updatedWidgetData
                             
@@ -440,7 +477,7 @@ struct ProviderLarge: IntentTimelineProvider {
                             widgetSizeSystemFormat: .systemLarge,
                             widgetSizeStringFormat: nil
                         )
-                        widgetData?["stops"] = Array(stops.prefix(maxStops))
+                        widgetData?["stops"] = WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
                         let (_, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(widgetData ?? [:], isClosestStop: true)
                         widgetData = updatedWidgetData
                     } else {
@@ -625,7 +662,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
         }
         
         
-        
+
         return false
     }
     
@@ -673,8 +710,6 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                 }
             }
         }
-        
-        
         
         return filledScheduleData
         

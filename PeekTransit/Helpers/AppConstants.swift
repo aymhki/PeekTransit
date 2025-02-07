@@ -83,7 +83,7 @@ public func getStopsDistanceRadius() -> Double {
 
 
 public func getMaxStopsAllowedToFetch() -> Int {
-    return 5
+    return 50
 }
 
 

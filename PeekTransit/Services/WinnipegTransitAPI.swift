@@ -114,65 +114,112 @@ class TransitAPI {
     
     
     
+    private func createVariantsForStop(_ stopNumber: Int, currentDate: Date, endDate: Date) async throws -> [[String: Any]] {
+        let dateFormatter = ISO8601DateFormatter()
+        let startTime = dateFormatter.string(from: currentDate)
+        let endTime = dateFormatter.string(from: endDate)
+        
+        guard let url = createURL(path: "variants.json", parameters: [
+            "start": startTime,
+            "end": endTime,
+            "stop": stopNumber
+        ]) else {
+            throw TransitError.invalidURL
+        }
+        
+        let data = try await fetchData(from: url)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let variantsArray = json["variants"] as? [[String: Any]] else {
+            throw TransitError.parseError("Invalid variants data format")
+        }
+        
+        return variantsArray.map { variant -> [String: Any] in
+            let route: [String: Any] = [
+                "key": stopNumber,
+                "number": stopNumber
+            ]
+            return ["route": route, "variant": variant]
+        }
+    }
+    
+    private func validateCaches(stops: [[String: Any]], enrichedStops: [[String: Any]], currentDate: Date, endDate: Date) async throws -> Bool {
+        let stopNumbers = stops.compactMap { $0["number"] as? Int }
+        let stopsParam = stopNumbers.map(String.init).joined(separator: ",")
+        
+        guard let url = createURL(path: "variants.json", parameters: [
+            "start": ISO8601DateFormatter().string(from: currentDate),
+            "end": ISO8601DateFormatter().string(from: endDate),
+            "stops": stopsParam
+        ]) else {
+            throw TransitError.invalidURL
+        }
+        
+        let data = try await fetchData(from: url)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let allVariants = json["variants"] as? [[String: Any]] else {
+            throw TransitError.parseError("Invalid bulk variants data format")
+        }
+        
+        // Create a set of all variants from the bulk request
+        let bulkVariantsSet = Set(allVariants.compactMap { variant -> String? in
+            guard let key = variant["key"] as? String,
+                  let name = variant["name"] as? String else { return nil }
+            return "\(key)|\(name)"
+        })
+        
+        // Check if all cached variants exist in the bulk request
+        for enrichedStop in enrichedStops {
+            guard let variants = enrichedStop["variants"] as? [[String: Any]] else { continue }
+            
+            for variant in variants {
+                guard let variantData = variant["variant"] as? [String: Any],
+                      let key = variantData["key"] as? String,
+                      let name = variantData["name"] as? String else { continue }
+                
+                let variantIdentifier = "\(key)|\(name)"
+                if !bulkVariantsSet.contains(variantIdentifier) {
+                    return false // Cache is invalid
+                }
+            }
+        }
+        
+        return true // All caches are valid
+    }
+    
     func getVariantsForStops(stops: [[String: Any]]) async throws -> [[String: Any]] {
         var enrichedStops: [[String: Any]] = []
         let currentDate = Date()
         let calendar = Calendar.current
         let endDate = calendar.date(byAdding: .hour, value: getTimePeriodAllowedForNextBusRoutes(), to: currentDate)!
         
-        let dateFormatter = ISO8601DateFormatter()
-        let startTime = dateFormatter.string(from: currentDate)
-        let endTime = dateFormatter.string(from: endDate)
-        
+        // Process each stop
         for var stop in stops {
-            do {
-                guard let stopNumber = stop["number"] as? Int else {
-                    print("Invalid stop number for stop: \(stop)")
-                    continue
+            if let stopNumber = stop["number"] as? Int {
+                var stopVariants: [[String: Any]]
+                
+                // Check cache first
+                if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
+                    stopVariants = cachedVariants
+                } else {
+                    // Fetch and cache if not found
+                    stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate)
+                    VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
                 }
                 
-                // Using the new URL format with variants.json
-                guard let url = createURL(path: "variants.json", parameters: [
-                    "start": startTime,
-                    "end": endTime,
-                    "stop": stopNumber
-                ]) else {
-                    throw TransitError.invalidURL
-                }
-                
-                let data = try await fetchData(from: url)
-                
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let variantsArray = json["variants"] as? [[String: Any]] else {
-                    print("Invalid variants data for stop \(stopNumber)")
-                    continue
-                }
-                
-                // Transform the new variant format to match the old format
-                let transformedVariants = variantsArray.map { variant -> [String: Any] in
-                    // Create a dummy route object to maintain the same structure
-                    let route: [String: Any] = [
-                        "key": stopNumber, // Using stopNumber as a fallback key
-                        "number": stopNumber // Using stopNumber as a fallback number
-                        // Add other default route properties if needed
-                    ]
-                    
-                    return ["route": route, "variant": variant]
-                }
-                
-                if !transformedVariants.isEmpty {
-                    stop["variants"] = transformedVariants
+                if !stopVariants.isEmpty {
+                    stop["variants"] = stopVariants
                     enrichedStops.append(stop)
                 }
-                
-            } catch {
-                print("Error processing stop \(stop["number"] ?? "unknown"): \(error.localizedDescription)")
-                continue
             }
         }
         
-        if enrichedStops.isEmpty {
-            throw TransitError.batchProcessingError("No stops could be processed successfully")
+        // Validate all caches
+        let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate)
+        
+        if !cachesValid {
+            // Clear all caches and retry
+            VariantsCacheManager.shared.clearAllCaches()
+            return try await getVariantsForStops(stops: stops) // Recursive call to retry with fresh data
         }
         
         return enrichedStops
@@ -562,5 +609,42 @@ enum TransitError: LocalizedError {
         case .batchProcessingError(let message):
             return "Error processing stops: \(message)"
         }
+    }
+}
+
+
+class VariantsCacheManager {
+    static let shared = VariantsCacheManager()
+    private let defaults = UserDefaults.standard
+    private let cacheKey = "transit_variants_cache"
+    private let lastUpdateKey = "transit_variants_last_update"
+    
+    private var cache: [String: [[String: Any]]] {
+        get {
+            if let data = defaults.data(forKey: cacheKey),
+               let cache = try? JSONSerialization.jsonObject(with: data) as? [String: [[String: Any]]] {
+                return cache
+            }
+            return [:]
+        }
+        set {
+            if let data = try? JSONSerialization.data(withJSONObject: newValue) {
+                defaults.set(data, forKey: cacheKey)
+            }
+        }
+    }
+    
+    func getCachedVariants(for stopNumber: Int) -> [[String: Any]]? {
+        return cache[String(stopNumber)]
+    }
+    
+    func cacheVariants(_ variants: [[String: Any]], for stopNumber: Int) {
+        var currentCache = cache
+        currentCache[String(stopNumber)] = variants
+        cache = currentCache
+    }
+    
+    func clearAllCaches() {
+        defaults.removeObject(forKey: cacheKey)
     }
 }

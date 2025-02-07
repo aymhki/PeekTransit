@@ -48,7 +48,7 @@ struct BusStopView: View {
                 HStack {
                     Text(stop["name"] as? String ?? "Bus Stop")
                         .font(.title3.bold())
-                    Spacer()
+                    Spacer(minLength: 8)
                     LiveIndicator()
                 }
                 .listRowBackground(Color.clear)
