@@ -1,0 +1,174 @@
+import WidgetKit
+import SwiftUI
+import Intents
+import Combine
+import Foundation
+
+struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
+    var entry: T
+    @Environment(\.widgetFamily) var family
+    
+    private func isWidgetFullyLoaded(widgetData: [String: Any], scheduleData: [String]?) -> Bool {
+        let scheduleDataSize = scheduleData?.count ?? 0
+        var totalNumberOfVariantsInStops = 0
+        let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(widgetSizeSystemFormat: family, widgetSizeStringFormat: nil)
+        
+        if scheduleDataSize > 0 {
+            if let widgetStops = widgetData["stops"] as? [[String: Any]] {
+                for stopIndex in widgetStops.prefix(maxStops).indices {
+                    let stop = widgetStops[stopIndex]
+                    
+                    let variants = stop["selectedVariants"]
+                    
+                    totalNumberOfVariantsInStops += (variants as? [[String: Any]])?.count ?? 0
+                }
+            }
+        }
+        
+        return (scheduleDataSize >= totalNumberOfVariantsInStops)
+    }
+    
+    private func AreAllSelectedVariantsInScheduleData(widgetData: [String: Any], scheduleData: [String]?) -> Bool {
+        let scheduleDataSize = scheduleData?.count ?? 0
+        var selectedVariantsSimplified: Set<String> = []
+        var availableScheduleVariantsSimplified: Set<String> = []
+        
+        if scheduleDataSize > 0 {
+            if let widgetStops = widgetData["stops"] as? [[String: Any]] {
+                for stopIndex in widgetStops.indices {
+                    let stop = widgetStops[stopIndex]
+                    
+                    let variants = stop["selectedVariants"]
+                    
+                    for variant in variants as? [[String: Any]] ?? [] {
+                        guard let variantKey = variant["key"] as? String,
+                              let variantName = variant["name"] as? String else {
+                            continue
+                        }
+                        
+                        selectedVariantsSimplified.insert("\(variantKey)-\(variantName)")
+                    }
+                }
+            }
+            
+            for scheduleString in scheduleData ?? [] {
+                let components = scheduleString.components(separatedBy: " ---- ")
+                if components.count >= 2 {
+                    let variantKey = components[0]
+                    let variantName = components[1]
+                    availableScheduleVariantsSimplified.insert("\(variantKey)-\(variantName)")
+                }
+            }
+            
+            return selectedVariantsSimplified.isSubset(of: availableScheduleVariantsSimplified)
+        }
+        
+        
+
+        return false
+    }
+    
+    private func getFilledScheduleData(widgetData: [String: Any], scheduleData: [String]?) -> [String]? {
+                
+        if AreAllSelectedVariantsInScheduleData(widgetData: widgetData, scheduleData: scheduleData) {
+            return scheduleData
+        }
+        
+        var filledScheduleData: [String] = scheduleData ?? []
+        var selectedVariantsSimplified: Set<String> = []
+        var availableScheduleVariantsSimplified: Set<String> = []
+
+        if let widgetStops = widgetData["stops"] as? [[String: Any]] {
+            for stopIndex in widgetStops.indices {
+                let stop = widgetStops[stopIndex]
+                
+                let variants = stop["selectedVariants"]
+                
+                for variant in variants as? [[String: Any]] ?? [] {
+                    guard let variantKey = variant["key"] as? String,
+                          let variantName = variant["name"] as? String else {
+                        continue
+                    }
+                    
+                    selectedVariantsSimplified.insert("\(variantKey)-\(variantName)")
+                }
+            }
+        }
+
+        for scheduleString in scheduleData ?? [] {
+            let components = scheduleString.components(separatedBy: " ---- ")
+            if components.count >= 2 {
+                let variantKey = components[0]
+                let variantName = components[1]
+                availableScheduleVariantsSimplified.insert("\(variantKey)-\(variantName)")
+            }
+        }
+
+        for selectedVariant in selectedVariantsSimplified {
+            if !availableScheduleVariantsSimplified.contains(selectedVariant) {
+                let components = selectedVariant.components(separatedBy: "-")
+                if components.count >= 2 {
+                    filledScheduleData.append("\(components[0]) ---- \(components[1]) ---- Ok ---- \(getTimePeriodAllowedForNextBusRoutes())hrs+")
+                }
+            }
+        }
+        
+        return filledScheduleData
+        
+    }
+    
+    var body: some View {
+        if let widgetData = entry.widgetData {
+           let filledScheduleData = getFilledScheduleData(widgetData: widgetData, scheduleData: entry.scheduleData)
+                
+            
+            
+            if widgetData["noStopsFound"] as? Bool == true {
+                
+                if (family != .accessoryRectangular) {
+                    Text("Could not fetch nearby bus stops \(String(format: "(within %.0fm)", getStopsDistanceRadius())), please wait a few minutes or move closer to a bus stop.")
+                        .foregroundColor(.red)
+                        .font(.system(.caption))
+                        .padding(.horizontal)
+                } else {
+                    Text("Could not nearby fetch stops \(String(format: "(%.0fm)", getStopsDistanceRadius())), please wait...")
+                        .foregroundColor(.red)
+                        .font(.system(.caption))
+                        .padding(.horizontal)
+                }
+                    
+                    
+            } else if (isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData))  {
+                DynamicWidgetView(
+                    widgetData: widgetData,
+                    scheduleData: filledScheduleData,
+                    size: family,
+                    updatedAt: entry.date,
+                    fullyLoaded: true
+                )
+            } else {
+                DynamicWidgetView(
+                    widgetData: widgetData,
+                    scheduleData: filledScheduleData,
+                    size: family,
+                    updatedAt: entry.date,
+                    fullyLoaded: false
+                )
+            }
+        } else {
+            Text("Select the widget configuration to start")
+                .foregroundColor(.blue)
+                .font(.system(.caption))
+                .padding(.horizontal)
+        }
+    }
+    
+}
+
+
+
+
+
+
+
+

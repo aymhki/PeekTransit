@@ -13,13 +13,13 @@ struct SizeSelectionStep: View {
         "lockscreen"
     ]
     
-    private let timeFormatExplainationText = "Due to the nature of iOS Widgets limitations, a live API widget can only be updated once every five minutes. For that reason, and until there is a fix around this issue it might not be very practical to display X(X) minutes remaining (when the bus is within 15 minutes of arrival time) if the widget updates after that amount of minutes has passed. Select from the options below which format you want the bus arrival times to be displayed in when glancing at your widget.\n\nNote that for both options you can select still see when the widget was last updated"
+    private let timeFormatExplainationText = "Due to the nature of iOS Widgets limitations, a live API widget can only be updated once every five minutes. For that reason, and until there is a fix around this issue it might not be very practical to display X(X) minutes remaining (when the bus is within 15 minutes of arrival time) if the widget updates after that amount of minutes has passed. Select from the options below which format you want the bus arrival times to be displayed in when glancing at your widget.\n\nNote that for both options you can select from the options below to see when the widget was last updated"
 
     
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                Text("Select Widget Size, Time Format, and Last Updated status")
+                Text("Select widget size, time format, and last updated status")
                     .font(.title3)
                     .padding([.top, .horizontal])
                 

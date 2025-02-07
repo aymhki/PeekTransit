@@ -23,7 +23,7 @@ struct WidgetSetupView: View {
 
     private func generateDefaultWidgetName() -> String {
         if isClosestStop {
-            return "Closest Stop - \(widgetSize)"
+            return "Closest Stop - \(widgetSize) - \(selectedTimeFormat.rawValue) - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         } else {
             let stopNumbers = selectedStops.compactMap { stop -> String? in
                 guard let number = stop["number"] as? Int else { return nil }
@@ -84,12 +84,6 @@ struct WidgetSetupView: View {
             return
         }
         
-//        if widgetSize == "lockscreen" && SavedWidgetsManager.shared.countLockscreenWidgets() > 0 {
-//            saveErrorMessage = "You can only have one lockscreen widget at a time."
-//            showingSaveError = true
-//            return
-//        }
-        
         let widgetData = createWidgetData()
         let widget = WidgetModel(widgetData: widgetData)
         SavedWidgetsManager.shared.addWidget(widget)
@@ -107,7 +101,7 @@ struct WidgetSetupView: View {
                 if selectedStops.count > maxStopsAllowed {
                     selectedStops = Array(selectedStops.prefix(maxStopsAllowed))
                 }
-                selectedVariants = [:] 
+                selectedVariants = [:]
             }
             
             currentStep += 1
@@ -171,7 +165,7 @@ struct WidgetSetupView: View {
         return getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
     }
     
-    private var maxVariantsPerStop: Int {        
+    private var maxVariantsPerStop: Int {
         return getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
         
     }

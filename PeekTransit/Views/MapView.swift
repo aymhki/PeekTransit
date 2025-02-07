@@ -270,8 +270,8 @@ struct MapViewRepresentable: UIViewRepresentable {
                     let glossyImage = UIGraphicsGetImageFromCurrentImageContext()
                     annotationView?.image = glossyImage
                     annotationView?.frame.size = size
-                    annotationView?.bounds = CGRect(x: 0, y: 0, width: 44, height: 44)
-                    annotationView?.centerOffset = CGPoint(x: 0, y: -16)
+                    annotationView?.bounds = CGRect(x: 0, y: 0, width: 42, height: 42)
+                    annotationView?.centerOffset = CGPoint(x: 0, y: -10)
                 }
             }
             

@@ -11,7 +11,7 @@ struct WidgetModel: Codable, Identifiable  {
     }
     
     var name: String {
-        return widgetData["name"] as? String ?? "Unnamed Widget" // Provide a default
+        return widgetData["name"] as? String ?? "Unnamed Widget" 
     }
     
     enum CodingKeys: String, CodingKey {

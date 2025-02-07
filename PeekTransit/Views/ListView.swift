@@ -12,10 +12,25 @@ struct ListView: View {
     @State private var savedStopsManager =  SavedStopsManager.shared
 
 
+    var combinedStops: [[String: Any]] {
+        var combined = stopsStore.stops
+        let existingStopNumbers = Set(combined.compactMap { $0["number"] as? Int })
+        
+        for stop in stopsStore.searchResults {
+            if let number = stop["number"] as? Int,
+               !existingStopNumbers.contains(number) {
+                combined.append(stop)
+            }
+        }
+        
+        return combined
+    }
+    
+    
        var filteredStops: [[String: Any]] {
            guard !searchText.isEmpty else { return stopsStore.stops }
         
-           return stopsStore.stops.filter { stop in
+           return combinedStops.filter { stop in
             if let name = stop["name"] as? String,
                name.localizedCaseInsensitiveContains(searchText) {
                 return true
@@ -63,11 +78,19 @@ struct ListView: View {
                         }
                         .buttonStyle(.bordered)
                     }
-                } else if stopsStore.stops.isEmpty {
+                } else if combinedStops.isEmpty {
                     Text("No stops found nearby")
                         .foregroundColor(.secondary)
                 } else {
                     List {
+                        if stopsStore.isSearching {
+                            HStack {
+                                Spacer()
+                                ProgressView("Searching...")
+                                Spacer()
+                            }
+                        }
+                        
                         ForEach(filteredStops.indices, id: \.self) { index in
                             let stop = filteredStops[index]
                             if let variants = stop["variants"] as? [[String: Any]] {
@@ -84,6 +107,13 @@ struct ListView: View {
                         }
                     }
                     .searchable(text: $searchText, prompt: "Search stops, routes...")
+                    .disableAutocorrection(true)
+                    .autocapitalization(.none)
+                    .onChange(of: searchText) { query in
+                        Task {
+                            await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
+                        }
+                    }
                     .refreshable {
                         let newLocation = locationManager.location
                         if let location = newLocation {

@@ -57,7 +57,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2F570C122D45D5EE00C01563 /* PeekTransit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PeekTransit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F570C122D45D5EE00C01563 /* Peek Transit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Peek Transit.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PeekTransitWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FBB709B2D500E0C008998C8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
 		2FBB709D2D500E0C008998C8 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
@@ -66,12 +66,12 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "PeekTransit" target */ = {
+		2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
+			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
 		};
 		2FBB70B02D500E0D008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -80,13 +80,17 @@
 			);
 			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
 		};
-		2FBB711C2D50131A008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransit" target */ = {
+		2FBB711C2D50131A008998C8 /* Exceptions for "PeekTransitWidget" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Managers/WidgetRefreshManager.swift,
 				PeekTransitWidget.intentdefinition,
-				WidgetRefreshManager.swift,
+				Views/BusScheduleRowView.swift,
+				Views/DynamicWidgetView.swift,
+				Views/LastUpdatedView.swift,
+				Views/WidgetStopView.swift,
 			);
-			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
+			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
 		};
 		2FBB712E2D501CC0008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransitWidgetIntentHelper" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -99,6 +103,10 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				PeekTransitWidget.intentdefinition,
+				Views/BusScheduleRowView.swift,
+				Views/DynamicWidgetView.swift,
+				Views/LastUpdatedView.swift,
+				Views/WidgetStopView.swift,
 			);
 			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
 		};
@@ -109,58 +117,58 @@
 			);
 			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
 		};
-		2FBB71342D501F90008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransit" target */ = {
+		2FBB71342D501F90008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				IntentHandler.swift,
 			);
-			target = 2F570C112D45D5EE00C01563 /* PeekTransit */;
+			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
 		};
 		2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				BusScheduleRow.swift,
-				DynamicWidgetView.swift,
-				SharedDefaults.swift,
-				WidgetKind.swift,
-				WidgetSize.swift,
+				Helpers/PeekTransitConstants.swift,
+				Helpers/TimeFormat.swift,
+				Helpers/TransitError.swift,
+				Helpers/WidgetKind.swift,
+				Helpers/WidgetSize.swift,
+				Managers/SavedWidgetsManager.swift,
+				Managers/VariantsCacheManager.swift,
+				Models/AnyCodable.swift,
+				Models/SharedDefaults.swift,
+				Models/WidgetModel.swift,
+				Services/WinnipegTransitAPI.swift,
 			);
 			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
 		};
 		2FBB714F2D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Helpers/AppConstants.swift,
-				Helpers/TimeFormat.swift,
-				Managers/SavedWidgetsManager.swift,
-				Models/AnyCodable.swift,
-				Models/WidgetModel.swift,
 				Services/StopsDataStore.swift,
-				Services/WinnipegTransitAPI.swift,
 			);
 			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
 		};
 		2FBB71502D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetIntentHelper" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Helpers/AppConstants.swift,
-				Helpers/TimeFormat.swift,
-				Managers/SavedWidgetsManager.swift,
-				Models/AnyCodable.swift,
-				Models/WidgetModel.swift,
 				Services/StopsDataStore.swift,
-				Services/WinnipegTransitAPI.swift,
 			);
 			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
 		};
 		2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				BusScheduleRow.swift,
-				DynamicWidgetView.swift,
-				SharedDefaults.swift,
-				WidgetKind.swift,
-				WidgetSize.swift,
+				Helpers/PeekTransitConstants.swift,
+				Helpers/TimeFormat.swift,
+				Helpers/TransitError.swift,
+				Helpers/WidgetKind.swift,
+				Helpers/WidgetSize.swift,
+				Managers/SavedWidgetsManager.swift,
+				Managers/VariantsCacheManager.swift,
+				Models/AnyCodable.swift,
+				Models/SharedDefaults.swift,
+				Models/WidgetModel.swift,
+				Services/WinnipegTransitAPI.swift,
 			);
 			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
 		};
@@ -179,7 +187,7 @@
 		2F570C142D45D5EE00C01563 /* PeekTransit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "PeekTransit" target */,
+				2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "Peek Transit" target */,
 				2FBB714F2D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetExtension" target */,
 				2FBB71502D502CB3008998C8 /* Exceptions for "PeekTransit" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
@@ -189,7 +197,7 @@
 		2FBB709F2D500E0C008998C8 /* PeekTransitWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2FBB711C2D50131A008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransit" target */,
+				2FBB711C2D50131A008998C8 /* Exceptions for "PeekTransitWidget" folder in "Peek Transit" target */,
 				2FBB70B02D500E0D008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetExtension" target */,
 				2FBB71302D501CF1008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
@@ -199,7 +207,7 @@
 		2FBB71242D501CC0008998C8 /* PeekTransitWidgetIntentHelper */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2FBB71342D501F90008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransit" target */,
+				2FBB71342D501F90008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "Peek Transit" target */,
 				2FBB71322D501F09008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransitWidgetExtension" target */,
 				2FBB712E2D501CC0008998C8 /* Exceptions for "PeekTransitWidgetIntentHelper" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
@@ -251,7 +259,7 @@
 		2F570C132D45D5EE00C01563 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2F570C122D45D5EE00C01563 /* PeekTransit.app */,
+				2F570C122D45D5EE00C01563 /* Peek Transit.app */,
 				2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */,
 				2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */,
 			);
@@ -271,9 +279,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2F570C112D45D5EE00C01563 /* PeekTransit */ = {
+		2F570C112D45D5EE00C01563 /* Peek Transit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2F570C232D45D5EF00C01563 /* Build configuration list for PBXNativeTarget "PeekTransit" */;
+			buildConfigurationList = 2F570C232D45D5EF00C01563 /* Build configuration list for PBXNativeTarget "Peek Transit" */;
 			buildPhases = (
 				2F570C0E2D45D5EE00C01563 /* Sources */,
 				2F570C0F2D45D5EE00C01563 /* Frameworks */,
@@ -291,11 +299,11 @@
 				2F200FCD2D4EBCEE009E18AE /* Shared */,
 				2F570C142D45D5EE00C01563 /* PeekTransit */,
 			);
-			name = PeekTransit;
+			name = "Peek Transit";
 			packageProductDependencies = (
 			);
 			productName = PeekTransit;
-			productReference = 2F570C122D45D5EE00C01563 /* PeekTransit.app */;
+			productReference = 2F570C122D45D5EE00C01563 /* Peek Transit.app */;
 			productType = "com.apple.product-type.application";
 		};
 		2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */ = {
@@ -363,7 +371,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "PeekTransit" */;
+			buildConfigurationList = 2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "Peek Transit" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -377,7 +385,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2F570C112D45D5EE00C01563 /* PeekTransit */,
+				2F570C112D45D5EE00C01563 /* Peek Transit */,
 				2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */,
 				2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */,
 			);
@@ -573,6 +581,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "Peek Transit";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -629,6 +638,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "Peek Transit";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
@@ -770,7 +780,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "PeekTransit" */ = {
+		2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "Peek Transit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2F570C262D45D5EF00C01563 /* Debug */,
@@ -779,7 +789,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2F570C232D45D5EF00C01563 /* Build configuration list for PBXNativeTarget "PeekTransit" */ = {
+		2F570C232D45D5EF00C01563 /* Build configuration list for PBXNativeTarget "Peek Transit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2F570C242D45D5EF00C01563 /* Debug */,

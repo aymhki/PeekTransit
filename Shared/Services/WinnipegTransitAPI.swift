@@ -26,7 +26,6 @@ class TransitAPI {
             case let array as [Any]:
                 stringValue = array.map { String(describing: $0) }.joined(separator: ",")
             case let date as Date:
-                // Use appropriate date formatter here
                 stringValue = ISO8601DateFormatter().string(from: date)
             case is NSNull:
                 stringValue = ""
@@ -43,8 +42,6 @@ class TransitAPI {
     func fetchData(from url: URL) async throws -> Data {
         isLoading = true
         defer { isLoading = false }
-        // WidgetCenter.shared.reloadAllTimelines()
-
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
@@ -112,6 +109,36 @@ class TransitAPI {
 
     }
     
+    func searchStops(query: String, forShort: Bool) async throws -> [[String: Any]] {
+        guard let url = createURL(
+            path: "stops:\(query).json",
+            parameters: [
+                "usage": forShort ? "short" : "long"
+            ]
+        ) else {
+            throw TransitError.invalidURL
+        }
+        
+        let data = try await fetchData(from: url)
+        
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let stops = json["stops"] as? [[String: Any]] else {
+            throw TransitError.parseError("Invalid stops data format")
+        }
+        
+        var mutableStops = stops
+        if forShort {
+            for (index, var stop) in mutableStops.enumerated() {
+                if let name = stop["name"] as? String {
+                    stop["name"] = name.replacingOccurrences(of: "@", with: " @ ")
+                    mutableStops[index] = stop
+                }
+            }
+        }
+        
+        return mutableStops.prefix(getMaxStopsAllowedToFetchForSearch()).map{$0}
+    }
+    
     
     
     private func createVariantsForStop(_ stopNumber: Int, currentDate: Date, endDate: Date) async throws -> [[String: Any]] {
@@ -160,14 +187,12 @@ class TransitAPI {
             throw TransitError.parseError("Invalid bulk variants data format")
         }
         
-        // Create a set of all variants from the bulk request
         let bulkVariantsSet = Set(allVariants.compactMap { variant -> String? in
             guard let key = variant["key"] as? String,
                   let name = variant["name"] as? String else { return nil }
             return "\(key)|\(name)"
         })
         
-        // Check if all cached variants exist in the bulk request
         for enrichedStop in enrichedStops {
             guard let variants = enrichedStop["variants"] as? [[String: Any]] else { continue }
             
@@ -178,12 +203,12 @@ class TransitAPI {
                 
                 let variantIdentifier = "\(key)|\(name)"
                 if !bulkVariantsSet.contains(variantIdentifier) {
-                    return false // Cache is invalid
+                    return false
                 }
             }
         }
         
-        return true // All caches are valid
+        return true
     }
     
     func getVariantsForStops(stops: [[String: Any]]) async throws -> [[String: Any]] {
@@ -192,34 +217,36 @@ class TransitAPI {
         let calendar = Calendar.current
         let endDate = calendar.date(byAdding: .hour, value: getTimePeriodAllowedForNextBusRoutes(), to: currentDate)!
         
-        // Process each stop
         for var stop in stops {
             if let stopNumber = stop["number"] as? Int {
                 var stopVariants: [[String: Any]]
                 
-                // Check cache first
                 if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
                     stopVariants = cachedVariants
                 } else {
-                    // Fetch and cache if not found
                     stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate)
                     VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
                 }
                 
                 if !stopVariants.isEmpty {
+                    stopVariants = stopVariants.filter { variantObjects in
+                        guard let variantObject = variantObjects["variant"] as? [String: Any],
+                        let variantKey = variantObject["key"] as? String 
+                        else { return true }
+                        return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W")
+                    }
+                    
                     stop["variants"] = stopVariants
                     enrichedStops.append(stop)
                 }
             }
         }
         
-        // Validate all caches
         let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate)
         
         if !cachesValid {
-            // Clear all caches and retry
             VariantsCacheManager.shared.clearAllCaches()
-            return try await getVariantsForStops(stops: stops) // Recursive call to retry with fresh data
+            return try await getVariantsForStops(stops: stops)
         }
         
         return enrichedStops
@@ -244,9 +271,9 @@ class TransitAPI {
         startOfNextDayComponents.minute = 0
         startOfNextDayComponents.second = 0
 
-        let twelveHoursLater = calendar.date(from: periodAllowedForBusRoutes)!
+        let periodOfTimeLater = calendar.date(from: periodAllowedForBusRoutes)!
         let startOfNextDay = calendar.date(from: startOfNextDayComponents)!
-        let endDate = twelveHoursLater // twelveHoursLater < startOfNextDay ? twelveHoursLater : startOfNextDay
+        let endDate = periodOfTimeLater // periodOfTimeLater < startOfNextDay ? periodOfTimeLater : startOfNextDay
 
         func formatToISO8601String(from components: DateComponents) -> String {
             let year = String(format: "%04d", components.year!)
@@ -278,8 +305,7 @@ class TransitAPI {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw TransitError.parseError("Invalid schedule data format")
         }
-//        print(json)
-//        print(cleanStopSchedule(schedule: json, timeFormat: TimeFormat.minutesRemaining))
+
         return json
     }
     
@@ -394,113 +420,112 @@ class TransitAPI {
                             
                             
                             if (variantKey.contains("BLUE")) {
-                                
                                 variantKey = "B"
                             }
                             
-                            if (variantName.contains("University of Manitoba")) {
-                                variantName = "U of M"
-                            } else if (variantName.contains("Prairie Pointe")) {
-                                variantName = "Prairie P."
-                            } else if (variantName.contains("Kildonan Place")) {
-                                variantName = "Kildonan P."
-                            } else if (variantName.contains("Markham Station")) {
-                                variantName = "Markham S."
-                            } else if (variantName.lowercased().contains("Via Kildare".lowercased())) {
-                                variantName = "V. Kildare"
-                            } else if (variantName.lowercased().contains("Via Regent".lowercased())) {
-                                variantName = "V. Regent"
-                            } else if (variantName.contains("Beaumont Station")) {
-                                variantName = "Beaumont S."
-                            } else if (variantName.contains("Garden City Centre")) {
-                                variantName = "Garden City C."
-                            } else if (variantName.contains("Outlet Collection")) {
-                                variantName = "Outlet"
-                            } else if (variantName.contains("Bridgwater Forest")) {
-                                variantName = "Bridgwater F."
-                            } else if (variantName.contains("Fort Garry Industrial")) {
-                                variantName = "Fort Garry I."
-                            } else if (variantName.contains("Misericordia Health Centre")) {
-                                variantName = "Misericordia HC"
-                            } else if (variantName.contains("Health Sciences Centre")) {
-                                variantName = "Health Sci."
-                            } else if (variantName.contains("Harkness Station")) {
-                                variantName = "Harkness S."
-                            } else if (variantName.contains("Industrial Park")) {
-                                variantName = "Industrial P."
-                            } else if (variantName.contains("South St. Vital")) {
-                                variantName = "S. St. Vital"
-                            } else if (variantName.contains("North Kildonan")) {
-                                variantName = "N. Kildonan"
-                            } else if (variantName.contains("Balmoral Station")) {
-                                variantName = "Balmoral S."
-                            } else if (variantName.contains("Crossroads Station")) {
-                                variantName = "Crossroads S."
-                            } else if (variantName.contains("Southdale Centre")) {
-                                variantName = "Southdale C."
-                            } else if (variantName.contains("St. Vital Centre")) {
-                                variantName = "St. Vital C."
-                            } else if (variantName.contains("Red River College")) {
-                                variantName = "Red River C."
-                            } else if (variantName.contains("Grace Hospital")) {
-                                variantName = "Grace Hosp."
-                            } else if (variantName.contains("Seven Oaks Hospital")) {
-                                variantName = "Seven Oaks"
-                            } else if (variantName.contains("Assiniboine Park")) {
-                                variantName = "Assiniboine Park"
-                            } else if (variantName.contains("North Transcona")) {
-                                variantName = "N. Transcona"
-                            } else if (variantName.contains("South Transcona")) {
-                                variantName = "S. Transcona"
-                            } else if (variantName.contains("Lakeside Meadows")) {
-                                variantName = "Lakeside M."
-                            } else if (variantName.contains("Castlebury Meadows")) {
-                                variantName = "Castlebury M."
-                            } else if (variantName.contains("Garden City Shopping Centre")) {
-                                variantName = "Garden City S. C."
-                            } else if (variantName.contains("Waterford Green Common")) {
-                                variantName = "Waterford G."
-                            } else if (variantName.contains("Birds Hill Provincial Park")) {
-                                variantName = "Birds Hill P. P."
-                            } else if (variantName.contains("Manitoba Institute of Trades")) {
-                                variantName = "MITT"
-                            } else if (variantName.contains("RRC Polytech")) {
-                                variantName = "RRC P."
-                            } else if (variantName.contains("Assiniboine Park Zoo")) {
-                                variantName = "Assiniboine Zoo"
-                            } else if (variantName.contains("Gordon Bell High School")) {
-                                variantName = "Gordon Bell"
-                            } else if (variantName.contains("Tuxedo Business Park")) {
-                                variantName = "Tuxedo B.P."
-                            } else if (variantName.contains("Fort Garry Industrial")) {
-                                variantName = "Fort Garry I."
-                            } else if (variantName.contains("South St. Vital")) {
-                                variantName = "S. St. Vital"
-                            } else if (variantName.contains("Prairie Point")) {
-                                variantName = "Prairie P."
-                            } else if (variantName.contains("South Pointe West")) {
-                                variantName = "S. Pointe W."
-                            } else if (variantName.contains("North Inkster Industrial")) {
-                                variantName = "N. Inkster I."
-                            } else if (variantName.contains("St. Boniface Industrial")) {
-                                variantName = "St. Boniface I."
-                            } else if (variantName.contains("North St. Boniface")) {
-                                variantName = "N. St. Boniface"
-                            } else if (variantName.contains("Windermere Terminal")) {
-                                variantName = "Windermere T."
-                            } else if (variantName.contains("Fort Rouge Station")) {
-                                variantName = "Fort Rouge S."
-                            } else if (variantName.contains("Jubilee Station")) {
-                                variantName = "Jubilee S."
-                            } else if (variantName.contains("Main Street/Cathedral")) {
-                                variantName = "Main/Cathedral"
-                            } else if (variantName.contains("Outlet Collection Mall")) {
-                                variantName = "Outlet Mall"
-                            } else if (variantName.contains("Unicity Mall")) {
-                                variantName = "Unicity M."
-                            } else if (variantName.contains("Crosstown East to Speers")) {
-                                variantName = "Crosstown\nE. S. E."
-                            }
+//                            if (variantName.contains("University of Manitoba")) {
+//                                variantName = "U of M"
+//                            } else if (variantName.contains("Prairie Pointe")) {
+//                                variantName = "Prairie P."
+//                            } else if (variantName.contains("Kildonan Place")) {
+//                                variantName = "Kildonan P."
+//                            } else if (variantName.contains("Markham Station")) {
+//                                variantName = "Markham S."
+//                            } else if (variantName.lowercased().contains("Via Kildare".lowercased())) {
+//                                variantName = "V. Kildare"
+//                            } else if (variantName.lowercased().contains("Via Regent".lowercased())) {
+//                                variantName = "V. Regent"
+//                            } else if (variantName.contains("Beaumont Station")) {
+//                                variantName = "Beaumont S."
+//                            } else if (variantName.contains("Garden City Centre")) {
+//                                variantName = "Garden City C."
+//                            } else if (variantName.contains("Outlet Collection")) {
+//                                variantName = "Outlet"
+//                            } else if (variantName.contains("Bridgwater Forest")) {
+//                                variantName = "Bridgwater F."
+//                            } else if (variantName.contains("Fort Garry Industrial")) {
+//                                variantName = "Fort Garry I."
+//                            } else if (variantName.contains("Misericordia Health Centre")) {
+//                                variantName = "Misericordia HC"
+//                            } else if (variantName.contains("Health Sciences Centre")) {
+//                                variantName = "Health Sci."
+//                            } else if (variantName.contains("Harkness Station")) {
+//                                variantName = "Harkness S."
+//                            } else if (variantName.contains("Industrial Park")) {
+//                                variantName = "Industrial P."
+//                            } else if (variantName.contains("South St. Vital")) {
+//                                variantName = "S. St. Vital"
+//                            } else if (variantName.contains("North Kildonan")) {
+//                                variantName = "N. Kildonan"
+//                            } else if (variantName.contains("Balmoral Station")) {
+//                                variantName = "Balmoral S."
+//                            } else if (variantName.contains("Crossroads Station")) {
+//                                variantName = "Crossroads S."
+//                            } else if (variantName.contains("Southdale Centre")) {
+//                                variantName = "Southdale C."
+//                            } else if (variantName.contains("St. Vital Centre")) {
+//                                variantName = "St. Vital C."
+//                            } else if (variantName.contains("Red River College")) {
+//                                variantName = "Red River C."
+//                            } else if (variantName.contains("Grace Hospital")) {
+//                                variantName = "Grace Hosp."
+//                            } else if (variantName.contains("Seven Oaks Hospital")) {
+//                                variantName = "Seven Oaks"
+//                            } else if (variantName.contains("Assiniboine Park")) {
+//                                variantName = "Assiniboine Park"
+//                            } else if (variantName.contains("North Transcona")) {
+//                                variantName = "N. Transcona"
+//                            } else if (variantName.contains("South Transcona")) {
+//                                variantName = "S. Transcona"
+//                            } else if (variantName.contains("Lakeside Meadows")) {
+//                                variantName = "Lakeside M."
+//                            } else if (variantName.contains("Castlebury Meadows")) {
+//                                variantName = "Castlebury M."
+//                            } else if (variantName.contains("Garden City Shopping Centre")) {
+//                                variantName = "Garden City S. C."
+//                            } else if (variantName.contains("Waterford Green Common")) {
+//                                variantName = "Waterford G."
+//                            } else if (variantName.contains("Birds Hill Provincial Park")) {
+//                                variantName = "Birds Hill P. P."
+//                            } else if (variantName.contains("Manitoba Institute of Trades")) {
+//                                variantName = "MITT"
+//                            } else if (variantName.contains("RRC Polytech")) {
+//                                variantName = "RRC P."
+//                            } else if (variantName.contains("Assiniboine Park Zoo")) {
+//                                variantName = "Assiniboine Zoo"
+//                            } else if (variantName.contains("Gordon Bell High School")) {
+//                                variantName = "Gordon Bell"
+//                            } else if (variantName.contains("Tuxedo Business Park")) {
+//                                variantName = "Tuxedo B.P."
+//                            } else if (variantName.contains("Fort Garry Industrial")) {
+//                                variantName = "Fort Garry I."
+//                            } else if (variantName.contains("South St. Vital")) {
+//                                variantName = "S. St. Vital"
+//                            } else if (variantName.contains("Prairie Point")) {
+//                                variantName = "Prairie P."
+//                            } else if (variantName.contains("South Pointe West")) {
+//                                variantName = "S. Pointe W."
+//                            } else if (variantName.contains("North Inkster Industrial")) {
+//                                variantName = "N. Inkster I."
+//                            } else if (variantName.contains("St. Boniface Industrial")) {
+//                                variantName = "St. Boniface I."
+//                            } else if (variantName.contains("North St. Boniface")) {
+//                                variantName = "N. St. Boniface"
+//                            } else if (variantName.contains("Windermere Terminal")) {
+//                                variantName = "Windermere T."
+//                            } else if (variantName.contains("Fort Rouge Station")) {
+//                                variantName = "Fort Rouge S."
+//                            } else if (variantName.contains("Jubilee Station")) {
+//                                variantName = "Jubilee S."
+//                            } else if (variantName.contains("Main Street/Cathedral")) {
+//                                variantName = "Main/Cathedral"
+//                            } else if (variantName.contains("Outlet Collection Mall")) {
+//                                variantName = "Outlet Mall"
+//                            } else if (variantName.contains("Unicity Mall")) {
+//                                variantName = "Unicity M."
+//                            } else if (variantName.contains("Crosstown East to Speers")) {
+//                                variantName = "Crosstown\nE. S. E."
+//                            }
                             
                             busScheduleList.append("\(variantKey) ---- \(variantName) ---- \(arrivalState) ---- \(finalArrivalText)")
                         }
@@ -583,68 +608,5 @@ class TransitAPI {
 }
 
 
-enum TransitError: LocalizedError {
-    case invalidURL
-    case networkError(Error)
-    case invalidResponse
-    case invalidData
-    case serviceDown
-    case parseError(String)
-    case batchProcessingError(String)
-    
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Invalid URL configuration"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
-        case .invalidResponse:
-            return "Invalid response from server"
-        case .invalidData:
-            return "Invalid data received"
-        case .serviceDown:
-            return "Transit service is currently unavailable"
-        case .parseError(let message):
-            return "Data parsing error: \(message)"
-        case .batchProcessingError(let message):
-            return "Error processing stops: \(message)"
-        }
-    }
-}
 
 
-class VariantsCacheManager {
-    static let shared = VariantsCacheManager()
-    private let defaults = UserDefaults.standard
-    private let cacheKey = "transit_variants_cache"
-    private let lastUpdateKey = "transit_variants_last_update"
-    
-    private var cache: [String: [[String: Any]]] {
-        get {
-            if let data = defaults.data(forKey: cacheKey),
-               let cache = try? JSONSerialization.jsonObject(with: data) as? [String: [[String: Any]]] {
-                return cache
-            }
-            return [:]
-        }
-        set {
-            if let data = try? JSONSerialization.data(withJSONObject: newValue) {
-                defaults.set(data, forKey: cacheKey)
-            }
-        }
-    }
-    
-    func getCachedVariants(for stopNumber: Int) -> [[String: Any]]? {
-        return cache[String(stopNumber)]
-    }
-    
-    func cacheVariants(_ variants: [[String: Any]], for stopNumber: Int) {
-        var currentCache = cache
-        currentCache[String(stopNumber)] = variants
-        cache = currentCache
-    }
-    
-    func clearAllCaches() {
-        defaults.removeObject(forKey: cacheKey)
-    }
-}

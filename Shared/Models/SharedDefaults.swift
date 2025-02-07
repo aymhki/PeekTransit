@@ -6,7 +6,6 @@ struct SharedDefaults {
     
     static var userDefaults: UserDefaults? {
         let defaults = UserDefaults(suiteName: suiteName)
-        print("Accessing SharedDefaults with suite name: \(suiteName), success: \(defaults != nil)") // Debug log
         return defaults
     }
 }

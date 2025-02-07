@@ -33,5 +33,7 @@
             <string>location</string>
         </array>
         
+        <key>CFBundleDisplayName</key>
+        <string>Peek Transit</string>
 </dict>
 </plist>
