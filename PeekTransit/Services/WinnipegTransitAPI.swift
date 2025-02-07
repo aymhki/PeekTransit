@@ -118,7 +118,7 @@ class TransitAPI {
         var enrichedStops: [[String: Any]] = []
         let currentDate = Date()
         let calendar = Calendar.current
-        let endDate = calendar.date(byAdding: .hour, value: 12, to: currentDate)!
+        let endDate = calendar.date(byAdding: .hour, value: getTimePeriodAllowedForNextBusRoutes(), to: currentDate)!
         
         let dateFormatter = ISO8601DateFormatter()
         let startTime = dateFormatter.string(from: currentDate)
@@ -183,12 +183,12 @@ class TransitAPI {
         let calendar = Calendar.current
         let currentComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: currentDate)
 
-        var twelveHoursLaterComponents = currentComponents
-        twelveHoursLaterComponents.hour! += 12
+        var periodAllowedForBusRoutes = currentComponents
+        periodAllowedForBusRoutes.hour! += getTimePeriodAllowedForNextBusRoutes()
 
-        if twelveHoursLaterComponents.hour! >= 24 {
-            twelveHoursLaterComponents.hour! -= 24
-            twelveHoursLaterComponents.day! += 1
+        if periodAllowedForBusRoutes.hour! >= 24 {
+            periodAllowedForBusRoutes.hour! -= 24
+            periodAllowedForBusRoutes.day! += 1
         }
 
         var startOfNextDayComponents = currentComponents
@@ -197,7 +197,7 @@ class TransitAPI {
         startOfNextDayComponents.minute = 0
         startOfNextDayComponents.second = 0
 
-        let twelveHoursLater = calendar.date(from: twelveHoursLaterComponents)!
+        let twelveHoursLater = calendar.date(from: periodAllowedForBusRoutes)!
         let startOfNextDay = calendar.date(from: startOfNextDayComponents)!
         let endDate = twelveHoursLater // twelveHoursLater < startOfNextDay ? twelveHoursLater : startOfNextDay
 

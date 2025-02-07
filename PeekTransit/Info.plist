@@ -18,6 +18,10 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+		<string>location</string>
 	</array>
+    
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+        <string>PeekTransit needs your location fetch nearby bus stops and bus times</string>
 </dict>
 </plist>

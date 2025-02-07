@@ -116,17 +116,17 @@ struct BusStopView: View {
                                         baseWidth,
                                         
                                         // Route Name
-                                        (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled"))  ? totalWidth * 0.37 :
-                                        totalWidth * 0.61,
+                                        (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled"))  ? totalWidth * 0.38 :
+                                        totalWidth * 0.58,
                                         
                                         // Arrival Status
                                         components[2].contains("Cancelled") ? totalWidth * 0.36 :
-                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.24 :
+                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.20 :
                                         totalWidth * 0.11,
                                         
                                         // Arrival Time
                                         components[2].contains("Cancelled") ? totalWidth * 0.0 :
-                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.3 :
+                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.28 :
                                             totalWidth * 0.3
                                     ]
 
@@ -137,7 +137,7 @@ struct BusStopView: View {
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[0], alignment: .leading)
 
-                                        Text( ( components[1].count > 12 && (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled")) ) ? components[1].prefix(12) + "..." : components[1])
+                                        Text( ( components[1].count > getMaxBusRouteLength() && (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled")) ) ? components[1].prefix(getMaxBusRoutePrefixLength()) + "..." : components[1])
                                             .font(.system(.subheadline, design: .monospaced).bold())
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)

@@ -78,10 +78,33 @@ public func getMaxVariantsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetS
 }
 
 public func getStopsDistanceRadius() -> Double {
-    return 650
+    return 550
 }
 
 
 public func getMaxStopsAllowedToFetch() -> Int {
-    return 25
+    return 5
+}
+
+
+public func getMaxBusRouteLength() -> Int {
+    return 10
+}
+
+public func getMaxBusRoutePrefixLength() -> Int {
+    return 8
+}
+
+
+public func getMaxBusRouteLengthForWidget() -> Int {
+    return 10
+}
+
+public func getMaxBusRoutePrefixLengthForWidget() -> Int {
+    return 8
+}
+
+
+public func getTimePeriodAllowedForNextBusRoutes() -> Int {
+    return 6
 }

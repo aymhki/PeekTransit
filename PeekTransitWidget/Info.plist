@@ -18,21 +18,20 @@
                 <string>ConfigurationSmallIntent</string>
             </array>
         </dict>
+
+        <key>NSWidgetWantsLocation</key>
+            <true/>
+        <key>NSLocationUsageDescription</key>
+            <string>We need your location to show nearby transit stops</string>
+        <key>NSLocationWhenInUseUsageDescription</key>
+            <string>We need your location to show nearby transit stops</string>
+
+
+        <key>UIBackgroundModes</key>
+        <array>
+            <string>fetch</string>
+            <string>location</string>
+        </array>
         
-    <key>NSLocationWhenInUseUsageDescription</key>
-        <string>We need your location to show nearby transit stops</string>
-        
-    <key>NSLocationUsageDescription</key>
-        <string>We need your location to show nearby transit stops</string>
-        
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-        <string>We need your location to show nearby transit stops</string>
-        
-    <key>NSWidgetWantsLocation</key>
-        <string>We need your location to show nearby transit stops</string>
-        
-        
-    <key>NSWidgetUsesLocationServices</key>
-        <true/>
 </dict>
 </plist>

@@ -7,15 +7,31 @@ struct DynamicWidgetView: View {
     let scheduleData: [String]?
     let size: WidgetFamily
     let updatedAt: Date
+    let fullyLoaded: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            content
-                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if ( !(!fullyLoaded && size == .systemSmall) ) {
+                content
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             
             
             
-            if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
+            if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular) {
+                Text("Winnipeg Transit API is throtling data requests. Some bus times were not loaded. Please wait a few minutes and try again.")
+                    .foregroundColor(.red)
+                    .font(.caption)
+                    .padding(.horizontal)
+                
+            } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular) {
+                Text("Could Not fetch bus times, please wait...")
+                    .foregroundColor(.red)
+                    .font(.caption)
+                    .padding(.horizontal)
+                
+            } else if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
                 
                 if (size != .accessoryRectangular) {
                     
@@ -46,9 +62,9 @@ struct DynamicWidgetView: View {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(Array(stops.prefix(maxStops)).indices, id: \.self) { stopIndex in
                     let stop = stops[stopIndex]
-                    StopView(stop: stop, scheduleData: scheduleData, size: size)
+                    StopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded)
                     
-                    if (stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular) {
+                    if (stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && fullyLoaded) {
                         Divider()
                     }
                 }
@@ -68,6 +84,7 @@ struct DynamicWidgetView: View {
 struct BusScheduleRow: View {
     let schedule: String
     let size: WidgetFamily
+    let fullyLoaded: Bool
     
     var body: some View {
         let components = schedule.components(separatedBy: " ---- ")
@@ -80,9 +97,8 @@ struct BusScheduleRow: View {
                 if !components[1].isEmpty {
                     
                     if (size != .systemSmall && size != .accessoryRectangular) {
-                        Text(components[1])
+                        Text(components[1].count > getMaxBusRouteLengthForWidget() ? components[1].prefix(getMaxBusRoutePrefixLengthForWidget()) + "..." : components[1])
                             .font(.system(size: fontSize - 2, design: .monospaced))
-                            .padding(.leading, 2)
                             .bold()
                     
                     } else {
@@ -90,19 +106,19 @@ struct BusScheduleRow: View {
                             
                             Text("\(components[1].prefix(1)).")
                                 .font(.system(size: fontSize - 2, design: .monospaced))
-                                .padding(.leading, 2)
                                 .bold()
                         } else {
                             Text(components[1])
                                 .font(.system(size: fontSize - 2, design: .monospaced))
-                                .padding(.leading, 2)
                                 .bold()
                         }
                         
                     }
                 }
                 
-                Spacer()
+                if (fullyLoaded && size != .systemSmall && size != .accessoryRectangular) {
+                    Spacer()
+                }
                 
                 if (components[2] == "Late" || components[2] == "Early" ||  components[2] == "Cancelled") {
                     if ( (size == .systemSmall || size == .accessoryRectangular) &&  components[2] != "Cancelled" ) {
@@ -120,10 +136,12 @@ struct BusScheduleRow: View {
                             .bold()
                     }
                 }
+                    
+                
                 
                 if (components[2] != "Cancelled") {
                     Text(components[3])
-                        .font(.system(size: fontSize, design: .monospaced))
+                        .font(.system(size: fontSize - 2, design: .monospaced))
                         .bold()
                         .frame(alignment: .leading)
                 }
@@ -148,6 +166,7 @@ struct StopView: View {
     let scheduleData: [String]?
     let size: WidgetFamily
     let stopNamePrefixSize = 40
+    let fullyLoaded: Bool
     
     
     
@@ -156,24 +175,53 @@ struct StopView: View {
             let stopName = stop["name"] as? String ?? "Unknown Stop"
             let stopNamePrefix = "\(stopName.prefix(stopNamePrefixSize))..."
             
+            
 
-            if (size != .accessoryRectangular) {
-                if (size == .systemSmall) {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName)")
-                        .font(.system(size:  8))
-                } else if (size == .systemLarge) {
-                    Text("• \(stopName)")
-                        .font(.system(.caption2))
-                } else {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName)")
-                        .font(.system(.caption2))
-                        .padding(.bottom, 1)
-                }
                 
-               if (size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3) {
-                    Spacer()
+            if let distances = stop["distances"] as? [String: Any],
+               let currentDistance = distances.first,
+               let currentDistandValueString = currentDistance.value as? String,
+               let distanceInMeters = Double(currentDistandValueString) {
+               
+                
+                if (size != .accessoryRectangular && fullyLoaded) {
+                    if (size == .systemSmall) {
+                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0fm away", distanceInMeters))")
+                            .font(.system(size:  8))
+                    } else if (size == .systemLarge) {
+                        Text("• \(stopName) - \(String(format: "%.0f m away", distanceInMeters))")
+                            .font(.system(.caption2))
+                    } else {
+                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0fm away", distanceInMeters))")
+                            .font(.system(.caption2))
+                            .padding(.bottom, 1)
+                    }
+                    
+                    if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3) && fullyLoaded) {
+                        Spacer()
+                    }
+                }
+            } else {
+                if (size != .accessoryRectangular && fullyLoaded) {
+                    if (size == .systemSmall) {
+                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName)")
+                            .font(.system(size:  8))
+                    } else if (size == .systemLarge) {
+                        Text("• \(stopName)")
+                            .font(.system(.caption2))
+                    } else {
+                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName)")
+                            .font(.system(.caption2))
+                            .padding(.bottom, 1)
+                    }
+                    
+                    if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3) && fullyLoaded) {
+                        Spacer()
+                    }
                 }
             }
+            
+
             
             if let variants = stop["selectedVariants"] as? [[String: Any]] {
                 let maxSchedules =  getMaxVariantsAllowed(widgetSizeSystemFormat: size, widgetSizeStringFormat: nil)
@@ -190,22 +238,24 @@ struct StopView: View {
                        }) {
                         
                         if (size == .systemSmall || size == .accessoryRectangular) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
                                 .padding(.horizontal, 8)
                             
                             
-                        } else if (size != .systemMedium && size != .accessoryRectangular) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size)
+                        } else if (size == .systemLarge) {
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
                                 .padding(.horizontal, 30)
                         } else if (size == .systemMedium) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
                                 .padding(.horizontal, 30)
                                 .padding(.bottom, variantIndex < variants.prefix(maxSchedules).count  - 1 ? 3 : 0)
                         } else if (size == .accessoryRectangular) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
+                        } else if (size == .systemSmall) {
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
                         }
                         
-                        if (size == .systemLarge || size == .systemSmall || ( ((scheduleData)?.count ?? 0 < 3) && size != .accessoryRectangular )) {
+                        if ((size == .systemLarge || size == .systemSmall || ( ((scheduleData)?.count ?? 0 < 3) && size != .accessoryRectangular )) && fullyLoaded) {
                             Spacer()
                         }
                     }

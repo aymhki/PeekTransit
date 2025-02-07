@@ -8,5 +8,7 @@
 	<array>
 		<string>group.com.PeekTransit.widget</string>
 	</array>
+	<key>com.apple.security.personal-information.location</key>
+	<true/>
 </dict>
 </plist>
