@@ -20,7 +20,7 @@ struct ContentView: View {
             
             SavedStopsView()
                 .tabItem {
-                    Label("Saved", systemImage: "star.fill")
+                    Label("Saved", systemImage: "bookmark.fill")
                 }
                 .tag(2)
             

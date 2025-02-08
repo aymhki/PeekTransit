@@ -39,7 +39,7 @@ struct StopMapPreview: View {
             color = .systemGray
         }
         
-        return UIImage(named: imageName)?.withTintColor(color, renderingMode: .alwaysTemplate)
+        return UIImage(named: imageName) //?.withTintColor(color, renderingMode: .alwaysTemplate)
     }
     
     private func generateSnapshot() {

@@ -106,7 +106,7 @@ public func getMaxBusRoutePrefixLengthForWidget() -> Int {
 
 
 public func getTimePeriodAllowedForNextBusRoutes() -> Int {
-    return 6
+    return 12
 }
 
 public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {

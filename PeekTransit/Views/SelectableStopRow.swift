@@ -10,6 +10,8 @@ struct SelectableStopRow: View {
     let isSelected: Bool
     let maxStops: Int
     let onSelect: () -> Void
+    @ObservedObject private var savedStopsManager = SavedStopsManager.shared
+
     
     private var uniqueVariants: [[String: Any]] {
         var seenKeys = Set<String>()
@@ -65,9 +67,19 @@ struct SelectableStopRow: View {
                        let currentDistandValueString = currentDistance.value as? String,
                        let distanceInMeters = Double(currentDistandValueString) {
                         
-                        Text(String(format: "%.0f meters away", distanceInMeters))
+                        if (savedStopsManager.isStopSaved(stop)) {
+                            HStack {
+                                Text(String(format: "%.0f meters away", distanceInMeters))
+                                Image(systemName: "bookmark.fill")
+                            }
                             .font(.subheadline)
                             .foregroundColor(.secondary)
+
+                        } else {
+                            Text(String(format: "%.0f meters away", distanceInMeters))
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     
                     ScrollView {

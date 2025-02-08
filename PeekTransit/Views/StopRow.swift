@@ -5,6 +5,7 @@ struct StopRow: View {
     let stop: [String: Any]
     let variants: [[String: Any]]
     let inSaved: Bool
+    @ObservedObject private var savedStopsManager = SavedStopsManager.shared
     
     private var uniqueVariants: [[String: Any]] {
         var seenKeys = Set<String>()
@@ -61,9 +62,19 @@ struct StopRow: View {
                            let currentDistandValueString = currentDistance.value as? String,
                            let distanceInMeters = Double(currentDistandValueString) {
                             
-                            Text(String(format: "%.0f meters away", distanceInMeters))
+                            if (savedStopsManager.isStopSaved(stop)) {
+                                HStack {
+                                    Text(String(format: "%.0f meters away", distanceInMeters))
+                                    Image(systemName: "bookmark.fill")
+                                }
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
+
+                            } else {
+                                Text(String(format: "%.0f meters away", distanceInMeters))
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
                     

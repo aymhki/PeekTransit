@@ -371,7 +371,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "Peek Transit" */;
+			buildConfigurationList = 2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "PeekTransit" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -780,7 +780,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "Peek Transit" */ = {
+		2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "PeekTransit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2F570C262D45D5EF00C01563 /* Debug */,

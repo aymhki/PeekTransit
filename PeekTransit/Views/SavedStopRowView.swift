@@ -20,13 +20,6 @@ struct SavedStopRowView: View {
             }
             
             StopRow(stop: savedStop.stopData, variants: uniqueVariants, inSaved: true)
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        savedStopsManager.toggleSavedStatus(for: savedStop.stopData)
-                    } label: {
-                        Label("Delete", systemImage: "star.slash.fill")
-                    }
-                }
         }
     }
 }

@@ -11,7 +11,12 @@ struct BusStopView: View {
     @State private var isManualRefresh = false
     @State private var errorFetchingSchedule = false
     @State private var errorText = ""
-    let timer = Timer.publish(every: 20, on: .main, in: .common).autoconnect()
+    @State private var isLiveUpdatesEnabled: Bool = false
+    let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
+    
+    private var liveUpdatesKey: String {
+        "live_updates_\(stop["number"] as? Int ?? 0)"
+    }
     
     private var coordinate: CLLocationCoordinate2D? {
         guard let centre = stop["centre"] as? [String: Any],
@@ -21,6 +26,15 @@ struct BusStopView: View {
                     return nil
                 }
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+    
+    private func getLiveUpdatePreference() -> Bool {
+
+        if UserDefaults.standard.object(forKey: liveUpdatesKey) != nil {
+            return UserDefaults.standard.bool(forKey: liveUpdatesKey)
+        }
+
+        return true
     }
     
     private func loadSchedules(isManual: Bool) async {
@@ -45,13 +59,30 @@ struct BusStopView: View {
     var body: some View {
         List {
             Section {
-                HStack {
-                    Text(stop["name"] as? String ?? "Bus Stop")
-                        .font(.title3.bold())
-                    Spacer(minLength: 8)
-                    LiveIndicator()
+                VStack() {
+                    HStack {
+                        Text(stop["name"] as? String ?? "Bus Stop")
+                            .font(.title3.bold())
+                        
+                        Spacer(minLength: 8)
+                        
+                        
+                        LiveIndicator(isAnimating: isLiveUpdatesEnabled)
+                        
+                    }
+                    
+                   
+                    
+                    Toggle("Live Updates", isOn: $isLiveUpdatesEnabled)
+                    .onChange(of: isLiveUpdatesEnabled) { newValue in
+                    UserDefaults.standard.set(newValue, forKey: liveUpdatesKey)
+                        if newValue {
+                            Task {
+                                await loadSchedules(isManual: false)
+                            }
+                        }
+                    }
                 }
-                .listRowBackground(Color.clear)
             }
 
             if let coordinate = coordinate {
@@ -63,6 +94,7 @@ struct BusStopView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 200)
                     .listRowInsets(EdgeInsets())
+                    
                 }
             }
             
@@ -137,7 +169,7 @@ struct BusStopView: View {
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[0], alignment: .leading)
 
-                                        Text( ( components[1].count > getMaxBusRouteLength() && (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled")) ) ? components[1].prefix(getMaxBusRoutePrefixLength()) + "..." : components[1])
+                                        Text( components[1])
                                             .font(.system(.subheadline, design: .monospaced).bold())
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
@@ -148,7 +180,7 @@ struct BusStopView: View {
                                                 .font(.system(.headline, design: .monospaced).bold())
                                                 .lineLimit(nil)
                                                 .fixedSize(horizontal: false, vertical: true)
-                                                .frame(width: columnWidths[2], alignment: .leading)
+                                                .frame(width: columnWidths[2], alignment: .trailing)
                                                 .foregroundStyle(
                                                     components[2].contains("Late") ? .red :
                                                         components[2].contains("Cancelled") ? .red :
@@ -162,7 +194,7 @@ struct BusStopView: View {
                                                 .font(.system(.headline, design: .monospaced).bold())
                                                 .lineLimit(nil)
                                                 .fixedSize(horizontal: false, vertical: true)
-                                                .frame(width: columnWidths[3], alignment: .leading)
+                                                .frame(width: columnWidths[3], alignment: .trailing)
                                         }
                                     }
                                     .padding(.vertical, 12)
@@ -175,14 +207,16 @@ struct BusStopView: View {
                         .padding(.all)
                         Spacer()
                     }
+                    .padding(.bottom, 50)
                     .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    //.clipShape(RoundedRectangle(cornerRadius: 12))
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                 }
             }
+            .listRowInsets(EdgeInsets())
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .navigationTitle("#\(String(stop["number"] as? Int ?? 0))")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -191,7 +225,7 @@ struct BusStopView: View {
                     savedStopsManager.toggleSavedStatus(for: stop)
                     isSaved.toggle()
                 } label: {
-                    Image(systemName: isSaved ? "star.fill" : "star")
+                    Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                 }
             }
         }
@@ -214,15 +248,19 @@ struct BusStopView: View {
         }
         .refreshable {
             isManualRefresh = true
-            await loadSchedules(isManual: true)
+            Task {
+                await loadSchedules(isManual: true)
+            }
         }
         .onAppear {
             isSaved = savedStopsManager.isStopSaved(stop)
+            isLiveUpdatesEnabled = getLiveUpdatePreference()
             Task {
                 await loadSchedules(isManual: false)
             }
         }
         .onReceive(timer) { _ in
+            guard isLiveUpdatesEnabled else { return }
             isManualRefresh = false
             Task {
                 await loadSchedules(isManual: false)

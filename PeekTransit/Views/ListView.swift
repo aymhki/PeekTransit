@@ -95,14 +95,6 @@ struct ListView: View {
                             let stop = filteredStops[index]
                             if let variants = stop["variants"] as? [[String: Any]] {
                                 StopRow(stop: stop, variants: variants, inSaved: false)
-                                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                        Button() {
-                                            savedStopsManager.saveStop(for: stop)
-                                        } label: {
-                                            Label("Save", systemImage: "star.fill")
-                                        }
-                                        .tint(.yellow)
-                                    }
                             }
                         }
                     }
