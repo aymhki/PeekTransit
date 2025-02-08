@@ -8,7 +8,7 @@ class WidgetRefreshManager {
     func startPeriodicRefresh() {
         timer?.invalidate()
         
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
             WidgetCenter.shared.reloadAllTimelines()
         }
     }

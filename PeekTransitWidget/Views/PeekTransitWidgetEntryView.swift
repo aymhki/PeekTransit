@@ -25,7 +25,9 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
             }
         }
         
-        return (scheduleDataSize >= totalNumberOfVariantsInStops)
+        let noVariantsSelected = widgetData["noSelectedVariants"] as? Bool ?? false
+        
+        return (scheduleDataSize >= totalNumberOfVariantsInStops || noVariantsSelected)
     }
     
     private func AreAllSelectedVariantsInScheduleData(widgetData: [String: Any], scheduleData: [String]?) -> Bool {

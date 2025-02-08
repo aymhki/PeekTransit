@@ -23,6 +23,7 @@ class StopsDataStore: ObservableObject {
         guard !isLoading else { return }
         
         await MainActor.run {
+            self.searchResults = []
             isLoading = true
             error = nil
             stops = []
@@ -43,7 +44,7 @@ class StopsDataStore: ObservableObject {
                         self.stops.append(contentsOf: enrichedBatch)
                     }
                     
-//                    try await Task.sleep(nanoseconds: 100_000_000)
+                    try await Task.sleep(nanoseconds: 100_000_000)
                 } catch {
                     print("Error processing batch: \(error.localizedDescription)")
                     continue

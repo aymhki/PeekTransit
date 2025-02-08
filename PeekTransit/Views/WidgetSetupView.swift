@@ -20,6 +20,9 @@ struct WidgetSetupView: View {
     @State private var saveErrorMessage = ""
     @State private var widgetName: String = ""
     @State private var showLastUpdatedStatus = true
+    @State private var showNoServiceAlert = false
+    @State private var stopsWithoutService: [Int] = []
+    @State private var noSelectedVariants: Bool = false
 
     private func generateDefaultWidgetName() -> String {
         if isClosestStop {
@@ -30,9 +33,15 @@ struct WidgetSetupView: View {
                 return "#\(number)"
             }.joined(separator: ", ")
             
-            let variantKeys = selectedVariants.values.flatMap { variants in
-                variants.compactMap { $0["key"] as? String }
-            }.joined(separator: ", ")
+            var variantKeys = ""
+            
+            if (!noSelectedVariants) {
+                variantKeys = selectedVariants.values.flatMap { variants in
+                    variants.compactMap { $0["key"] as? String }
+                }.joined(separator: ", ")
+            } else {
+                variantKeys = "Up Coming Buses"
+            }
             
             return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(selectedTimeFormat.rawValue) - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         }
@@ -48,8 +57,8 @@ struct WidgetSetupView: View {
             "isClosestStop": isClosestStop,
             "name": widgetName.isEmpty ? generateDefaultWidgetName() : widgetName,
             "timeFormat": selectedTimeFormat.rawValue,
-            "showLastUpdatedStatus": showLastUpdatedStatus
-            
+            "showLastUpdatedStatus": showLastUpdatedStatus,
+            "noSelectedVariants": noSelectedVariants
         ]
         
         if isClosestStop {
@@ -155,7 +164,7 @@ struct WidgetSetupView: View {
             return !selectedStops.allSatisfy { stop in
                 guard let stopNumber = stop["number"] as? Int else { return false }
                 return selectedVariants[String(stopNumber)]?.isEmpty == false
-            }
+            } && !noSelectedVariants
         default:
             return false
         }
@@ -205,7 +214,10 @@ struct WidgetSetupView: View {
                                 VariantSelectionStep(
                                     selectedStops: selectedStops,
                                     selectedVariants: $selectedVariants,
-                                    maxVariantsPerStop: maxVariantsPerStop
+                                    maxVariantsPerStop: maxVariantsPerStop,
+                                    stopsWithoutService: $stopsWithoutService,
+                                    showNoServiceAlert: $showNoServiceAlert,
+                                    noSelectedVariants: $noSelectedVariants
                                 )
                                 
                                 ContinueButton(
@@ -268,6 +280,14 @@ struct WidgetSetupView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(saveErrorMessage)
+        }
+        .alert("Stop\(stopsWithoutService.count > 1 ? "s" : "") Without Service", isPresented: $showNoServiceAlert) {
+            Button("Go Back", role: .cancel) {
+                previousStep()
+                selectedStops = []
+            }
+        } message: {
+            Text("Stop\(stopsWithoutService.count > 1 ? "s" : "") \(stopsWithoutService.map { String($0) }.joined(separator: ", ")) doesn't have any active service. Please select different stops.")
         }
     }
 }

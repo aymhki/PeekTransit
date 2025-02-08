@@ -22,12 +22,14 @@ struct ProviderLarge: IntentTimelineProvider {
                 if widget.widgetData["isClosestStop"] as? Bool == true {
                     if let location = await LocationManager.shared.getCurrentLocation() {
                         let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: true)
+                        
+                        
                         if let stops = nearbyStops, !stops.isEmpty {
                             let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(
                                 widgetSizeSystemFormat: .systemLarge,
                                 widgetSizeStringFormat: nil
                             )
-                            finalWidgetData["stops"] = WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
+                            finalWidgetData["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
                             let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData, isClosestStop: true)
                             finalWidgetData = updatedWidgetData
                             
@@ -76,7 +78,7 @@ struct ProviderLarge: IntentTimelineProvider {
                             widgetSizeSystemFormat: .systemLarge,
                             widgetSizeStringFormat: nil
                         )
-                        widgetData?["stops"] = WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
+                        widgetData?["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
                         let (_, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(widgetData ?? [:], isClosestStop: true)
                         widgetData = updatedWidgetData
                     } else {

@@ -141,7 +141,7 @@ class TransitAPI {
     
     
     
-    private func createVariantsForStop(_ stopNumber: Int, currentDate: Date, endDate: Date) async throws -> [[String: Any]] {
+    private func createVariantsForStop(_ stopNumber: Int, currentDate: Date, endDate: Date, forShort: Bool) async throws -> [[String: Any]] {
         let dateFormatter = ISO8601DateFormatter()
         let startTime = dateFormatter.string(from: currentDate)
         let endTime = dateFormatter.string(from: endDate)
@@ -149,7 +149,8 @@ class TransitAPI {
         guard let url = createURL(path: "variants.json", parameters: [
             "start": startTime,
             "end": endTime,
-            "stop": stopNumber
+            "stop": stopNumber,
+            "usage": forShort ? "short" : "long"
         ]) else {
             throw TransitError.invalidURL
         }
@@ -169,14 +170,15 @@ class TransitAPI {
         }
     }
     
-    private func validateCaches(stops: [[String: Any]], enrichedStops: [[String: Any]], currentDate: Date, endDate: Date) async throws -> Bool {
+    private func validateCaches(stops: [[String: Any]], enrichedStops: [[String: Any]], currentDate: Date, endDate: Date, forShort: Bool) async throws -> Bool {
         let stopNumbers = stops.compactMap { $0["number"] as? Int }
         let stopsParam = stopNumbers.map(String.init).joined(separator: ",")
         
         guard let url = createURL(path: "variants.json", parameters: [
             "start": ISO8601DateFormatter().string(from: currentDate),
             "end": ISO8601DateFormatter().string(from: endDate),
-            "stops": stopsParam
+            "stops": stopsParam,
+            "usage": forShort ? "short" : "long"
         ]) else {
             throw TransitError.invalidURL
         }
@@ -190,7 +192,7 @@ class TransitAPI {
         let bulkVariantsSet = Set(allVariants.compactMap { variant -> String? in
             guard let key = variant["key"] as? String,
                   let name = variant["name"] as? String else { return nil }
-            return "\(key)|\(name)"
+            return "\(key)-\(name)"
         })
         
         for enrichedStop in enrichedStops {
@@ -201,7 +203,7 @@ class TransitAPI {
                       let key = variantData["key"] as? String,
                       let name = variantData["name"] as? String else { continue }
                 
-                let variantIdentifier = "\(key)|\(name)"
+                let variantIdentifier = "\(key)-\(name)"
                 if !bulkVariantsSet.contains(variantIdentifier) {
                     return false
                 }
@@ -224,7 +226,7 @@ class TransitAPI {
                 if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
                     stopVariants = cachedVariants
                 } else {
-                    stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate)
+                    stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: true)
                     VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
                 }
                 
@@ -242,7 +244,7 @@ class TransitAPI {
             }
         }
         
-        let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate)
+        let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate, forShort: true)
         
         if !cachesValid {
             VariantsCacheManager.shared.clearAllCaches()
@@ -250,6 +252,37 @@ class TransitAPI {
         }
         
         return enrichedStops
+    }
+    
+    func getOnlyVariantsForStop(stop: [String: Any]) async throws -> [[String: Any]] {
+        let currentDate = Date()
+        let calendar = Calendar.current
+        let endDate = calendar.date(byAdding: .hour, value: getTimePeriodAllowedForNextBusRoutes(), to: currentDate)!
+        
+        if let stopNumber = stop["number"] as? Int {
+            var stopVariants: [[String: Any]]
+            
+            if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
+                stopVariants = cachedVariants
+            } else {
+                stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: true)
+                VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
+            }
+            
+            if !stopVariants.isEmpty {
+                stopVariants = stopVariants.filter { variantObjects in
+                    guard let variantObject = variantObjects["variant"] as? [String: Any],
+                    let variantKey = variantObject["key"] as? String
+                    else { return true }
+                    return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W")
+                }
+                
+                return stopVariants
+            }
+        }
+        
+        
+        return []
     }
     
     func getStopSchedule(stopNumber: Int) async throws -> [String: Any] {

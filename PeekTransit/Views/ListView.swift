@@ -28,7 +28,7 @@ struct ListView: View {
     
     
        var filteredStops: [[String: Any]] {
-           guard !searchText.isEmpty else { return stopsStore.stops }
+           guard !searchText.isEmpty else { return combinedStops }
         
            return combinedStops.filter { stop in
             if let name = stop["name"] as? String,
@@ -60,6 +60,8 @@ struct ListView: View {
             Group {
                 if stopsStore.isLoading {
                     ProgressView("Loading stops...")
+                        
+
                 } else if let error = stopsStore.error {
                     VStack {
                         Text("Error loading stops")
@@ -124,7 +126,6 @@ struct ListView: View {
         }
         .onAppear {
             locationManager.requestLocation()
-            WidgetCenter.shared.reloadAllTimelines()
         }
         .onChange(of: locationManager.location) { newLocation in
             if let location = newLocation,

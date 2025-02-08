@@ -23,7 +23,6 @@ class IntentHandler: INExtension, ConfigurationLargeIntentHandling, Configuratio
                 return WidgetConfig(identifier: id, display: name)
             }
             
-            WidgetCenter.shared.reloadAllTimelines()
             let collection = INObjectCollection(items: widgetConfigs)
             return collection
             

@@ -14,46 +14,75 @@ enum WidgetHelper {
             return nil
         }
         
-        Task {
-            try? await Task.sleep(for: .seconds(60))
-            WidgetCenter.shared.reloadAllTimelines()
-        }
         return savedWidgets.first { $0.id == id }
     }
     
-    static func getFilteredStopsForWidget(_ stops: [[String: Any]], maxStops: Int) -> [[String: Any]] {
+    static func getFilteredStopsForWidget(_ stops: [[String: Any]], maxStops: Int) async -> [[String: Any]] {
         var filteredStops: [[String: Any]] = []
-        
-        var usedKeys = Set<String>()
+        var seenVariants = Set<String>()
         
         for stop in stops {
-            guard let direction = stop["direction"] as? String,
-                  let street = stop["street"] as? [String: Any],
-                    let streetName = street["name"] as? String
-            
-            
-            
-            else {
+            guard let stopNumber = stop["number"] as? Int else {
                 continue
             }
             
-            let compositeKey = "\(direction)-\(streetName)"
-            
-            if !usedKeys.contains(compositeKey) {
-                filteredStops.append(stop)
-                usedKeys.insert(compositeKey)
+            do {
+                let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
+                    schedule: schedule,
+                    timeFormat: .default
+                )
+                
+                var stopVariants = Set<String>()
+                for scheduleString in cleanedSchedule {
+                    let components = scheduleString.components(separatedBy: " ---- ")
+                    if components.count >= 2 {
+                        let variantCombo = "\(components[0])-\(components[1])"
+                        stopVariants.insert(variantCombo)
+                    }
+                }
+                
+                let uniqueVariants = stopVariants.subtracting(seenVariants)
+                if !uniqueVariants.isEmpty {
+                    filteredStops.append(stop)
+                    seenVariants.formUnion(stopVariants)
+                    
+                    if filteredStops.count >= maxStops {
+                        break
+                    }
+                }
+            } catch {
+                print("Error fetching schedule for stop \(stopNumber): \(error)")
+                continue
             }
-            
-            if filteredStops.count >= maxStops {
-                break
-            }
-            
         }
-        
+
         if filteredStops.isEmpty {
-            filteredStops = Array(stops.prefix(maxStops))
+            var usedKeys = Set<String>()
+            
+            for stop in stops {
+                guard let direction = stop["direction"] as? String,
+                      let street = stop["street"] as? [String: Any],
+                      let streetName = street["name"] as? String else {
+                    continue
+                }
+                
+                let compositeKey = "\(direction)-\(streetName)"
+                
+                if !usedKeys.contains(compositeKey) {
+                    filteredStops.append(stop)
+                    usedKeys.insert(compositeKey)
+                    
+                    if filteredStops.count >= maxStops {
+                        break
+                    }
+                }
+            }
+            
+            if filteredStops.isEmpty {
+                filteredStops = Array(stops.prefix(maxStops))
+            }
         }
-        
         
         return filteredStops
     }
@@ -77,7 +106,7 @@ enum WidgetHelper {
                     timeFormat: widgetData["timeFormat"] as? String == TimeFormat.clockTime.rawValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
                 )
                 
-                if isClosestStop ?? false {
+                if ((isClosestStop ?? false) || widgetData["noSelectedVariants"] as? Bool == true) {
                     let maxVariants = getMaxVariantsAllowedForWidget(
                         widgetSizeSystemFormat: nil,
                         widgetSizeStringFormat: widgetData["size"] as? String
@@ -96,7 +125,7 @@ enum WidgetHelper {
                         if components.count >= 2 {
                             let variantKey = components[0]
                             let variantName = components[1]
-                            let compositeKey = "\(variantKey)-\(variantName)"
+                            let compositeKey = "\(stopNumber)-\(variantKey)-\(variantName)"
                             
                             if !usedKeys.contains(compositeKey) {
                                 selectedVariants.append([
@@ -106,7 +135,7 @@ enum WidgetHelper {
                                 usedKeys.insert(compositeKey)
                                 schedulesDict[compositeKey] = scheduleString
                                 
-                                if selectedVariants.count >= (maxVariants * maxStops) {
+                                if selectedVariants.count >= (maxVariants * maxStops < 2 ? 2 : maxVariants * maxStops) {
                                     break
                                 }
                             }
@@ -122,7 +151,7 @@ enum WidgetHelper {
                                 continue
                             }
                             
-                            let compositeKey = "\(variantKey)-\(variantName)"
+                            let compositeKey = "\(stopNumber)-\(variantKey)-\(variantName)"
                             if !schedulesDict.keys.contains(compositeKey),
                                let firstMatchingSchedule = cleanedSchedule.first(where: { scheduleString in
                                    let components = scheduleString.components(separatedBy: " ---- ")

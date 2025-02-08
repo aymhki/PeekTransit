@@ -4,10 +4,14 @@ struct VariantSelectionStep: View {
     let selectedStops: [[String: Any]]
     @Binding var selectedVariants: [String: [[String: Any]]]
     let maxVariantsPerStop: Int
-    
+    @Binding var stopsWithoutService: [Int]
+    @Binding var showNoServiceAlert: Bool
+    @Binding var noSelectedVariants: Bool
     @State private var stopSchedules: [String: Set<UniqueVariant>] = [:]
     @State private var isLoading = false
     @State private var error: Error?
+    
+
     
     struct UniqueVariant: Hashable {
         let key: String
@@ -40,6 +44,30 @@ struct VariantSelectionStep: View {
         return uniqueVariants
     }
     
+    private func convertVariantArrayToUniqueSet(_ variants: [[String: Any]]) -> Set<UniqueVariant> {
+        var uniqueVariants = Set<UniqueVariant>()
+        
+        for variantRouteObjects in variants {
+            guard var variant = variantRouteObjects["variant"] as? [String: Any],
+                  var key = variant["key"] as? String,
+                  var name = variant["name"] as? String else { continue }
+            
+            
+                    if let firstPart = key.split(separator: "-").first {
+                        key = String(firstPart)
+                    }
+            
+            
+                    if (key.contains("BLUE")) {
+                        key = "B"
+                    }
+            
+                    uniqueVariants.insert(UniqueVariant(key: key, name: name))
+        }
+        
+        return uniqueVariants
+    }
+    
     private func loadSchedules() async {
         await MainActor.run {
             isLoading = true
@@ -47,15 +75,30 @@ struct VariantSelectionStep: View {
         }
         
         do {
+            var stopsNoService: [Int] = []
+            
             for stop in selectedStops {
                 guard let stopNumber = stop["number"] as? Int else { continue }
                 
                 let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
-                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
-                let uniqueVariants = processSchedules(cleanedSchedule)
+                let cleanSchedule =  TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: .default)
+                let stopVariants = try  await TransitAPI.shared.getOnlyVariantsForStop(stop: stop)
+                let stopVaraintsSet = convertVariantArrayToUniqueSet(stopVariants)
                 
-                await MainActor.run {
-                    stopSchedules[String(stopNumber)] = uniqueVariants
+                if (!cleanSchedule.isEmpty) {
+                                        
+                    await MainActor.run {
+                        stopSchedules[String(stopNumber)] = stopVaraintsSet
+                    }
+                } else {
+                   // Return something to the widget setup flow indicaiting that the user has chosen a stop that is not eligible for widgets as it does not have service, the widget setup flow, should go back to the stop selection step, reset the user stop selection, and show an alert error indicaiting what happened.
+                    
+                    stopsNoService.append(stopNumber)
+                    
+                    if !stopsNoService.isEmpty {
+                        stopsWithoutService = stopsNoService
+                        showNoServiceAlert = true
+                    }
                 }
             }
             
@@ -107,8 +150,6 @@ struct VariantSelectionStep: View {
     
     var body: some View {
         VStack {
-
-            
             if isLoading {
                 ProgressView("Loading bus schedules...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -138,21 +179,50 @@ struct VariantSelectionStep: View {
                             .foregroundColor(.secondary)
                             .padding(.horizontal)
                         
-                        ForEach(selectedStops.indices, id: \.self) { index in
-                            let stop = selectedStops[index]
-                            if let stopNumber = stop["number"] as? Int,
-                               let variants = stopSchedules[String(stopNumber)] {
-                                StopScheduleSection(
-                                    stop: stop,
-                                    variants: Array(variants),
-                                    selectedVariants: selectedVariants[String(stopNumber)] ?? [],
-                                    maxVariants: maxVariantsPerStop,
-                                    onVariantSelect: { variant in
-                                        withAnimation {
-                                            toggleVariantSelection(stopNumber: stopNumber, variant: variant)
+                        Button(action: {
+                            withAnimation {
+                                noSelectedVariants.toggle()
+                                if noSelectedVariants {
+                                    selectedVariants  = [:]
+                                }
+                            }
+                        }) {
+                            HStack {
+                                if noSelectedVariants {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.white)
+                                    Text("Upcoming buses option selected. Click again to go back to variant selection or click next to proceed")
+                                } else {
+                                    Image(systemName: "clock.fill")
+                                    Text("Click here to only show the upcoming buses for your stops at the time of viewing the widget instead of selecting certain bus variants")
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(noSelectedVariants ? Color.red : Color.accentColor)
+                            .foregroundColor(noSelectedVariants ? .white : Color(uiColor: UIColor.systemBackground))
+                            .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                        
+                        if !noSelectedVariants {
+                            
+                            ForEach(selectedStops.indices, id: \.self) { index in
+                                let stop = selectedStops[index]
+                                if let stopNumber = stop["number"] as? Int,
+                                   let variants = stopSchedules[String(stopNumber)] {
+                                    StopScheduleSection(
+                                        stop: stop,
+                                        variants: Array(variants),
+                                        selectedVariants: selectedVariants[String(stopNumber)] ?? [],
+                                        maxVariants: maxVariantsPerStop,
+                                        onVariantSelect: { variant in
+                                            withAnimation {
+                                                toggleVariantSelection(stopNumber: stopNumber, variant: variant)
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
@@ -165,5 +235,6 @@ struct VariantSelectionStep: View {
                 await loadSchedules()
             }
         }
+
     }
 }

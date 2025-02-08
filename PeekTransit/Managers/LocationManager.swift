@@ -3,7 +3,7 @@ import WidgetKit
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     let manager: CLLocationManager
-    private let minimumDistanceThreshold: CLLocationDistance = 10 
+    private let minimumDistanceThreshold: CLLocationDistance = 50
     
     @Published var location: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus?
@@ -37,7 +37,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func requestLocation() {
-        WidgetCenter.shared.reloadAllTimelines()
         let status = manager.authorizationStatus
             if status == .notDetermined {
                 manager.requestWhenInUseAuthorization()
@@ -47,7 +46,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        WidgetCenter.shared.reloadAllTimelines()
         location = locations.first
     }
     

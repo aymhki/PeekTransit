@@ -25,7 +25,7 @@ struct StopSelectionStep: View {
     }
     
     var filteredStops: [[String: Any]] {
-        guard !searchText.isEmpty else { return stopsStore.stops }
+        guard !searchText.isEmpty else { return combinedStops }
         
         return combinedStops.filter { stop in
             if let name = stop["name"] as? String,
@@ -87,10 +87,10 @@ struct StopSelectionStep: View {
                     if isClosestStop {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.white)
-                        Text("Closest Stop(s) based on location selected, click again to go back or click next to proceed")
+                        Text("Closest stop(s) based on location selected, click again to go back to stop selection or click next to proceed")
                     } else {
                         Image(systemName: "location.fill")
-                        Text("Use Closest Stop based on my location at the time of viewing the widget")
+                        Text("Click here to use closest stop\(maxStopsAllowed > 1 ? "s" : "") based on your location at the time of viewing the widget")
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -112,6 +112,7 @@ struct StopSelectionStep: View {
                 VStack {
                     if stopsStore.isLoading {
                         ProgressView("Loading stops...")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else if let error = stopsStore.error {
                         VStack {
                             Text("Error loading stops")
@@ -162,6 +163,14 @@ struct StopSelectionStep: View {
                             }
                         }
                         .listStyle(.plain)
+                        .refreshable {
+                            let newLocation = locationManager.location
+                            if let location = newLocation {
+                                Task {
+                                    await stopsStore.loadStops(userLocation: location)
+                                }
+                            }
+                        }
                     }
                 }
                 .searchable(text: $searchText, prompt: "Search stops, routes...")

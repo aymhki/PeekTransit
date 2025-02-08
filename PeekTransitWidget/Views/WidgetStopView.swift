@@ -25,7 +25,7 @@ struct WidgetStopView: View {
                         Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0fm away", distanceInMeters))")
                             .font(.system(size:  8))
                     } else if (size == .systemLarge) {
-                        Text("• \(stopName) - \(String(format: "%.0f m away", distanceInMeters))")
+                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0f m away", distanceInMeters))")
                             .font(.system(.caption2))
                     } else {
                         Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0fm away", distanceInMeters))")

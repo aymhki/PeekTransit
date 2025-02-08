@@ -28,7 +28,7 @@ struct ProviderLockscreen: IntentTimelineProvider {
                                 widgetSizeSystemFormat: .accessoryRectangular,
                                 widgetSizeStringFormat: nil
                             )
-                            finalWidgetData["stops"] = Array(stops.prefix(maxStops))
+                            finalWidgetData["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
                             let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData, isClosestStop: true)
                             finalWidgetData = updatedWidgetData
                             
@@ -77,7 +77,7 @@ struct ProviderLockscreen: IntentTimelineProvider {
                             widgetSizeSystemFormat: .accessoryRectangular,
                             widgetSizeStringFormat: nil
                         )
-                        widgetData?["stops"] = Array(stops.prefix(maxStops))
+                        widgetData?["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
                         let (_, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(widgetData ?? [:], isClosestStop: true)
                         widgetData = updatedWidgetData
                     } else {
