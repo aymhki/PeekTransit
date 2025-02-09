@@ -8,7 +8,7 @@ struct BusScheduleRow: View {
     let forPreview: Bool
     
     var body: some View {
-        let components = schedule.components(separatedBy: " ---- ")
+        let components = schedule.components(separatedBy: getScheduleStringSeparator())
         if components.count >= 4 {
             HStack {
                 Text(components[0])

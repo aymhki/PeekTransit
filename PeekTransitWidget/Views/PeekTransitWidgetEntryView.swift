@@ -48,17 +48,17 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                             continue
                         }
                         
-                        selectedVariantsSimplified.insert("\(variantKey)-\(variantName)")
+                        selectedVariantsSimplified.insert("\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)")
                     }
                 }
             }
             
             for scheduleString in scheduleData ?? [] {
-                let components = scheduleString.components(separatedBy: " ---- ")
+                let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                 if components.count >= 2 {
                     let variantKey = components[0]
                     let variantName = components[1]
-                    availableScheduleVariantsSimplified.insert("\(variantKey)-\(variantName)")
+                    availableScheduleVariantsSimplified.insert("\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)")
                 }
             }
             
@@ -92,17 +92,17 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                         continue
                     }
                     
-                    selectedVariantsSimplified.insert("\(variantKey)-\(variantName)")
+                    selectedVariantsSimplified.insert("\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)")
                 }
             }
         }
 
         for scheduleString in scheduleData ?? [] {
-            let components = scheduleString.components(separatedBy: " ---- ")
+            let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
             if components.count >= 2 {
                 let variantKey = components[0]
                 let variantName = components[1]
-                availableScheduleVariantsSimplified.insert("\(variantKey)-\(variantName)")
+                availableScheduleVariantsSimplified.insert("\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)")
             }
         }
 
@@ -110,7 +110,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
             if !availableScheduleVariantsSimplified.contains(selectedVariant) {
                 let components = selectedVariant.components(separatedBy: "-")
                 if components.count >= 2 {
-                    filledScheduleData.append("\(components[0]) ---- \(components[1]) ---- Ok ---- \(getTimePeriodAllowedForNextBusRoutes())hrs+")
+                    filledScheduleData.append("\(components[0])\(getScheduleStringSeparator())\(components[1])\(getScheduleStringSeparator())Ok\(getScheduleStringSeparator())\(getTimePeriodAllowedForNextBusRoutes())hrs+")
                 }
             }
         }

@@ -20,7 +20,6 @@ struct WidgetRowView: View {
             
             VStack(spacing: 8) {
                 let currentSize = widgetData["size"] as? String ?? "medium"
-                
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color(.secondarySystemGroupedBackground))
@@ -34,9 +33,9 @@ struct WidgetRowView: View {
                         fullyLoaded: true,
                         forPreview: true
                     )
-                    .padding(.horizontal, 8)
+                    .padding()
                 }
-                .frame(maxWidth: currentSize == "small" || currentSize == "lockscreen" ? 170 : .infinity)
+                .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: currentSize))
                 .frame(height: getPreviewHeight())
                 
                 Spacer()
@@ -48,26 +47,17 @@ struct WidgetRowView: View {
                 Divider()
             }
         }
-        .contentShape(Rectangle()) // Makes the entire row tappable
+        .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }
-        .padding(12)
+        .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
     }
     
     private func getPreviewHeight() -> CGFloat {
         let size = widgetData["size"] as? String ?? "medium"
-        switch size.lowercased() {
-        case "small":
-            return 180
-        case "large":
-            return 380
-        case "lockscreen":
-            return 100
-        default:
-            return 180
-        }
+        return getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: size)
     }
 }

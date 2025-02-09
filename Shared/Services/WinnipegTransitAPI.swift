@@ -192,7 +192,7 @@ class TransitAPI {
         let bulkVariantsSet = Set(allVariants.compactMap { variant -> String? in
             guard let key = variant["key"] as? String,
                   let name = variant["name"] as? String else { return nil }
-            return "\(key)-\(name)"
+            return "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
         })
         
         for enrichedStop in enrichedStops {
@@ -203,7 +203,7 @@ class TransitAPI {
                       let key = variantData["key"] as? String,
                       let name = variantData["name"] as? String else { continue }
                 
-                let variantIdentifier = "\(key)-\(name)"
+                let variantIdentifier = "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
                 if !bulkVariantsSet.contains(variantIdentifier) {
                     return false
                 }
@@ -560,7 +560,7 @@ class TransitAPI {
 //                                variantName = "Crosstown\nE. S. E."
 //                            }
                             
-                            busScheduleList.append("\(variantKey) ---- \(variantName) ---- \(arrivalState) ---- \(finalArrivalText)")
+                            busScheduleList.append("\(variantKey)\(getScheduleStringSeparator())\(variantName)\(getScheduleStringSeparator())\(arrivalState)\(getScheduleStringSeparator())\(finalArrivalText)")
                         }
                     }
                 }
@@ -568,8 +568,8 @@ class TransitAPI {
         }
         
         return busScheduleList.sorted(by: { (str1: String, str2: String) -> Bool in
-            let componentsA = str1.components(separatedBy: " ---- ")
-            let componentsB = str2.components(separatedBy: " ---- ")
+            let componentsA = str1.components(separatedBy: getScheduleStringSeparator())
+            let componentsB = str2.components(separatedBy: getScheduleStringSeparator())
             
             let timeA = componentsA[3]
             let timeB = componentsB[3]

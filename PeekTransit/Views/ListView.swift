@@ -142,6 +142,6 @@ struct ListView: View {
 
 extension CLLocationCoordinate2D: Identifiable {
     public var id: String {
-        "\(latitude)-\(longitude)"
+        "\(latitude)\(getCompositKeyLinkerForDictionaries())\(longitude)"
     }
 }

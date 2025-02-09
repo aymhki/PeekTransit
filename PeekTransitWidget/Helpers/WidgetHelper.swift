@@ -35,9 +35,9 @@ enum WidgetHelper {
                 
                 var stopVariants = Set<String>()
                 for scheduleString in cleanedSchedule {
-                    let components = scheduleString.components(separatedBy: " ---- ")
+                    let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                     if components.count >= 2 {
-                        let variantCombo = "\(components[0])-\(components[1])"
+                        let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
                         stopVariants.insert(variantCombo)
                     }
                 }
@@ -67,7 +67,7 @@ enum WidgetHelper {
                     continue
                 }
                 
-                let compositeKey = "\(direction)-\(streetName)"
+                let compositeKey = "\(direction)\(getCompositKeyLinkerForDictionaries())\(streetName)"
                 
                 if !usedKeys.contains(compositeKey) {
                     filteredStops.append(stop)
@@ -121,11 +121,11 @@ enum WidgetHelper {
                     var usedKeys = Set<String>()
                     
                     for scheduleString in cleanedSchedule {
-                        let components = scheduleString.components(separatedBy: " ---- ")
+                        let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                         if components.count >= 2 {
                             let variantKey = components[0]
                             let variantName = components[1]
-                            let compositeKey = "\(stopNumber)-\(variantKey)-\(variantName)"
+                            let compositeKey = "\(stopNumber)\(getCompositKeyLinkerForDictionaries())\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)"
                             
                             if !usedKeys.contains(compositeKey) {
                                 selectedVariants.append([
@@ -151,10 +151,10 @@ enum WidgetHelper {
                                 continue
                             }
                             
-                            let compositeKey = "\(stopNumber)-\(variantKey)-\(variantName)"
+                            let compositeKey = "\(stopNumber)\(getCompositKeyLinkerForDictionaries())\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)"
                             if !schedulesDict.keys.contains(compositeKey),
                                let firstMatchingSchedule = cleanedSchedule.first(where: { scheduleString in
-                                   let components = scheduleString.components(separatedBy: " ---- ")
+                                   let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                                    return components.count >= 2 &&
                                           components[0] == variantKey &&
                                           components[1] == variantName

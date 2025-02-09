@@ -34,7 +34,7 @@ struct StopRow: View {
     }
     
     var body: some View {
-        NavigationLink(destination: BusStopView(stop: stop)) {
+        NavigationLink(destination: BusStopView(stop: stop, isDeepLink: false)) {
             HStack(alignment: .top, spacing: 12) {
                 if let coordinate = coordinate {
                                     StopMapPreview(

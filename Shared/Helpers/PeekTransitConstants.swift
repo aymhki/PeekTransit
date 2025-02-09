@@ -74,16 +74,16 @@ public func getMaxVariantsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetS
 }
 
 public func getStopsDistanceRadius() -> Double {
-    return 500
+    return 650
 }
 
 
 public func getMaxStopsAllowedToFetch() -> Int {
-    return 20
+    return 35
 }
 
 public func getMaxStopsAllowedToFetchForSearch() -> Int {
-    return 5
+    return 10
 }
 
 
@@ -143,7 +143,6 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
 }
 
 
-
 public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
     if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
         if (widgetSizeStringFormat == "large") {
@@ -179,4 +178,112 @@ public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
 
 public func getStopNameMaxPrefixLengthForWidget() -> Int {
     return 40
+}
+
+
+public func getWidgetPreviewHeightForSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
+    if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
+        
+        if (widgetSizeStringFormat == "large") {
+            return 300
+        } else if (widgetSizeStringFormat == "medium") {
+            return 170
+        } else if (widgetSizeStringFormat == "small") {
+            return 170
+        } else if (widgetSizeStringFormat == "lockscreen") {
+            return 80
+        } else {
+            return 300
+        }
+        
+    } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
+        if (widgetSizeSystemFormat == .systemLarge) {
+            return 300
+        } else if (widgetSizeSystemFormat == .systemMedium) {
+            return 170
+        } else if (widgetSizeSystemFormat == .systemSmall) {
+            return 170
+        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
+            return 80
+        } else {
+            return 300
+        }
+    } else {
+        return 300
+    }
+}
+
+public func getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
+    if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
+        
+        if (widgetSizeStringFormat == "large") {
+            return 380
+        } else if (widgetSizeStringFormat == "medium") {
+            return 180
+        } else if (widgetSizeStringFormat == "small") {
+            return 180
+        } else if (widgetSizeStringFormat == "lockscreen") {
+            return 100
+        } else {
+            return 380
+        }
+        
+    } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
+        if (widgetSizeSystemFormat == .systemLarge) {
+            return 380
+        } else if (widgetSizeSystemFormat == .systemMedium) {
+            return 180
+        } else if (widgetSizeSystemFormat == .systemSmall) {
+            return 180
+        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
+            return 100
+        } else {
+            return 380
+        }
+    } else {
+        return 380
+    }
+}
+
+public func getWidgetPreviewWidthForSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
+    if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
+        if (widgetSizeStringFormat == "large") {
+            return .infinity
+        } else if (widgetSizeStringFormat == "medium") {
+            return .infinity
+        } else if (widgetSizeStringFormat == "small") {
+            return 170
+        } else if (widgetSizeStringFormat == "lockscreen") {
+            return 170
+        } else {
+            return .infinity
+        }
+        
+    } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
+        if (widgetSizeSystemFormat == .systemLarge) {
+            return .infinity
+        } else if (widgetSizeSystemFormat == .systemMedium) {
+            return .infinity
+        } else if (widgetSizeSystemFormat == .systemSmall) {
+            return 170
+        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
+            return 170
+        } else {
+            return .infinity
+        }
+    } else {
+        return .infinity
+    }
+}
+
+public func getScheduleStringSeparator() -> String {
+    return " ---- "
+}
+
+public func getCompositKeyLinkerForDictionaries() -> String {
+    return "-"
+}
+
+public func getWidgetTextPlaceholder() -> String {
+    return "TBD"
 }

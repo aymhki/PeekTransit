@@ -18,29 +18,27 @@ enum PreviewHelper {
                             for variant in variants {
                                 if let key = variant["key"] as? String,
                                    let name = variant["name"] as? String {
-                                    previewSchedules.append("\(key) ---- \(name) ---- Ok ---- TBD")
+                                    previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
                                 }
                             }
                         }
                     } else {
-                        // Handle noSelectedVariants case
                         let widgetSize = widgetData["size"] as? String ?? "medium"
                         let maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
                         
                         var selectedVariants: [[String: Any]] = []
                         for _ in 0..<maxVariants {
                             let variant: [String: Any] = [
-                                "key": "TBD",
-                                "name": "TBD"
+                                "key": getWidgetTextPlaceholder(),
+                                "name": getWidgetTextPlaceholder()
                             ]
                             selectedVariants.append(variant)
-                            previewSchedules.append("TBD ---- TBD ---- Ok ---- TBD")
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
                         }
                         
                         var updatedStop = stop
                         updatedStop["selectedVariants"] = selectedVariants
                         
-                        // Update the stops array in the widget data
                         if var updatedStops = updatedWidgetData["stops"] as? [[String: Any]],
                            let stopIndex = updatedStops.firstIndex(where: { ($0["number"] as? Int) == (stop["number"] as? Int) }) {
                             updatedStops[stopIndex] = updatedStop
@@ -60,16 +58,16 @@ enum PreviewHelper {
                     
                     for _ in 0..<maxVariants {
                         let variant: [String: Any] = [
-                            "key": "TBD",
-                            "name": "TBD"
+                            "key": getWidgetTextPlaceholder(),
+                            "name": getWidgetTextPlaceholder()
                         ]
                         selectedVariants.append(variant)
-                        previewSchedules.append("TBD ---- TBD ---- Ok ---- TBD")
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
                     }
                     
                     let stop: [String: Any] = [
                         "id": "preview_stop_\(stopIndex)",
-                        "name": "TBD",
+                        "name": getWidgetTextPlaceholder(),
                         "number": Int.random(in: 1000...9999),
                         "selectedVariants": selectedVariants
                     ]
@@ -91,16 +89,16 @@ enum PreviewHelper {
                 
                 for _ in 0..<maxVariants {
                     let variant: [String: Any] = [
-                        "key": "TBD",
-                        "name": "TBD"
+                        "key": getWidgetTextPlaceholder(),
+                        "name": getWidgetTextPlaceholder()
                     ]
                     selectedVariants.append(variant)
-                    previewSchedules.append("TBD ---- TBD ---- Ok ---- TBD")
+                    previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
                 }
                 
                 let stop: [String: Any] = [
                     "id": "preview_stop_\(stopIndex)",
-                    "name": "TBD",
+                    "name": getWidgetTextPlaceholder(),
                     "number": Int.random(in: 1000...9999),
                     "selectedVariants": selectedVariants
                 ]

@@ -31,7 +31,7 @@ struct VariantSelectionStep: View {
         var uniqueVariants = Set<UniqueVariant>()
         
         for schedule in schedules {
-            let components = schedule.components(separatedBy: " ---- ")
+            let components = schedule.components(separatedBy: getScheduleStringSeparator())
             if components.count >= 2 {
                 let variant = UniqueVariant(
                     key: components[0],

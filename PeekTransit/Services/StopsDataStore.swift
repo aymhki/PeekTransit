@@ -120,4 +120,34 @@ class StopsDataStore: ObservableObject {
             }
         }
     }
+    
+    
+    func getStop(number: Int) async throws -> [String: Any]? {
+        if let stop = stops.first(where: { ($0["number"] as? Int) == number }) {
+            return stop
+        }
+        
+        if let stop = searchResults.first(where: { ($0["number"] as? Int) == number }) {
+            return stop
+        }
+        
+        guard let url = TransitAPI.shared.createURL(
+            path: "stops/\(number).json",
+            parameters: ["usage": "long"]
+        ) else {
+            throw TransitError.invalidURL
+        }
+        
+        let data = try await TransitAPI.shared.fetchData(from: url)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let stop = json["stop"] as? [String: Any] else {
+            throw TransitError.parseError("Invalid stop data format")
+        }
+        
+        var enrichedStop = stop
+        let variants = try await TransitAPI.shared.getOnlyVariantsForStop(stop: stop)
+        enrichedStop["variants"] = variants
+        
+        return enrichedStop
+    }
 }

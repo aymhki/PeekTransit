@@ -3,6 +3,8 @@ import SwiftData
 
 @main
 struct PeekTransitApp: App {
+    @StateObject private var deepLinkHandler = DeepLinkHandler.shared
+
     
     init() {
         WidgetRefreshManager.shared.startPeriodicRefresh()
@@ -10,9 +12,10 @@ struct PeekTransitApp: App {
     
     var body: some Scene {
         WindowGroup {
-   
             ContentView()
-            
+                .onOpenURL { url in
+                    deepLinkHandler.handleURL(url)
+            }
         }
     }
 }

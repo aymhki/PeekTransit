@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2F570C112D45D5EE00C01563"
-               BuildableName = "Peek Transit.app"
-               BlueprintName = "Peek Transit"
+               BuildableName = "PeekTransit.app"
+               BlueprintName = "PeekTransit"
                ReferencedContainer = "container:PeekTransit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2F570C112D45D5EE00C01563"
-            BuildableName = "Peek Transit.app"
-            BlueprintName = "Peek Transit"
+            BuildableName = "PeekTransit.app"
+            BlueprintName = "PeekTransit"
             ReferencedContainer = "container:PeekTransit.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2F570C112D45D5EE00C01563"
-            BuildableName = "Peek Transit.app"
-            BlueprintName = "Peek Transit"
+            BuildableName = "PeekTransit.app"
+            BlueprintName = "PeekTransit"
             ReferencedContainer = "container:PeekTransit.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

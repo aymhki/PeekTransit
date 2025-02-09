@@ -4,7 +4,7 @@ struct SizeSelectionStep: View {
     @Binding var selectedSize: String
     @Binding var selectedTimeFormat: TimeFormat
     @Binding var showLastUpdatedStatus: Bool
-    @State private var isLoading = true
+    @State private var isLoading = false
     
     private let availableSizes = [
         "small",
@@ -54,11 +54,10 @@ struct SizeSelectionStep: View {
                             forPreview: true
                         )
                         .padding(8)
+                        .foregroundColor(Color.primary)
                     }
-                    .frame(maxWidth: selectedSize == "small" ? 170 : selectedSize == "lockscreen" ? 170 : .infinity)
-                    .frame(height: selectedSize == "small" ? 170 :
-                                   selectedSize == "large" ? 300 :
-                                   selectedSize == "lockscreen" ? 80 : 170)
+                    .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
+                    .frame(height: getWidgetPreviewHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
                     .opacity(isLoading ? 0 : 1)
                 }
                 .padding()
@@ -152,12 +151,6 @@ struct SizeSelectionStep: View {
                 Spacer(minLength: 50)
             }
         }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                withAnimation {
-                    isLoading = false
-                }
-            }
-        }
+        .onAppear {}
     }
 }

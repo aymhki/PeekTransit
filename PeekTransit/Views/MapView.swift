@@ -39,7 +39,8 @@ struct MapView: View {
                             Image(systemName: "location.fill")
                                 .font(.title2)
                                 .padding()
-                                .background(Color(.systemBackground))
+                                .foregroundStyle(.white)
+                                .background(.blue)
                                 .clipShape(Circle())
                                 .shadow(radius: 4)
                         }
@@ -86,7 +87,7 @@ struct MapView: View {
                 set: { if !$0 { selectedStop = nil } }
             )) {
                 if let stop = selectedStop {
-                    BusStopView(stop: stop)
+                    BusStopView(stop: stop, isDeepLink: false)
                 }
             }
         }

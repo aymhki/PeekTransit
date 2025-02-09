@@ -10,6 +10,16 @@ struct DynamicWidgetView: View {
     let fullyLoaded: Bool
     let forPreview: Bool
     
+    private func createStopURL(stopNumber: Int) -> URL? {
+        var components = URLComponents()
+        components.scheme = "peektransit"
+        components.host = "stop"
+        components.queryItems = [
+            URLQueryItem(name: "number", value: String(stopNumber))
+        ]
+        return components.url
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             
@@ -57,7 +67,13 @@ struct DynamicWidgetView: View {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(Array(stops.prefix(maxStops)).indices, id: \.self) { stopIndex in
                     let stop = stops[stopIndex]
-                    WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                    if let stopNumber = stop["number"] as? Int {
+                        Link(destination: createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!) {
+                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                        }
+                    } else {
+                        WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                    }
                     
                     if (stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && fullyLoaded ) {
                         Divider()

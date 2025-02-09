@@ -4,6 +4,7 @@ import MapKit
 
 struct BusStopView: View {
     let stop: [String: Any]
+    let isDeepLink: Bool
     @StateObject private var savedStopsManager = SavedStopsManager.shared
     @State private var isSaved: Bool = false
     @State private var schedules: [String] = []
@@ -53,21 +54,27 @@ struct BusStopView: View {
             print("Error loading schedules: \(error)")
             errorText = "Error loading schedules: \(error.localizedDescription)"
             errorFetchingSchedule = true
+            isLiveUpdatesEnabled = false
         }
     }
     
     var body: some View {
         List {
             Section {
-                VStack() {
-                    HStack {
-                        Text(stop["name"] as? String ?? "Bus Stop")
+                VStack(spacing: 30) {
+                    HStack (spacing: 30) {
+                        Text( (stop["name"] as? String ?? "Bus Stop"))
                             .font(.title3.bold())
+                            .fixedSize(horizontal: false, vertical: true) 
+                            .lineLimit(nil)
+                            .multilineTextAlignment(.leading)
+                            
                         
                         Spacer(minLength: 8)
                         
                         
                         LiveIndicator(isAnimating: isLiveUpdatesEnabled)
+                            .padding()
                         
                     }
                     
@@ -118,6 +125,12 @@ struct BusStopView: View {
                             .font(.title3)
                             .foregroundStyle(.secondary)
                     }
+                    .padding()
+                    
+                    
+                    
+                    
+                    
                 } else if (schedules.isEmpty && !(isLoading || isManualRefresh)) {
                     VStack(spacing: 16) {
                         Image(systemName: "bus.fill")
@@ -133,7 +146,7 @@ struct BusStopView: View {
                     VStack(spacing: 0) {
                         Spacer()
                         ForEach(schedules, id: \.self) { schedule in
-                            let components = schedule.components(separatedBy: " ---- ")
+                            let components = schedule.components(separatedBy: getScheduleStringSeparator())
                             
  
                             if components.count > 1 {
@@ -220,7 +233,7 @@ struct BusStopView: View {
         .navigationTitle("#\(String(stop["number"] as? Int ?? 0))")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: isDeepLink ? .navigationBarLeading : .navigationBarTrailing) {
                 Button {
                     savedStopsManager.toggleSavedStatus(for: stop)
                     isSaved.toggle()
@@ -238,6 +251,7 @@ struct BusStopView: View {
             } label: {
                 Image(systemName: "arrow.clockwise")
                     .font(.title2)
+                    .bold()
                     .foregroundStyle(.white)
                     .padding()
                     .background(.blue)
@@ -245,13 +259,12 @@ struct BusStopView: View {
                     .shadow(radius: 4)
             }
             .padding()
+            .disabled(isLoading)
         }
-        .refreshable {
+        .modifier(ConditionalRefreshable(isEnabled: !isDeepLink) {
             isManualRefresh = true
-            Task {
-                await loadSchedules(isManual: true)
-            }
-        }
+            await loadSchedules(isManual: true)
+        })
         .onAppear {
             isSaved = savedStopsManager.isStopSaved(stop)
             isLiveUpdatesEnabled = getLiveUpdatePreference()
@@ -265,6 +278,21 @@ struct BusStopView: View {
             Task {
                 await loadSchedules(isManual: false)
             }
+        }
+    }
+}
+
+struct ConditionalRefreshable: ViewModifier {
+    let isEnabled: Bool
+    let action: () async -> Void
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.refreshable {
+                await action()
+            }
+        } else {
+            content
         }
     }
 }

@@ -13,50 +13,28 @@ struct WidgetStopView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             let stopName = stop["name"] as? String ?? "Unknown Stop"
+            let stopNumber = stop["number"] as? Int ?? 0
             let stopNamePrefix = "\(stopName.prefix(stopNamePrefixSize))..."
             
-            if let distances = stop["distances"] as? [String: Any],
-               let currentDistance = distances.first,
-               let currentDistandValueString = currentDistance.value as? String,
-               let distanceInMeters = Double(currentDistandValueString) {
-               
-                
-                if (size != .accessoryRectangular && fullyLoaded) {
-                    if (size == .systemSmall) {
-                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0fm away", distanceInMeters))")
-                            .font(.system(size:  8))
-                    } else if (size == .systemLarge) {
-                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0f m away", distanceInMeters))")
-                            .font(.system(.caption2))
-                    } else {
-                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(String(format: "%.0fm away", distanceInMeters))")
-                            .font(.system(.caption2))
-                            .padding(.bottom, 1)
-                    }
-                    
-                    if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3) && fullyLoaded) {
-                        Spacer()
-                    }
+
+            if (size != .accessoryRectangular && fullyLoaded) {
+                if (size == .systemSmall) {
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
+                        .font(.system(size:  8))
+                } else if (size == .systemLarge) {
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
+                        .font(.system(.caption2))
+                } else {
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
+                        .font(.system(.caption2))
+                        .padding(.bottom, 1)
                 }
-            } else {
-                if (size != .accessoryRectangular && fullyLoaded) {
-                    if (size == .systemSmall) {
-                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName)")
-                            .font(.system(size:  8))
-                    } else if (size == .systemLarge) {
-                        Text("• \(stopName)")
-                            .font(.system(.caption2))
-                    } else {
-                        Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName)")
-                            .font(.system(.caption2))
-                            .padding(.bottom, 1)
-                    }
-                    
-                    if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3) && fullyLoaded) {
-                        Spacer()
-                    }
+                
+                if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3) && fullyLoaded) {
+                    Spacer()
                 }
             }
+            
             
             
             if let variants = stop["selectedVariants"] as? [[String: Any]] {
@@ -67,7 +45,7 @@ struct WidgetStopView: View {
                        let schedules = scheduleData,
                        let variantName = variants[variantIndex]["name"] as? String,
                        let matchingSchedule = schedules.first(where: { scheduleString in
-                           let components = scheduleString.components(separatedBy: " ---- ")
+                           let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                            return components.count >= 2 &&
                                   components[0] == key &&
                                   components[1] == variantName
