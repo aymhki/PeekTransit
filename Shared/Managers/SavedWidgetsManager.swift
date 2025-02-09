@@ -66,5 +66,11 @@ class SavedWidgetsManager: ObservableObject {
         return savedWidgets.filter { ($0.widgetData["size"] as? String) == "lockscreen" }.count
     }
     
+    func updateWidget(_ id: String, with newData: [String: Any]) {
+        if let index = savedWidgets.firstIndex(where: { $0.id == id }) {
+            savedWidgets[index] = WidgetModel(widgetData: newData)
+            saveToDisk()
+        }
+    }
 
 }

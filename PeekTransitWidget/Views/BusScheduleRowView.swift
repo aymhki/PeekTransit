@@ -5,6 +5,7 @@ struct BusScheduleRow: View {
     let schedule: String
     let size: WidgetFamily
     let fullyLoaded: Bool
+    let forPreview: Bool
     
     var body: some View {
         let components = schedule.components(separatedBy: " ---- ")

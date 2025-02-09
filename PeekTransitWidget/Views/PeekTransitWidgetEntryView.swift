@@ -146,7 +146,8 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     scheduleData: filledScheduleData,
                     size: family,
                     updatedAt: entry.date,
-                    fullyLoaded: true
+                    fullyLoaded: true,
+                    forPreview: false
                 )
             } else {
                 DynamicWidgetView(
@@ -154,7 +155,8 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     scheduleData: filledScheduleData,
                     size: family,
                     updatedAt: entry.date,
-                    fullyLoaded: false
+                    fullyLoaded: false,
+                    forPreview: false
                 )
             }
         } else {

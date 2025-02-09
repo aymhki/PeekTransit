@@ -23,6 +23,34 @@ struct WidgetSetupView: View {
     @State private var showNoServiceAlert = false
     @State private var stopsWithoutService: [Int] = []
     @State private var noSelectedVariants: Bool = false
+    let editingWidget: WidgetModel?
+
+    
+    
+    init(editingWidget: WidgetModel? = nil) {
+        self.editingWidget = editingWidget
+        
+        if let widget = editingWidget {
+            _widgetSize = State(initialValue: widget.widgetData["size"] as? String ?? "medium")
+            _selectedTimeFormat = State(initialValue: TimeFormat(rawValue: widget.widgetData["timeFormat"] as? String ?? "") ?? .default)
+            _showLastUpdatedStatus = State(initialValue: widget.widgetData["showLastUpdatedStatus"] as? Bool ?? true)
+            _isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
+            _selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
+            _widgetName = State(initialValue: widget.widgetData["name"] as? String ?? "")
+            _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
+            
+            if let stops = widget.widgetData["stops"] as? [[String: Any]] {
+                var variants: [String: [[String: Any]]] = [:]
+                for stop in stops {
+                    if let number = stop["number"] as? Int,
+                       let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
+                        variants[String(number)] = selectedVariants
+                    }
+                }
+                _selectedVariants = State(initialValue: variants)
+            }
+        }
+    }
 
     private func generateDefaultWidgetName() -> String {
         if isClosestStop {
@@ -87,15 +115,26 @@ struct WidgetSetupView: View {
             widgetName = generateDefaultWidgetName()
         }
         
-        if SavedWidgetsManager.shared.hasWidgetWithName(widgetName) {
-            saveErrorMessage = "A widget with this name already exists. Please choose a different name."
-            showingSaveError = true
-            return
+        if let existingWidget = editingWidget {
+            if SavedWidgetsManager.shared.hasWidgetWithName(widgetName) &&
+               widgetName != existingWidget.widgetData["name"] as? String {
+                saveErrorMessage = "A widget with this name already exists. Please choose a different name."
+                showingSaveError = true
+                return
+            }
+            
+            SavedWidgetsManager.shared.updateWidget(existingWidget.id, with: createWidgetData())
+        } else {
+            if SavedWidgetsManager.shared.hasWidgetWithName(widgetName) {
+                saveErrorMessage = "A widget with this name already exists. Please choose a different name."
+                showingSaveError = true
+                return
+            }
+            
+            let widgetData = createWidgetData()
+            let widget = WidgetModel(widgetData: widgetData)
+            SavedWidgetsManager.shared.addWidget(widget)
         }
-        
-        let widgetData = createWidgetData()
-        let widget = WidgetModel(widgetData: widgetData)
-        SavedWidgetsManager.shared.addWidget(widget)
         dismiss()
     }
     

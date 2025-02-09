@@ -8,6 +8,7 @@ struct DynamicWidgetView: View {
     let size: WidgetFamily
     let updatedAt: Date
     let fullyLoaded: Bool
+    let forPreview: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -17,13 +18,13 @@ struct DynamicWidgetView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             
-            if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular) {
+            if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
                 Text("Winnipeg Transit API is throtling data requests. Some bus times were not loaded. Please wait a few minutes and try again.")
                     .foregroundColor(.red)
                     .font(.caption)
                     .padding(.horizontal)
                 
-            } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular) {
+            } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular && !forPreview) {
                 Text("Could Not fetch bus times, please wait...")
                     .foregroundColor(.red)
                     .font(.caption)
@@ -56,9 +57,9 @@ struct DynamicWidgetView: View {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(Array(stops.prefix(maxStops)).indices, id: \.self) { stopIndex in
                     let stop = stops[stopIndex]
-                    WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded)
+                    WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                     
-                    if (stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && fullyLoaded) {
+                    if (stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && fullyLoaded ) {
                         Divider()
                     }
                 }

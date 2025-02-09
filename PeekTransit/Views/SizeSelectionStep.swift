@@ -42,13 +42,25 @@ struct SizeSelectionStep: View {
                             .fill(Color(.secondarySystemGroupedBackground))
                             .shadow(radius: 2)
                         
-                        Text("Size: \(selectedSize)")
-                            .font(.headline)
+                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize], noConfig: true) ?? ([], [:])
+
+                        
+                        DynamicWidgetView(
+                            widgetData: newWidgetData ?? [:],
+                            scheduleData: newSchedule,
+                            size: PreviewHelper.getWidgetSize(from: selectedSize),
+                            updatedAt: Date(),
+                            fullyLoaded: true,
+                            forPreview: true
+                        )
+                        .padding(8)
                     }
+                    .frame(maxWidth: selectedSize == "small" ? 170 : selectedSize == "lockscreen" ? 170 : .infinity)
+                    .frame(height: selectedSize == "small" ? 170 :
+                                   selectedSize == "large" ? 300 :
+                                   selectedSize == "lockscreen" ? 80 : 170)
                     .opacity(isLoading ? 0 : 1)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 200)
                 .padding()
                 
                 VStack(alignment: .leading, spacing: 16) {

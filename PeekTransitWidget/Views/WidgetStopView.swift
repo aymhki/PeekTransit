@@ -7,6 +7,7 @@ struct WidgetStopView: View {
     let size: WidgetFamily
     let stopNamePrefixSize = getStopNameMaxPrefixLengthForWidget()
     let fullyLoaded: Bool
+    let forPreview: Bool
     
     
     var body: some View {
@@ -73,24 +74,24 @@ struct WidgetStopView: View {
                        }) {
                         
                         if (size == .systemSmall || size == .accessoryRectangular) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                                 .padding(.horizontal, 8)
                             
                             
                         } else if (size == .systemLarge) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                                 .padding(.horizontal, 30)
                         } else if (size == .systemMedium) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                                 .padding(.horizontal, 30)
                                 .padding(.bottom, variantIndex < variants.prefix(maxSchedules).count  - 1 ? 3 : 0)
                         } else if (size == .accessoryRectangular) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                         } else if (size == .systemSmall) {
-                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded)
+                            BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                         }
                         
-                        if ((size == .systemLarge || size == .systemSmall || ( ((scheduleData)?.count ?? 0 < 3) && size != .accessoryRectangular )) && fullyLoaded) {
+                        if ((size == .systemLarge || size == .systemSmall || ((scheduleData)?.count ?? 0 < 3 ) && size != .accessoryRectangular ) && fullyLoaded) {
                             Spacer()
                         }
                     }
