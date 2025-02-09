@@ -12,7 +12,7 @@ struct WidgetStopView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            let stopName = stop["name"] as? String ?? "Unknown Stop"
+            let stopName = stop["name"] as? String ?? "Unknown"
             let stopNumber = stop["number"] as? Int ?? 0
             let stopNamePrefix = "\(stopName.prefix(stopNamePrefixSize))..."
             
@@ -53,15 +53,12 @@ struct WidgetStopView: View {
                         
                         if (size == .systemSmall || size == .accessoryRectangular) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                                .padding(.horizontal, 8)
-                            
-                            
                         } else if (size == .systemLarge) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                                .padding(.horizontal, 30)
+                                .padding(.horizontal, 8)
                         } else if (size == .systemMedium) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                                .padding(.horizontal, 30)
+                                .padding(.horizontal, 8)
                                 .padding(.bottom, variantIndex < variants.prefix(maxSchedules).count  - 1 ? 3 : 0)
                         } else if (size == .accessoryRectangular) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)

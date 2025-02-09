@@ -34,6 +34,12 @@ struct ContentView: View {
                     Label("Widgets", systemImage: "note.text")
                 }
                 .tag(3)
+            
+            MoreTabView()
+                .tabItem {
+                    Label("More", systemImage: "ellipsis.circle.fill")
+                }
+                .tag(4)
         }
         .sheet(isPresented: $deepLinkHandler.isShowingBusStop) {
             NavigationView {

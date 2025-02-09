@@ -36,7 +36,7 @@ struct WidgetSetupView: View {
             _showLastUpdatedStatus = State(initialValue: widget.widgetData["showLastUpdatedStatus"] as? Bool ?? true)
             _isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
             _selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
-            _widgetName = State(initialValue: widget.widgetData["name"] as? String ?? "")
+            _widgetName = State(initialValue: "")
             _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
             
             if let stops = widget.widgetData["stops"] as? [[String: Any]] {

@@ -101,7 +101,7 @@ public func getMaxBusRouteLengthForWidget() -> Int {
 }
 
 public func getMaxBusRoutePrefixLengthForWidget() -> Int {
-    return 8
+    return 10
 }
 
 
@@ -119,7 +119,7 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
         } else if (widgetSizeStringFormat == "small") {
             return 14
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 12
+            return 13
         } else {
             return 11
         }
@@ -132,7 +132,7 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
         } else if (widgetSizeSystemFormat == .systemSmall) {
             return 14
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 12
+            return 13
         } else {
             return 11
         }
@@ -150,9 +150,9 @@ public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeStringFormat == "medium") {
             return 12
         } else if (widgetSizeStringFormat == "small") {
-            return 10
+            return 12
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 10
+            return 12
         } else {
             return 12
         }
@@ -163,9 +163,9 @@ public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return 12
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 10
+            return 12
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 10
+            return 12
         } else {
             return 12
         }

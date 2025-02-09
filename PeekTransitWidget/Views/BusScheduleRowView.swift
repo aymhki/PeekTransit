@@ -18,7 +18,9 @@ struct BusScheduleRow: View {
                 if !components[1].isEmpty {
                     
                     if (size != .systemSmall && size != .accessoryRectangular) {
-                        Text(components[1].count > getMaxBusRouteLengthForWidget() ? components[1].prefix(getMaxBusRoutePrefixLengthForWidget()) + "..." : components[1])
+                        let routeName: String = components[1].components(separatedBy: .whitespaces).first?.trimmingCharacters(in: .whitespaces) as? String ?? "Unknown"
+                        
+                        Text(routeName.count > getMaxBusRouteLengthForWidget() ? routeName.prefix(getMaxBusRoutePrefixLengthForWidget()) + "..." : routeName)
                             .font(.system(size: fontSize - 2, design: .monospaced))
                             .bold()
                     

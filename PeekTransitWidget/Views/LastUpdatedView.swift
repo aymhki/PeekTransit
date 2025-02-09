@@ -7,14 +7,20 @@ struct LastUpdatedView: View {
     
     var body: some View {
         let fontSizeToUse = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: size)
-        Text("Last updated at \(formattedTime)")
-            .font(.system(size:  fontSizeToUse))
+        
+        if (size == "lockscreen" || size == "small") {
+            Text("Updated at \(formattedTime)")
+                .font(.system(size:  fontSizeToUse))
+        } else {
+            Text("Last updated at \(formattedTime)")
+                .font(.system(size:  fontSizeToUse))
+        }
     }
     
     private var formattedTime: String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        formatter.dateFormat = "hh:mm a"
+        formatter.dateFormat = "h:mm a"
         return formatter.string(from: updatedAt)
     }
 }

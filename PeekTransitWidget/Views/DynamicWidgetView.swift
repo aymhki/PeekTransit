@@ -48,8 +48,13 @@ struct DynamicWidgetView: View {
                     }
                 }
                 
-                LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
-                    .frame(maxWidth: .infinity, alignment: .center)
+                if (size != .accessoryRectangular) {
+                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else {
+                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
             }
         }
         .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
@@ -67,13 +72,14 @@ struct DynamicWidgetView: View {
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(Array(stops.prefix(maxStops)).indices, id: \.self) { stopIndex in
                     let stop = stops[stopIndex]
-                    if let stopNumber = stop["number"] as? Int {
-                        Link(destination: createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!) {
-                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                        }
-                    } else {
+                    let stopNumber = stop["number"] as? Int ?? 0
+                    let destinationUrl = createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!
+                    Link(destination: destinationUrl ) {
+                        
                         WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                            .widgetURL(destinationUrl)
                     }
+                    
                     
                     if (stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && fullyLoaded ) {
                         Divider()
