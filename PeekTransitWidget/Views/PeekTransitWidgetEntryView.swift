@@ -6,7 +6,8 @@ import Foundation
 
 struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     var entry: T
-    @Environment(\.widgetFamily) var family    
+    @Environment(\.widgetFamily) var family
+    
     
     private func isWidgetFullyLoaded(widgetData: [String: Any], scheduleData: [String]?) -> Bool {
         let scheduleDataSize = scheduleData?.count ?? 0
@@ -110,7 +111,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
             if !availableScheduleVariantsSimplified.contains(selectedVariant) {
                 let components = selectedVariant.components(separatedBy: "-")
                 if components.count >= 2 {
-                    filledScheduleData.append("\(components[0])\(getScheduleStringSeparator())\(components[1])\(getScheduleStringSeparator())Ok\(getScheduleStringSeparator())\(getTimePeriodAllowedForNextBusRoutes())hrs+")
+                    filledScheduleData.append("\(components[0])\(getScheduleStringSeparator())\(components[1])\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getTimePeriodAllowedForNextBusRoutes())hrs+")
                 }
             }
         }

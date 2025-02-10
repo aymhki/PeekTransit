@@ -13,6 +13,14 @@ struct SizeSelectionStep: View {
         "lockscreen"
     ]
     
+    private var currentTheme: StopViewTheme {
+        if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
+           let theme = StopViewTheme(rawValue: savedTheme) {
+            return theme
+        }
+        return .default
+    }
+    
     private let timeFormatExplainationText = "Due to the nature of iOS Widgets limitations, a live API widget can only be updated once every five minutes. For that reason, and until there is a fix around this issue it might not be very practical to display X(X) minutes remaining (when the bus is within 15 minutes of arrival time) if the widget updates after that amount of minutes has passed. Select from the options below which format you want the bus arrival times to be displayed in when glancing at your widget.\n\nNote that for both options you can select from the options below to see when the widget was last updated"
 
     
@@ -39,7 +47,7 @@ struct SizeSelectionStep: View {
                     
                     ZStack {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.secondarySystemGroupedBackground))
+                            .fill(Color(currentTheme == .classic ? .black : .secondarySystemGroupedBackground))
                             .shadow(radius: 2)
                         
                         let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus) ?? ([], [:])
@@ -54,8 +62,14 @@ struct SizeSelectionStep: View {
                             forPreview: true
                             
                         )
+                        .if(currentTheme == .classic) { view in
+                            view.background(.black)
+                        }
                         .padding(8)
                         .foregroundColor(Color.primary)
+                    }
+                    .if(currentTheme == .classic) { view in
+                        view.background(.black)
                     }
                     .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
                     .frame(height: getWidgetPreviewHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))

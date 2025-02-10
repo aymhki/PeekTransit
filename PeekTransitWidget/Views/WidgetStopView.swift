@@ -9,9 +9,19 @@ struct WidgetStopView: View {
     let fullyLoaded: Bool
     let forPreview: Bool
 
+    private var currentTheme: StopViewTheme {
+        if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
+           let theme = StopViewTheme(rawValue: savedTheme) {
+            return theme
+        }
+        return .default
+    }
     
     
     var body: some View {
+        
+
+        
         VStack(alignment: .leading, spacing: 4) {
             let stopName = stop["name"] as? String ?? "Unknown"
             let stopNumber = stop["number"] as? Int ?? 0
@@ -21,17 +31,17 @@ struct WidgetStopView: View {
             if (size != .accessoryRectangular && fullyLoaded) {
                 if (size == .systemSmall) {
                     Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
-                        .font(.system(size:  8))
+                        .widgetTheme(currentTheme, text: "stop", size: size)
                 } else if (size == .systemLarge) {
                     Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
-                        .font(.system(.caption2))
+                        .widgetTheme(currentTheme, text: "stop", size: size)
                 } else {
                     Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
-                        .font(.system(.caption2))
+                        .widgetTheme(currentTheme, text: "stop", size: size)
                         .padding(.bottom, 1)
                 }
                 
-                if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3) && fullyLoaded) {
+                if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3 ) && fullyLoaded) {
                     Spacer()
                 }
             }
@@ -54,6 +64,7 @@ struct WidgetStopView: View {
                         
                         if (size == .systemSmall || size == .accessoryRectangular) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                                .padding(.horizontal, 2)
                         } else if (size == .systemLarge) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                                 .padding(.horizontal, 8)
@@ -67,15 +78,34 @@ struct WidgetStopView: View {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                         }
                         
-                        if ((size == .systemLarge || size == .systemSmall || ((scheduleData)?.count ?? 0 < 3 ) && size != .accessoryRectangular ) && fullyLoaded) {
+                        if ( ( (size == .systemLarge || size == .systemSmall || ( (scheduleData)?.count ?? 0 <= 3 ) ) && size != .accessoryRectangular ) && fullyLoaded) {
                             Spacer()
                         }
                     }
                 }
             }
         }
+        .if(currentTheme == .classic && size != .accessoryRectangular) { view in
+            view.background(.black)
+        }
     }
+    
+    private func getUniqueMatchesCount(_ scheduleData: [String]?) -> Int {
+        guard let scheduleData = scheduleData else { return 0 }
+        var uniqueMatches: Set<String> = []
+        
+        for schedule in scheduleData {
+            let components = schedule.components(separatedBy: getScheduleStringSeparator())
+            if components.count >= 2 {
+                let compositeKey = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
+                uniqueMatches.insert(compositeKey)
+            }
+        }
+        return uniqueMatches.count
+    }
+
 }
+
 
 
 

@@ -6,7 +6,7 @@ enum TimeFormat: String, CaseIterable {
         return .minutesRemaining
     }
     
-    var description: String {
+    var `description`: String {
         switch self {
         case .minutesRemaining:
             return "X(X) Minutes remaining when the bus is within 15 minutes with \(getLateStatusTextString()) (L.) and \(getEarlyStatusTextString()) (E.) prefix"
@@ -15,7 +15,7 @@ enum TimeFormat: String, CaseIterable {
         }
     }
     
-    var brief: String {
+    var `brief`: String {
         switch self {
         case .minutesRemaining:
             return "X(X) min."

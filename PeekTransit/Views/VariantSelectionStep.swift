@@ -91,8 +91,6 @@ struct VariantSelectionStep: View {
                         stopSchedules[String(stopNumber)] = stopVaraintsSet
                     }
                 } else {
-                   // Return something to the widget setup flow indicaiting that the user has chosen a stop that is not eligible for widgets as it does not have service, the widget setup flow, should go back to the stop selection step, reset the user stop selection, and show an alert error indicaiting what happened.
-                    
                     stopsNoService.append(stopNumber)
                     
                     if !stopsNoService.isEmpty {
@@ -192,15 +190,17 @@ struct VariantSelectionStep: View {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.white)
                                     Text("Upcoming buses option selected. Click again to go back to variant selection or click next to proceed")
+                                        .foregroundColor(.white)
                                 } else {
                                     Image(systemName: "clock.fill")
+                                        .foregroundColor(.white)
                                     Text("Click here to only show the upcoming buses for your stops at the time of viewing the widget instead of selecting certain bus variants")
+                                        .foregroundColor(.white)
                                 }
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(noSelectedVariants ? Color.red : Color.accentColor)
-                            .foregroundColor(noSelectedVariants ? .white : Color(uiColor: UIColor.systemBackground))
+                            .background(noSelectedVariants ? Color.red : Color.blue)
                             .cornerRadius(10)
                         }
                         .padding(.horizontal)

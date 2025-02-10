@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
@@ -6,6 +7,7 @@ class ThemeManager: ObservableObject {
     @Published var currentTheme: StopViewTheme {
         didSet {
             SharedDefaults.userDefaults?.set(currentTheme.rawValue, forKey: settingsUserDefaultsKeys.sharedStopViewTheme)
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
     

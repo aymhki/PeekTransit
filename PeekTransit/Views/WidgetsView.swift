@@ -9,7 +9,9 @@ struct WidgetsView: View {
     @State private var isEditing = false
     @State private var selectedWidgets: Set<String> = []
     @State private var showingDeleteAlert = false
-    @State private var widgetToDelete: WidgetModel? = nil // For single widget deletion
+    @State private var widgetToDelete: WidgetModel? = nil
+    @StateObject private var themeManager = ThemeManager.shared // Add this line
+
     
     var body: some View {
         NavigationView {
@@ -87,11 +89,9 @@ struct WidgetsView: View {
                 Button("Yes", role: .destructive) {
                     withAnimation {
                         if let widget = widgetToDelete {
-                            // Single widget deletion
                             savedWidgetsManager.deleteWidget(for: widget.widgetData)
                             widgetToDelete = nil
                         } else {
-                            // Multiple widgets deletion
                             for widgetId in selectedWidgets {
                                 if let widget = savedWidgetsManager.savedWidgets.first(where: { $0.id == widgetId }) {
                                     savedWidgetsManager.deleteWidget(for: widget.widgetData)
@@ -110,6 +110,7 @@ struct WidgetsView: View {
                 }
             }
         }
+        .environmentObject(themeManager)
         .overlay(alignment: .bottomTrailing) {
             if !isEditing {
                 Button {
@@ -135,4 +136,5 @@ struct WidgetsView: View {
             savedWidgetsManager.loadSavedWidgets()
         }
     }
+    
 }

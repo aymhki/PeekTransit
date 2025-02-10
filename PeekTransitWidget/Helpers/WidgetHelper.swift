@@ -135,7 +135,7 @@ enum WidgetHelper {
                                 usedKeys.insert(compositeKey)
                                 schedulesDict[compositeKey] = scheduleString
                                 
-                                if selectedVariants.count >= (maxVariants * maxStops < 2 ? 2 : maxVariants * maxStops) {
+                                if selectedVariants.count >= maxVariants {
                                     break
                                 }
                             }

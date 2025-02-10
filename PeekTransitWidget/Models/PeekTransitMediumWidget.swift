@@ -8,6 +8,7 @@ struct PeekTransitMediumWidget: Widget {
     var body: some WidgetConfiguration {
         IntentConfiguration(kind: kind, intent: ConfigurationMediumIntent.self, provider: ProviderMedium()) { entry in
             PeekTransitWidgetEntryView(entry: entry)
+
         }
         .configurationDisplayName("Transit Widget - Medium")
         .description("Shows transit schedules in medium size")

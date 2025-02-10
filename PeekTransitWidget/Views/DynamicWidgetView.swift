@@ -9,6 +9,14 @@ struct DynamicWidgetView: View {
     let updatedAt: Date
     let fullyLoaded: Bool
     let forPreview: Bool
+    
+    private var currentTheme: StopViewTheme {
+        if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
+           let theme = StopViewTheme(rawValue: savedTheme) {
+            return theme
+        }
+        return .default
+    }
 
     
     private func createStopURL(stopNumber: Int) -> URL? {
@@ -22,43 +30,58 @@ struct DynamicWidgetView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        ZStack {
             
-            if ( !(!fullyLoaded && size == .systemSmall) ) {
-                content
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            
-            if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
-                Text("Winnipeg Transit API is throtling data requests. Some bus times were not loaded. Please wait a few minutes and try again.")
-                    .foregroundColor(.red)
-                    .font(.caption)
-                    .padding(.horizontal)
-                
-            } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular && !forPreview) {
-                Text("Could Not fetch bus times, please wait...")
-                    .foregroundColor(.red)
-                    .font(.caption)
-                    .padding(.horizontal)
-                
-            } else if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
-                
-                if (size != .accessoryRectangular) {
-                    if (size != .systemMedium || (scheduleData)?.count ?? 0 <= 3) {
-                        Spacer(minLength: 2)
+            if (size != .accessoryRectangular) {
+                Group {
+                    switch currentTheme {
+                    case .classic:
+                        Color.black
+                    case .modern:
+                        Color(.secondarySystemGroupedBackground)
                     }
                 }
+                .ignoresSafeArea()
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
                 
-                if (size != .accessoryRectangular) {
-                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                } else {
-                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                if ( !(!fullyLoaded && size == .systemSmall) ) {
+                    content
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                
+                if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
+                    Text("Winnipeg Transit API is throtling data requests. Some bus times were not loaded. Please wait a few minutes and try again.")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .padding(.horizontal)
+                    
+                } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular && !forPreview) {
+                    Text("Could Not fetch bus times, please wait...")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .padding(.horizontal)
+                    
+                } else if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
+                    
+                    if (size != .accessoryRectangular) {
+                        if (size != .systemMedium || (scheduleData)?.count ?? 0 <= 3) {
+                            Spacer(minLength: 2)
+                        }
+                    }
+                    
+                    if (size != .accessoryRectangular) {
+                        LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    } else {
+                        LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
             }
+            .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
         }
-        .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
     }
     
     @ViewBuilder
@@ -76,9 +99,12 @@ struct DynamicWidgetView: View {
                     let stopNumber = stop["number"] as? Int ?? 0
                     let destinationUrl = createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!
                     Link(destination: destinationUrl ) {
-                        
-                        WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                            .widgetURL(destinationUrl)
+                        if (size == .accessoryRectangular || size == .systemSmall) {
+                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                                .widgetURL(destinationUrl)
+                        } else {
+                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                        }
                     }
                     
                     

@@ -101,11 +101,11 @@ public func getMaxBusRoutePrefixLength() -> Int {
 
 
 public func getMaxBusRouteLengthForWidget() -> Int {
-    return 10
+    return 15
 }
 
 public func getMaxBusRoutePrefixLengthForWidget() -> Int {
-    return 10
+    return 12
 }
 
 
@@ -117,28 +117,28 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
 
     if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
         if (widgetSizeStringFormat == "large") {
-            return 16
-        } else if (widgetSizeStringFormat == "medium") {
-            return 15
-        } else if (widgetSizeStringFormat == "small") {
             return 14
-        } else if (widgetSizeStringFormat == "lockscreen") {
+        } else if (widgetSizeStringFormat == "medium") {
             return 13
-        } else {
+        } else if (widgetSizeStringFormat == "small") {
+            return 12
+        } else if (widgetSizeStringFormat == "lockscreen") {
             return 11
+        } else {
+            return 10
         }
         
     } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
         if (widgetSizeSystemFormat == .systemLarge) {
-            return 16
-        } else if (widgetSizeSystemFormat == .systemMedium) {
-            return 15
-        } else if (widgetSizeSystemFormat == .systemSmall) {
             return 14
-        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
+        } else if (widgetSizeSystemFormat == .systemMedium) {
             return 13
-        } else {
+        } else if (widgetSizeSystemFormat == .systemSmall) {
+            return 12
+        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
             return 11
+        } else {
+            return 10
         }
     } else {
         return 11
@@ -146,32 +146,66 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
     
 }
 
+public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
 
-public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
     if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
         if (widgetSizeStringFormat == "large") {
             return 12
         } else if (widgetSizeStringFormat == "medium") {
-            return 12
+            return 11
         } else if (widgetSizeStringFormat == "small") {
-            return 12
+            return 10
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 12
+            return 9
         } else {
-            return 12
+            return 8
         }
         
     } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
         if (widgetSizeSystemFormat == .systemLarge) {
             return 12
         } else if (widgetSizeSystemFormat == .systemMedium) {
-            return 12
+            return 11
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 12
+            return 10
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 12
+            return 9
         } else {
-            return 12
+            return 8
+        }
+    } else {
+        return 8
+    }
+    
+}
+
+
+
+public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
+    if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
+        if (widgetSizeStringFormat == "large") {
+            return 10
+        } else if (widgetSizeStringFormat == "medium") {
+            return 10
+        } else if (widgetSizeStringFormat == "small") {
+            return 10
+        } else if (widgetSizeStringFormat == "lockscreen") {
+            return 10
+        } else {
+            return 10
+        }
+        
+    } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
+        if (widgetSizeSystemFormat == .systemLarge) {
+            return 10
+        } else if (widgetSizeSystemFormat == .systemMedium) {
+            return 10
+        } else if (widgetSizeSystemFormat == .systemSmall) {
+            return 10
+        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
+            return 10
+        } else {
+            return 10
         }
     } else {
         return 11
@@ -181,7 +215,7 @@ public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
 
 
 public func getStopNameMaxPrefixLengthForWidget() -> Int {
-    return 40
+    return 28
 }
 
 
@@ -468,3 +502,73 @@ public let settingsUserDefaultsKeys = (
     stopViewTheme: "stop_view_theme_preference",
     sharedStopViewTheme: "shared_stop_view_theme"
 )
+
+
+public struct WidgetThemeModifier: ViewModifier {
+    let theme: StopViewTheme
+    let text: String
+    let widgetSize: WidgetFamily
+    
+    public func body(content: Content) -> some View {
+        switch theme {
+        case .modern:
+            content
+                .font(.system(size: getFontSize(), design: .monospaced).bold())
+                .background(Color(.secondarySystemGroupedBackground))
+                .foregroundStyle(.primary)
+                .foregroundStyle(foregroundColor(for: text))
+        case .classic:
+            content
+                .font(.custom("LCDDot", size: getFontSize()))
+                .fontWeight(.black)
+                .background(widgetSize == .accessoryRectangular ? .clear : .black)
+                .foregroundStyle(Color(hex: "#EB8634", brightness: 150, saturation: 150))
+        }
+    }
+    
+    private func getFontSize() -> CGFloat {
+        let baseFontSize = getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+        
+        if text.contains(getLateStatusTextString()) ||
+           text.contains(getEarlyStatusTextString()) ||
+           text.contains(getCancelledStatusTextString()) {
+            return baseFontSize - 2
+        }
+        
+        if text.lowercased().contains("updated") {
+            return getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+        }
+        
+        if text.lowercased().contains("stop") {
+            return getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+        }
+        
+        return baseFontSize
+    }
+    
+    private func foregroundColor(for text: String) -> Color {
+        if text.contains(getLateStatusTextString()) || text.contains(getCancelledStatusTextString()) {
+            return .red
+        } else if text.contains(getEarlyStatusTextString()) {
+            return .blue
+        }
+        return .primary
+    }
+}
+
+public extension View {
+    func widgetTheme(_ theme: StopViewTheme, text: String, size: WidgetFamily) -> some View {
+        modifier(WidgetThemeModifier(theme: theme, text: text, widgetSize: size))
+    }
+}
+
+
+public extension View {
+    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
+    }
+}
