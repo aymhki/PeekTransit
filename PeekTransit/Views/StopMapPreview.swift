@@ -1,4 +1,3 @@
-
 import SwiftUI
 import CoreLocation
 import MapKit
@@ -7,8 +6,10 @@ struct StopMapPreview: View {
     let coordinate: CLLocationCoordinate2D
     let direction: String
     @State private var snapshotImage: UIImage?
+    @State private var snapshotID = UUID()
     
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject private var themeManager: ThemeManager
     
     private func getMarkerImage() -> UIImage? {
         let imageName: String
@@ -39,10 +40,13 @@ struct StopMapPreview: View {
             color = .systemGray
         }
         
-        return UIImage(named: imageName) //?.withTintColor(color, renderingMode: .alwaysTemplate)
+        return UIImage(named: imageName)
     }
     
     private func generateSnapshot() {
+        snapshotImage = nil
+        snapshotID = UUID()
+        
         let options = MKMapSnapshotter.Options()
         options.region = MKCoordinateRegion(
             center: coordinate,
@@ -51,49 +55,75 @@ struct StopMapPreview: View {
         options.size = CGSize(width: 80, height: 80)
         options.showsBuildings = false
         options.pointOfInterestFilter = .excludingAll
+        options.traitCollection = UITraitCollection(userInterfaceStyle: getPreferredStyle())
         
         let snapshotter = MKMapSnapshotter(options: options)
-        snapshotter.start { snapshot, error in
-            guard let snapshot = snapshot,
-                  let markerImage = getMarkerImage() else { return }
-            
-            let markerSize = CGSize(width: 32, height: 32)
-            let renderer = UIGraphicsImageRenderer(size: snapshot.image.size)
-            
-            let finalImage = renderer.image { context in
-                snapshot.image.draw(at: .zero)
+        
+        Task { @MainActor in
+            do {
+                let snapshot: MKMapSnapshotter.Snapshot = try await withCheckedThrowingContinuation { continuation in
+                    snapshotter.start { snapshot, error in
+                        if let error = error {
+                            continuation.resume(throwing: error)
+                            return
+                        }
+                        if let snapshot = snapshot {
+                            continuation.resume(returning: snapshot)
+                        } else {
+                            continuation.resume(throwing: NSError(domain: "MapSnapshot", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to generate snapshot"]))
+                        }
+                    }
+                }
                 
-                let markerPoint = snapshot.point(for: coordinate)
-                let markerRect = CGRect(
-                    x: markerPoint.x - markerSize.width/2,
-                    y: markerPoint.y - markerSize.height/2,
-                    width: markerSize.width,
-                    height: markerSize.height
-                )
+                guard let markerImage = getMarkerImage() else { return }
                 
-                markerImage.draw(in: markerRect)
-                context.cgContext.setBlendMode(.plusLighter)
+                let markerSize = CGSize(width: 32, height: 32)
+                let renderer = UIGraphicsImageRenderer(size: snapshot.image.size)
                 
-                let brightSpotRect = CGRect(
-                    x: markerRect.minX + markerRect.width * 0.35,
-                    y: markerRect.minY + markerRect.height * 0.1,
-                    width: markerRect.width * 0.1,
-                    height: markerRect.height * 0.1
-                )
-                let brightSpotPath = UIBezierPath(ovalIn: brightSpotRect)
-                UIColor.white.withAlphaComponent(0.9).setFill()
-                brightSpotPath.fill()
+                let finalImage = renderer.image { context in
+                    snapshot.image.draw(at: .zero)
+                    
+                    let markerPoint = snapshot.point(for: coordinate)
+                    let markerRect = CGRect(
+                        x: markerPoint.x - markerSize.width/2,
+                        y: markerPoint.y - markerSize.height/2,
+                        width: markerSize.width,
+                        height: markerSize.height
+                    )
+                    
+                    markerImage.draw(in: markerRect)
+                    context.cgContext.setBlendMode(.plusLighter)
+                    
+                    let brightSpotRect = CGRect(
+                        x: markerRect.minX + markerRect.width * 0.35,
+                        y: markerRect.minY + markerRect.height * 0.1,
+                        width: markerRect.width * 0.1,
+                        height: markerRect.height * 0.1
+                    )
+                    let brightSpotPath = UIBezierPath(ovalIn: brightSpotRect)
+                    UIColor.white.withAlphaComponent(0.9).setFill()
+                    brightSpotPath.fill()
+                    
+                    context.cgContext.setShadow(
+                        offset: CGSize(width: 0, height: 1),
+                        blur: 1,
+                        color: UIColor.black.withAlphaComponent(0.3).cgColor
+                    )
+                }
                 
-                context.cgContext.setShadow(
-                    offset: CGSize(width: 0, height: 1),
-                    blur: 1,
-                    color: UIColor.black.withAlphaComponent(0.3).cgColor
-                )
-            }
-            
-            DispatchQueue.main.async {
                 self.snapshotImage = finalImage
+            } catch {
+                print("Failed to generate snapshot: \(error)")
             }
+        }
+    }
+    
+    private func getPreferredStyle() -> UIUserInterfaceStyle {
+        switch themeManager.currentTheme {
+        case .classic:
+            return .dark
+        case .modern:
+            return colorScheme == .dark ? .dark : .light
         }
     }
     
@@ -104,6 +134,7 @@ struct StopMapPreview: View {
                     .resizable()
                     .frame(width: 80, height: 80)
                     .cornerRadius(8)
+                    .id(snapshotID)
             } else {
                 Color.gray.opacity(0.2)
                     .frame(width: 80, height: 80)
@@ -114,7 +145,14 @@ struct StopMapPreview: View {
             }
         }
         .onChange(of: colorScheme) { _ in
-            generateSnapshot()
+            withAnimation {
+                generateSnapshot()
+            }
+        }
+        .onChange(of: themeManager.currentTheme) { _ in
+            withAnimation {
+                generateSnapshot()
+            }
         }
     }
 }

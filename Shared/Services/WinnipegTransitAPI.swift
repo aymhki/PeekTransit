@@ -403,7 +403,7 @@ class TransitAPI {
                                 }
                                 
                                 if cancelled == "true" {
-                                    arrivalState = "Cancelled"
+                                    arrivalState = getCancelledStatusTextString()
                                     finalArrivalText = ""
                                 } else {
                                     if (timeDifference < 0 && timeFormat != TimeFormat.clockTime) {
@@ -430,17 +430,17 @@ class TransitAPI {
                                     }
                                     
                                     if (delay > 0 && timeDifference < 15 && timeFormat != TimeFormat.clockTime) {
-                                        arrivalState = "Late"
+                                        arrivalState = getLateStatusTextString()
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else if delay < 0 && timeDifference < 15 {
-                                        arrivalState = "Early"
+                                        arrivalState = getEarlyStatusTextString()
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else {
-                                        arrivalState = "Ok"
+                                        arrivalState = getOKStatusTextString()
                                     }
                                     
                                     if (timeDifference == 0 || (timeDifference > 1 && timeDifference < -1)) {
-                                        finalArrivalText = "Due"
+                                        finalArrivalText = getDueStatusTextString()
                                     }
                                 }
                             } else {
@@ -472,13 +472,13 @@ class TransitAPI {
             let stateA = componentsA[2]
             let stateB = componentsB[2]
             
-            if timeA == "Due" && timeB != "Due" {
+            if timeA == getDueStatusTextString() && timeB != getDueStatusTextString() {
                 return true
             }
-            if timeB == "Due" && timeA != "Due" {
+            if timeB == getDueStatusTextString() && timeA != getDueStatusTextString() {
                 return false
             }
-            if timeA == "Due" && timeB == "Due" {
+            if timeA == getDueStatusTextString() && timeB == getDueStatusTextString() {
                 return true
             }
             
@@ -490,10 +490,10 @@ class TransitAPI {
                 let minutesB = Int(timeB.components(separatedBy: " ")[0]) ?? 0
                 
                 if stateA != stateB {
-                    if stateA == "Early" { return true }
-                    if stateB == "Early" { return false }
-                    if stateA == "Late" { return true }
-                    if stateB == "Late" { return false }
+                    if stateA == getEarlyStatusTextString() { return true }
+                    if stateB == getEarlyStatusTextString() { return false }
+                    if stateA == getLateStatusTextString() { return true }
+                    if stateB == getLateStatusTextString() { return false }
                 }
                 
                 return minutesA < minutesB

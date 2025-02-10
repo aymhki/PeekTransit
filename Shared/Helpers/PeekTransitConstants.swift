@@ -1,4 +1,8 @@
 import WidgetKit
+import SwiftUI
+import Foundation
+import Combine
+
 
 public func getMaxSopsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> Int {
     
@@ -287,3 +291,180 @@ public func getCompositKeyLinkerForDictionaries() -> String {
 public func getWidgetTextPlaceholder() -> String {
     return "TBD"
 }
+
+
+public func getLateStatusTextString() -> String {
+    return "LATE"
+}
+
+public func getEarlyStatusTextString() -> String {
+    return "EARLY"
+}
+
+public func getCancelledStatusTextString() -> String {
+    return "CANCELLED"
+}
+
+public func getOKStatusTextString() -> String {
+    return "OK"
+}
+
+public func getDueStatusTextString() -> String {
+    return "DUE"
+}
+
+public enum DefaultTab: Int, CaseIterable, Identifiable {
+    case map = 0
+    case stops = 1
+    case saved = 2
+    case widgets = 3
+    case more = 4
+    
+    public var id: Int { self.rawValue }
+    
+    public var name: String {
+        switch self {
+        case .map: return "Map"
+        case .stops: return "Stops"
+        case .saved: return "Saved"
+        case .widgets: return "Widgets"
+        case .more: return "More"
+        }
+    }
+    
+    public var icon: String {
+        switch self {
+        case .map: return "map.fill"
+        case .stops: return "list.bullet"
+        case .saved: return "bookmark.fill"
+        case .widgets: return "note.text"
+        case .more: return "ellipsis.circle.fill"
+        }
+    }
+}
+
+
+
+
+public enum StopViewTheme: String, CaseIterable {
+    case classic = "Classic"
+    case modern = "Simple Modern Mono"
+    
+    
+    public var id: String { self.rawValue }
+    
+    static var `default`: StopViewTheme {
+        return .classic
+    }
+    
+    var description: String {
+        switch self {
+        case .classic:
+            return "Always Dark"
+        case .modern:
+            return "Auto"
+        }
+    }
+    
+    var preferredColorScheme: ColorScheme? {
+        switch self {
+        case .modern:
+            return nil
+        case .classic:
+            return .dark
+        }
+    }
+}
+
+public struct ThemeModifier: ViewModifier {
+    let theme: StopViewTheme
+    let text: String
+    
+    public func body(content: Content) -> some View {
+        switch theme {
+        case .modern:
+            content
+                .font(.system(size: 13, design: .monospaced).bold())
+                .background(Color(.secondarySystemGroupedBackground))
+                .foregroundStyle(.primary)
+                .foregroundStyle(foregroundColor(for: text))
+        case .classic:
+            content
+                .font(.custom("LCDDot", size: 14))
+                .fontWeight(.black)
+                .background(.black)
+                .foregroundStyle(Color(hex: "#EB8634", brightness: 150, saturation: 150))
+                //.shadow(color: Color(hex: "#EB8634", brightness: 2).opacity(0.5), radius: 4)
+        }
+    }
+    
+    private func foregroundColor(for text: String) -> Color {
+        if text.contains(getLateStatusTextString()) || text.contains(getCancelledStatusTextString()) {
+            return .red
+        } else if text.contains(getEarlyStatusTextString()) {
+            return .blue
+        }
+        return .primary
+    }
+}
+
+public extension View {
+    func stopViewTheme(_ theme: StopViewTheme, text: String) -> some View {
+        modifier(ThemeModifier(theme: theme, text: text))
+    }
+}
+
+extension Color {
+    init(hex: String, brightness: Double = 1.0, saturation: Double = 1.0) {
+        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let red = Double((rgb >> 16) & 0xFF) / 255.0
+        let green = Double((rgb >> 8) & 0xFF) / 255.0
+        let blue = Double(rgb & 0xFF) / 255.0
+
+        let uiColor = UIColor(red: CGFloat(red), green: CGFloat(green), blue: CGFloat(blue), alpha: 1.0)
+
+        let adjustedColor = uiColor.adjustBrightness(brightness).adjustSaturation(saturation)
+
+        self.init(uiColor: adjustedColor)
+    }
+}
+
+extension UIColor {
+    func adjustBrightness(_ factor: Double) -> UIColor {
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        if getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha) {
+            brightness = min(brightness * CGFloat(factor), 1.0)
+            return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: alpha)
+        }
+        return self
+    }
+
+    func adjustSaturation(_ factor: Double) -> UIColor {
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        if getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha) {
+            saturation = min(saturation * CGFloat(factor), 1.0)
+            return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: alpha)
+        }
+        return self
+    }
+}
+
+
+public let settingsUserDefaultsKeys = (
+    defaultTab: "default_tab_preference",
+    stopViewTheme: "stop_view_theme_preference",
+    sharedStopViewTheme: "shared_stop_view_theme"
+)

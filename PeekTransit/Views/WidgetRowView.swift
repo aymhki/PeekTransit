@@ -9,7 +9,9 @@ struct WidgetRowView: View {
     let isSelected: Bool
     
     var body: some View {
-        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: widgetData, noConfig: false) ?? ([], [:])
+        let showLastUpdatedStatus = widgetData["showLastUpdatedStatus"] as? Bool ?? true
+        let timeFormatSelected = widgetData["timeFormat"] as? TimeFormat ?? .default
+        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: widgetData, noConfig: false, timeFormat: timeFormatSelected, showLastUpdatedStatus:showLastUpdatedStatus ) ?? ([], [:])
         
         HStack(spacing: 12) {
             if isEditing {

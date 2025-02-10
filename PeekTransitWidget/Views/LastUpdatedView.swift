@@ -4,6 +4,7 @@ import SwiftUI
 struct LastUpdatedView: View {
     let updatedAt: Date
     let size: String
+
     
     var body: some View {
         let fontSizeToUse = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: size)

@@ -8,6 +8,7 @@ struct WidgetStopView: View {
     let stopNamePrefixSize = getStopNameMaxPrefixLengthForWidget()
     let fullyLoaded: Bool
     let forPreview: Bool
+
     
     
     var body: some View {

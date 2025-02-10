@@ -25,7 +25,7 @@ struct BusScheduleRow: View {
                             .bold()
                     
                     } else {
-                        if (components[2] == "Late" || components[2] == "Early" || components[2] == "Cancelled" || components[1].count > 3) {
+                        if (components[2] == getLateStatusTextString() || components[2] == getEarlyStatusTextString() || components[2] == getCancelledStatusTextString() || components[1].count > 3) {
                             
                             Text("\(components[1].prefix(1)).")
                                 .font(.system(size: fontSize - 2, design: .monospaced))
@@ -43,17 +43,17 @@ struct BusScheduleRow: View {
                     Spacer()
                 }
                 
-                if (components[2] == "Late" || components[2] == "Early" ||  components[2] == "Cancelled") {
-                    if ( (size == .systemSmall || size == .accessoryRectangular) &&  components[2] != "Cancelled" ) {
+                if (components[2] == getLateStatusTextString() || components[2] == getEarlyStatusTextString() ||  components[2] == getCancelledStatusTextString()) {
+                    if ( (size == .systemSmall || size == .accessoryRectangular) &&  components[2] != getCancelledStatusTextString() ) {
                         Text("\(components[2].prefix(1)).")
-                            .foregroundColor((components[2] == "Late" || components[2] == "Cancelled")  ? .red : .blue)
+                            .foregroundColor((components[2] == getLateStatusTextString() || components[2] == getCancelledStatusTextString())  ? .red : .blue)
                             .font(.system(size: fontSize - 2, design: .monospaced))
                             .bold()
                         
                         
                     } else {
                         Text(components[2])
-                            .foregroundColor((components[2] == "Late" || components[2] == "Cancelled") ? .red : .blue)
+                            .foregroundColor((components[2] == getLateStatusTextString() || components[2] == getCancelledStatusTextString()) ? .red : .blue)
                             .font(.system(size: fontSize - 2, design: .monospaced))
                             .frame(alignment: .leading)
                             .bold()
@@ -62,7 +62,7 @@ struct BusScheduleRow: View {
                     
                 
                 
-                if (components[2] != "Cancelled") {
+                if (components[2] != getCancelledStatusTextString()) {
                     Text(components[3])
                         .font(.system(size: fontSize - 2, design: .monospaced))
                         .bold()

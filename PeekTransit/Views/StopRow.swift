@@ -6,6 +6,9 @@ struct StopRow: View {
     let variants: [[String: Any]]
     let inSaved: Bool
     @ObservedObject private var savedStopsManager = SavedStopsManager.shared
+    @EnvironmentObject private var themeManager: ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    @State private var forceUpdate = UUID()
     
     private var uniqueVariants: [[String: Any]] {
         var seenKeys = Set<String>()
@@ -21,7 +24,6 @@ struct StopRow: View {
             return true
         }
     }
-
     
     private var coordinate: CLLocationCoordinate2D? {
         guard let centre = stop["centre"] as? [String: Any],
@@ -37,11 +39,12 @@ struct StopRow: View {
         NavigationLink(destination: BusStopView(stop: stop, isDeepLink: false)) {
             HStack(alignment: .top, spacing: 12) {
                 if let coordinate = coordinate {
-                                    StopMapPreview(
-                                        coordinate: coordinate,
-                                        direction: stop["direction"] as? String ?? "Unknown Direction"
-                                    )
-                                }
+                    StopMapPreview(
+                        coordinate: coordinate,
+                        direction: stop["direction"] as? String ?? "Unknown Direction"
+                    )
+                    .id(forceUpdate)
+                }
                 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
@@ -52,9 +55,7 @@ struct StopRow: View {
                         Text("#\(stop["number"] as? Int ?? 0)".replacingOccurrences(of: ",", with: ""))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-                            
                     }
-                    
                     
                     if (!inSaved) {
                         if let distances = stop["distances"] as? [String: Any],
@@ -69,7 +70,6 @@ struct StopRow: View {
                                 }
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
-
                             } else {
                                 Text(String(format: "%.0f meters away", distanceInMeters))
                                     .font(.subheadline)
@@ -94,5 +94,11 @@ struct StopRow: View {
             .padding(.vertical, 8)
         }
         .buttonStyle(PlainButtonStyle())
+        .onChange(of: themeManager.currentTheme) { _ in
+            forceUpdate = UUID()
+        }
+        .onChange(of: colorScheme) { _ in
+            forceUpdate = UUID()
+        }
     }
 }

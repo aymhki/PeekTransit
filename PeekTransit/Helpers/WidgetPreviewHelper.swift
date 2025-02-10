@@ -4,9 +4,10 @@ import SwiftUI
 import WidgetKit
 
 enum PreviewHelper {
-    static func generatePreviewSchedule(from widgetData: [String: Any], noConfig: Bool) -> ([String]?, [String: Any]?)? {
+    static func generatePreviewSchedule(from widgetData: [String: Any], noConfig: Bool, timeFormat: TimeFormat, showLastUpdatedStatus: Bool) -> ([String]?, [String: Any]?)? {
         var previewSchedules: [String] = []
         var updatedWidgetData: [String: Any] = widgetData
+        let timeFormatTextToUse = timeFormat.brief
         
         if (!noConfig) {
             if (widgetData["isClosestStop"] as? Bool == false) {
@@ -18,7 +19,7 @@ enum PreviewHelper {
                             for variant in variants {
                                 if let key = variant["key"] as? String,
                                    let name = variant["name"] as? String {
-                                    previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                                    previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                                 }
                             }
                         }
@@ -33,7 +34,7 @@ enum PreviewHelper {
                                 "name": getWidgetTextPlaceholder()
                             ]
                             selectedVariants.append(variant)
-                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                         }
                         
                         var updatedStop = stop
@@ -62,7 +63,7 @@ enum PreviewHelper {
                             "name": getWidgetTextPlaceholder()
                         ]
                         selectedVariants.append(variant)
-                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                     }
                     
                     let stop: [String: Any] = [
@@ -93,7 +94,7 @@ enum PreviewHelper {
                         "name": getWidgetTextPlaceholder()
                     ]
                     selectedVariants.append(variant)
-                    previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                    previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                 }
                 
                 let stop: [String: Any] = [
@@ -110,6 +111,9 @@ enum PreviewHelper {
             updatedWidgetData["isClosestStop"] = true
             updatedWidgetData["noSelectedVariants"] = false
         }
+        
+        updatedWidgetData["showLastUpdatedStatus"] = showLastUpdatedStatus
+        
         
         return (previewSchedules.isEmpty ? nil : previewSchedules, updatedWidgetData)
     }

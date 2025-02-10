@@ -42,7 +42,7 @@ struct SizeSelectionStep: View {
                             .fill(Color(.secondarySystemGroupedBackground))
                             .shadow(radius: 2)
                         
-                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize], noConfig: true) ?? ([], [:])
+                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus) ?? ([], [:])
 
                         
                         DynamicWidgetView(
@@ -52,6 +52,7 @@ struct SizeSelectionStep: View {
                             updatedAt: Date(),
                             fullyLoaded: true,
                             forPreview: true
+                            
                         )
                         .padding(8)
                         .foregroundColor(Color.primary)

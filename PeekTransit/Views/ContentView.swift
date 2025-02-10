@@ -5,9 +5,11 @@ struct ContentView: View {
     @State private var selection: Int = 0
     @StateObject private var deepLinkHandler = DeepLinkHandler.shared
     @StateObject private var stopsStore = StopsDataStore.shared
+    @StateObject private var themeManager = ThemeManager.shared
     @State private var selectedStop: [String: Any]? = nil
     @State private var isLoading = false
     @State private var error: Error? = nil
+    @AppStorage(settingsUserDefaultsKeys.defaultTab) private var defaultTab: Int = 0
     
     var body: some View {
         TabView(selection: $selection) {
@@ -16,7 +18,7 @@ struct ContentView: View {
                     Label("Map", systemImage: "map.fill")
                 }
                 .tag(0)
-
+            
             ListView()
                 .tabItem {
                     Label("Stops", systemImage: "list.bullet")
@@ -67,9 +69,16 @@ struct ContentView: View {
                 }
             }
         }
+        .environmentObject(themeManager)
+        .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
         .onChange(of: deepLinkHandler.selectedStopNumber) { stopNumber in
             guard let stopNumber = stopNumber else { return }
             loadStop(number: stopNumber)
+        }
+        .onAppear {
+            if selection == 0 {
+                selection = defaultTab
+            }
         }
     }
     

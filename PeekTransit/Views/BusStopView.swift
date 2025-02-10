@@ -13,7 +13,10 @@ struct BusStopView: View {
     @State private var errorFetchingSchedule = false
     @State private var errorText = ""
     @State private var isLiveUpdatesEnabled: Bool = false
+    @State private var currentTheme: StopViewTheme = .default
     let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
+    @EnvironmentObject private var themeManager: ThemeManager
+
     
     private var liveUpdatesKey: String {
         "live_updates_\(stop["number"] as? Int ?? 0)"
@@ -153,58 +156,43 @@ struct BusStopView: View {
                                 GeometryReader { geometry in
                                     let totalWidth = geometry.size.width
                                     let spacing: CGFloat = 0
-                                    let baseWidth = totalWidth * 0.14
 
                                     let columnWidths = [
-                                        
                                         // Route Key
-                                        baseWidth,
+                                        totalWidth * 0.13,
                                         
                                         // Route Name
-                                        (components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled"))  ? totalWidth * 0.38 :
-                                        totalWidth * 0.58,
+                                        totalWidth * 0.44,
                                         
                                         // Arrival Status
-                                        components[2].contains("Cancelled") ? totalWidth * 0.36 :
-                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.20 :
-                                        totalWidth * 0.11,
+                                        components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.36 :
+                                        totalWidth * 0.16,
                                         
                                         // Arrival Time
-                                        components[2].contains("Cancelled") ? totalWidth * 0.0 :
-                                            (components[2].contains("Late") || components[2].contains("Early"))  ? totalWidth * 0.28 :
-                                            totalWidth * 0.3
+                                        components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.0 :
+                                            totalWidth * 0.24
                                     ]
 
                                     HStack(spacing: spacing) {
                                         Text(components[0])
-                                            .font(.system(.subheadline, design: .monospaced).bold())
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[0], alignment: .leading)
 
                                         Text( components[1])
-                                            .font(.system(.subheadline, design: .monospaced).bold())
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[1], alignment: .leading)
 
-                                        if ( components[2].contains("Late") || components[2].contains("Early") || components[2].contains("Cancelled") )  {
+
                                             Text(components[2])
-                                                .font(.system(.headline, design: .monospaced).bold())
                                                 .lineLimit(nil)
                                                 .fixedSize(horizontal: false, vertical: true)
                                                 .frame(width: columnWidths[2], alignment: .trailing)
-                                                .foregroundStyle(
-                                                    components[2].contains("Late") ? .red :
-                                                        components[2].contains("Cancelled") ? .red :
-                                                        components[2].contains("Early") ? .blue :
-                                                            .primary
-                                                )
-                                        }
+                                                .stopViewTheme(themeManager.currentTheme, text: components[2])
 
-                                        if (components.count > 3 && !components[2].contains("Cancelled")) {
+                                        if (components.count > 3 && !components[2].contains(getCancelledStatusTextString())) {
                                             Text(components[3])
-                                                .font(.system(.headline, design: .monospaced).bold())
                                                 .lineLimit(nil)
                                                 .fixedSize(horizontal: false, vertical: true)
                                                 .frame(width: columnWidths[3], alignment: .trailing)
@@ -221,7 +209,7 @@ struct BusStopView: View {
                         Spacer()
                     }
                     .padding(.bottom, 50)
-                    .background(Color(.secondarySystemGroupedBackground))
+                    .stopViewTheme(themeManager.currentTheme, text: "")
                     //.clipShape(RoundedRectangle(cornerRadius: 12))
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
@@ -270,6 +258,11 @@ struct BusStopView: View {
             isLiveUpdatesEnabled = getLiveUpdatePreference()
             Task {
                 await loadSchedules(isManual: false)
+            }
+            
+            if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
+               let theme = StopViewTheme(rawValue: savedTheme) {
+                currentTheme = theme
             }
         }
         .onReceive(timer) { _ in

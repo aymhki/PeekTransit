@@ -6,7 +6,7 @@ import Foundation
 
 struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     var entry: T
-    @Environment(\.widgetFamily) var family
+    @Environment(\.widgetFamily) var family    
     
     private func isWidgetFullyLoaded(widgetData: [String: Any], scheduleData: [String]?) -> Bool {
         let scheduleDataSize = scheduleData?.count ?? 0
@@ -120,6 +120,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     }
     
     var body: some View {
+
         if let widgetData = entry.widgetData {
            let filledScheduleData = getFilledScheduleData(widgetData: widgetData, scheduleData: entry.scheduleData)
                 
@@ -130,12 +131,10 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                 if (family != .accessoryRectangular) {
                     Text("Could not fetch nearby bus stops \(String(format: "(within %.0fm)", getStopsDistanceRadius())), please wait a few minutes or move closer to a bus stop.")
                         .foregroundColor(.red)
-                        .font(.system(.caption))
                         .padding(.horizontal)
                 } else {
                     Text("Could not nearby fetch stops \(String(format: "(%.0fm)", getStopsDistanceRadius())), please wait...")
                         .foregroundColor(.red)
-                        .font(.system(.caption))
                         .padding(.horizontal)
                 }
                     
@@ -149,6 +148,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     fullyLoaded: true,
                     forPreview: false
                 )
+
             } else {
                 DynamicWidgetView(
                     widgetData: widgetData,
@@ -158,11 +158,11 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     fullyLoaded: false,
                     forPreview: false
                 )
+
             }
         } else {
             Text("Select the widget configuration to start")
                 .foregroundColor(.blue)
-                .font(.system(.caption))
                 .padding(.horizontal)
         }
     }

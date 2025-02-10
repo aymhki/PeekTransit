@@ -9,9 +9,18 @@ enum TimeFormat: String, CaseIterable {
     var description: String {
         switch self {
         case .minutesRemaining:
-            return "X(X) Minutes remaining when the bus is within 15 minutes with Late (L.) and Early (E.) prefix"
+            return "X(X) Minutes remaining when the bus is within 15 minutes with \(getLateStatusTextString()) (L.) and \(getEarlyStatusTextString()) (E.) prefix"
         case .clockTime:
-            return "Always clock Time (HH:MM AM/PM) without Late (L.) and Early (E.) prefix"
+            return "Always clock Time (HH:MM AM/PM) without \(getLateStatusTextString()) (L.) and \(getEarlyStatusTextString()) (E.) prefix"
+        }
+    }
+    
+    var brief: String {
+        switch self {
+        case .minutesRemaining:
+            return "X(X) min."
+        case .clockTime:
+            return "HH:MM AM/PM"
         }
     }
 }

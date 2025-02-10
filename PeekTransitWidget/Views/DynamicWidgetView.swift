@@ -9,6 +9,7 @@ struct DynamicWidgetView: View {
     let updatedAt: Date
     let fullyLoaded: Bool
     let forPreview: Bool
+
     
     private func createStopURL(stopNumber: Int) -> URL? {
         var components = URLComponents()

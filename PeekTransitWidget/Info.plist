@@ -35,5 +35,15 @@
         
         <key>CFBundleDisplayName</key>
         <string>Peek Transit</string>
+        
+        <key>UIAppFonts</key>
+        <array>
+            <string>Doto-VariableFont_ROND,wght.ttf</string>
+            <string>Doto-Black.ttf</string>
+            <string>Doto-SemiBold.ttf</string>
+            <string>Doto-ExtraBold.ttf</string>
+            <string>Doto_Rounded-Black.ttf</string>
+            <string>LCDDot.ttf</string>
+        </array>
 </dict>
 </plist>

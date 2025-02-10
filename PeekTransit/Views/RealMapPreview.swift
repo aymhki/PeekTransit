@@ -55,15 +55,15 @@ struct RealMapPreview: UIViewRepresentable {
             let markerImage: UIImage?
             switch parent.direction.lowercased() {
             case "southbound":
-                markerImage = UIImage(named: "GreenBall")?.withTintColor(.systemGreen, renderingMode: .alwaysTemplate)
+                markerImage = UIImage(named: "GreenBall")//?.withTintColor(.systemGreen, renderingMode: .alwaysTemplate)
             case "northbound":
-                markerImage = UIImage(named: "OrangeBall")?.withTintColor(.systemOrange, renderingMode: .alwaysTemplate)
+                markerImage = UIImage(named: "OrangeBall")//?.withTintColor(.systemOrange, renderingMode: .alwaysTemplate)
             case "eastbound":
-                markerImage = UIImage(named: "PinkBall")?.withTintColor(.systemRed, renderingMode: .alwaysTemplate)
+                markerImage = UIImage(named: "PinkBall")//?.withTintColor(.systemRed, renderingMode: .alwaysTemplate)
             case "westbound":
-                markerImage = UIImage(named: "BlueBall")?.withTintColor(.systemBlue, renderingMode: .alwaysTemplate)
+                markerImage = UIImage(named: "BlueBall")//?.withTintColor(.systemBlue, renderingMode: .alwaysTemplate)
             default:
-                markerImage = UIImage(named: "DefaultBall")?.withTintColor(.systemGray, renderingMode: .alwaysTemplate)
+                markerImage = UIImage(named: "DefaultBall")//?.withTintColor(.systemGray, renderingMode: .alwaysTemplate)
             }
 
             if let image = markerImage {
