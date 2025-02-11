@@ -1,0 +1,27 @@
+Terms of Use & Privacy Policy
+
+Peek Transit is a third-party application that utilizes the Winnipeg Transit API to provide bus stop information, schedules, and transit widgets. This app is not affiliated with or endorsed by Winnipeg Transit or The City of Winnipeg.
+
+
+Data Usage & Attribution
+
+All transit data is provided by permission of Winnipeg Transit, a department of The City of Winnipeg. The data is licensed under the Public Domain Dedication and License (PDDL).
+
+
+Privacy Policy
+
+
+• We do not collect or store any personal information\n• Your favorite routes and stops are stored locally on your device\n• No analytics or tracking services are implemented\n• No data is shared with third parties.
+
+
+Disclaimer
+
+
+This application is provided 'as is' without warranty of any kind. While we strive to provide accurate and timely information, we cannot guarantee the accuracy of the data as it is directly sourced from Winnipeg Transit's API.
+
+
+
+Contact
+
+
+For any questions or concerns regarding this application, please contact the developer through the About section.
