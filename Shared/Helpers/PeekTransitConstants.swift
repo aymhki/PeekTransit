@@ -531,6 +531,8 @@ public struct WidgetThemeModifier: ViewModifier {
         
         if theme == .classic {
             baseFontSize = baseFontSize - 4
+        } else {
+            baseFontSize = baseFontSize - 2
         }
         
         if text.contains(getLateStatusTextString()) ||
@@ -542,9 +544,9 @@ public struct WidgetThemeModifier: ViewModifier {
         if text.lowercased().contains("updated") {
             baseFontSize = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
             
-            if (theme == .classic) {
-                baseFontSize = baseFontSize - 2
-            }
+           
+            baseFontSize = baseFontSize - 2
+            
         }
         
         if text.lowercased().contains("stop") {
@@ -552,6 +554,8 @@ public struct WidgetThemeModifier: ViewModifier {
             
             if (theme == .classic) {
                 baseFontSize = baseFontSize - 4
+            } else {
+                baseFontSize = baseFontSize - 2
             }
         }
         
@@ -634,8 +638,8 @@ public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
 
 public func getRouteNameWidth(size: WidgetFamily) -> CGFloat {
     switch size {
-    case .systemLarge: return 130
-    case .systemMedium: return 130
+    case .systemLarge: return 110
+    case .systemMedium: return 110
     case .systemSmall: return 70
     case .accessoryRectangular: return 60
     default: return 70

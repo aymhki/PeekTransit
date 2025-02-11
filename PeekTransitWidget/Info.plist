@@ -25,13 +25,6 @@
             <string>The widget needs your location to show nearby transit stops</string>
         <key>NSLocationWhenInUseUsageDescription</key>
             <string>The widget needs your location to show nearby transit stops</string>
-
-
-        <key>UIBackgroundModes</key>
-        <array>
-            <string>fetch</string>
-            <string>location</string>
-        </array>
         
         <key>CFBundleDisplayName</key>
         <string>Peek Transit</string>

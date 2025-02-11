@@ -70,10 +70,10 @@ struct WidgetStopView: View {
                                 .padding(.horizontal, 2)
                         } else if (size == .systemLarge) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                                .padding(.horizontal, 8)
+                                .padding(.horizontal, 2)
                         } else if (size == .systemMedium) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                                .padding(.horizontal, 8)
+                                .padding(.horizontal, 2)
                                 .padding(.bottom, variantIndex < variants.prefix(maxSchedules).count  - 1 ? 3 : 0)
                         } else if (size == .accessoryRectangular) {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)

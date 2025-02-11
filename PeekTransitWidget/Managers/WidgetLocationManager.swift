@@ -14,11 +14,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         locationManager = CLLocationManager()
         locationManager?.delegate = self
         locationManager?.desiredAccuracy = kCLLocationAccuracyHundredMeters
-        locationManager?.allowsBackgroundLocationUpdates = true
     }
     
     func getCurrentLocation() async -> CLLocation? {
         return await withCheckedContinuation { continuation in
+            
+            locationManager?.requestLocation()
+            
             if let location = locationManager?.location {
                 continuation.resume(returning: location)
             } else {

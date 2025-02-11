@@ -8,6 +8,12 @@
 	</array>
 	<key>CFBundleGetInfoString</key>
 	<string></string>
+	<key>CFBundleURLName</key>
+	<string>com.aymanhki.PeekTransit</string>
+	<key>CFBundleURLSchemes</key>
+	<array>
+		<string>peektransit</string>
+	</array>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>ConfigurationLargeIntent</string>
@@ -15,32 +21,24 @@
 		<string>ConfigurationMediumIntent</string>
 		<string>ConfigurationSmallIntent</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Doto-VariableFont_ROND,wght.ttf</string>
+		<string>Doto-Black.ttf</string>
+		<string>Doto-SemiBold.ttf</string>
+		<string>Doto-ExtraBold.ttf</string>
+		<string>Doto_Rounded-Black.ttf</string>
+		<string>LCDDot.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>location</string>
 	</array>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>The app needs your location fetch nearby bus stops and bus times</string>
-    <key>CFBundleDisplayName</key>
-    <string>Peek Transit</string>
-    
-    <key>CFBundleURLSchemes</key>
-    <array>
-        <string>peektransit</string>
-    </array>
-    
-    <key>CFBundleURLName</key>
-    <string>com.aymanhki.PeekTransit</string>
-    
-    <key>UIAppFonts</key>
-    <array>
-        <string>Doto-VariableFont_ROND,wght.ttf</string>
-        <string>Doto-Black.ttf</string>
-        <string>Doto-SemiBold.ttf</string>
-        <string>Doto-ExtraBold.ttf</string>
-        <string>Doto_Rounded-Black.ttf</string>
-        <string>LCDDot.ttf</string>
-    </array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIImageName</key>
+		<string>Launch Screen</string>
+	</dict>
 </dict>
 </plist>
