@@ -469,8 +469,6 @@ class TransitAPI {
             
             let timeA = componentsA[3]
             let timeB = componentsB[3]
-            let stateA = componentsA[2]
-            let stateB = componentsB[2]
             
             if timeA == getDueStatusTextString() && timeB != getDueStatusTextString() {
                 return true
@@ -489,14 +487,21 @@ class TransitAPI {
                 let minutesA = Int(timeA.components(separatedBy: " ")[0]) ?? 0
                 let minutesB = Int(timeB.components(separatedBy: " ")[0]) ?? 0
                 
-                if stateA != stateB {
-                    if stateA == getEarlyStatusTextString() { return true }
-                    if stateB == getEarlyStatusTextString() { return false }
-                    if stateA == getLateStatusTextString() { return true }
-                    if stateB == getLateStatusTextString() { return false }
+                if minutesA != minutesB {
+                    return minutesA < minutesB
                 }
                 
-                return minutesA < minutesB
+                let stateA = componentsA[2]
+                let stateB = componentsB[2]
+                
+                if stateA != stateB {
+                    if stateA == getOKStatusTextString() { return true }
+                    if stateB == getOKStatusTextString() { return false }
+                    if stateA == getEarlyStatusTextString() { return true }
+                    if stateB == getEarlyStatusTextString() { return false }
+                }
+                
+                return true
             }
             
             if isMinutesA { return true }

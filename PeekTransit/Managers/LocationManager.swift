@@ -3,24 +3,21 @@ import WidgetKit
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     let manager: CLLocationManager
-    private let minimumDistanceThreshold: CLLocationDistance = 50
+    private let minimumDistanceThreshold: CLLocationDistance = (getStopsDistanceRadius() / 4)
     
     @Published var location: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus?
     private var lastRefreshLocation: CLLocation?
     
-    override init() {
+    override init() { 
         manager = CLLocationManager()
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
         manager.startUpdatingLocation()
-        
     }
     
     func shouldRefresh(for newLocation: CLLocation) -> Bool {
-        
-        
         guard let lastRefresh = lastRefreshLocation else {
             lastRefreshLocation = newLocation
             return true
@@ -38,11 +35,11 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func requestLocation() {
         let status = manager.authorizationStatus
-            if status == .notDetermined {
-                manager.requestWhenInUseAuthorization()
-            } else if status == .authorizedWhenInUse || status == .authorizedAlways {
-                manager.requestLocation()
-            }
+        if status == .notDetermined {
+            manager.requestWhenInUseAuthorization()
+        } else if status == .authorizedWhenInUse || status == .authorizedAlways {
+            manager.requestLocation()
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

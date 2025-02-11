@@ -15,6 +15,7 @@ struct VariantBadge: View {
         HStack(spacing: 4) {
             Text(variantNumber)
                 .fontWeight(.bold)
+                .font(.caption)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)

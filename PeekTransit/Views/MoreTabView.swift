@@ -26,33 +26,34 @@ struct MoreTabView: View {
                         
                         Picker("", selection: $defaultTab) {
                             ForEach(DefaultTab.allCases) { tab in
-                                Label(tab.name, systemImage: tab.icon)
-                                    .tag(tab.rawValue)
+                                HStack(spacing: 12) {
+                                    Image(systemName: tab.icon)
+                                        .imageScale(.small)
+                                        .padding(.trailing, 10)
+                                    Text(tab.name)
+                                }
+                                .tag(tab.rawValue)
+                            
                             }
                         }
                         .pickerStyle(.menu)
+                        .font(.caption)
+                        .scaleEffect(0.9)
                     }
                 }
                 
                 Section("Legal") {
                     
-                    NavigationLink(destination: Text("Terms of Service")) {
+                    NavigationLink(destination: TermsAndPrivacyView()) {
                         SettingsRow(
                             icon: "doc.on.doc.fill",
                             iconColor: .blue,
-                            text: "Terms of Service"
+                            text: "Terms of Service & Privacy"
                         )
                     }
+
                     
-                    NavigationLink(destination: Text("Privacy")) {
-                        SettingsRow(
-                            icon: "doc.on.doc.fill",
-                            iconColor: .blue,
-                            text: "Terms of Service"
-                        )
-                    }
-                    
-                    NavigationLink(destination: Text("Credits")) {
+                    NavigationLink(destination: CreditsView()) {
                         SettingsRow(
                             icon: "person.2.fill",
                             iconColor: .indigo,
@@ -62,7 +63,7 @@ struct MoreTabView: View {
                 }
                 
                 Section("Info") {
-                    NavigationLink(destination: Text("Author")) {
+                    NavigationLink(destination: AboutView()) {
                         SettingsRow(
                             icon: "person.fill",
                             iconColor: .red,
@@ -72,26 +73,6 @@ struct MoreTabView: View {
                 }
             }
             .navigationTitle("More")
-        }
-    }
-}
-
-struct SettingsRow: View {
-    let icon: String
-    let iconColor: Color
-    let text: String
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(.white)
-                .frame(width: 28, height: 28)
-                .background(iconColor)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-            
-            Text(text)
-                .font(.system(.body))
         }
     }
 }

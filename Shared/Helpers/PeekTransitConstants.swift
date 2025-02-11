@@ -2,6 +2,7 @@ import WidgetKit
 import SwiftUI
 import Foundation
 import Combine
+import CoreLocation
 
 
 public func getMaxSopsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> Int {
@@ -154,9 +155,9 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeStringFormat == "medium") {
             return 11
         } else if (widgetSizeStringFormat == "small") {
-            return 10
+            return 11
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 9
+            return 11
         } else {
             return 8
         }
@@ -167,9 +168,9 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return 11
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 10
+            return 11
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 9
+            return 11
         } else {
             return 8
         }
@@ -192,7 +193,7 @@ public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeStringFormat == "lockscreen") {
             return 10
         } else {
-            return 10
+            return 8
         }
         
     } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
@@ -205,10 +206,10 @@ public func getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
             return 10
         } else {
-            return 10
+            return 8
         }
     } else {
-        return 11
+        return 8
     }
     
 }
@@ -381,14 +382,13 @@ public enum DefaultTab: Int, CaseIterable, Identifiable {
 
 
 public enum StopViewTheme: String, CaseIterable {
+    case modern = "Modern"
     case classic = "Classic"
-    case modern = "Simple Modern Mono"
-    
     
     public var id: String { self.rawValue }
     
     static var `default`: StopViewTheme {
-        return .classic
+        return .modern
     }
     
     var description: String {
@@ -418,13 +418,13 @@ public struct ThemeModifier: ViewModifier {
         switch theme {
         case .modern:
             content
-                .font(.system(size: 13, design: .monospaced).bold())
+                .font(.system(size: 14, design: .monospaced).bold())
                 .background(Color(.secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))
         case .classic:
             content
-                .font(.custom("LCDDot", size: 14))
+                .font(.custom("LCDDot", size: 10)).bold()
                 .fontWeight(.black)
                 .background(.black)
                 .foregroundStyle(Color(hex: "#EB8634", brightness: 150, saturation: 150))
@@ -514,12 +514,12 @@ public struct WidgetThemeModifier: ViewModifier {
         case .modern:
             content
                 .font(.system(size: getFontSize(), design: .monospaced).bold())
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Color(widgetSize == .accessoryRectangular ? .clear : .secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))
         case .classic:
             content
-                .font(.custom("LCDDot", size: getFontSize()))
+                .font(.custom("LCDDot", size: getFontSize())).bold()
                 .fontWeight(.black)
                 .background(widgetSize == .accessoryRectangular ? .clear : .black)
                 .foregroundStyle(Color(hex: "#EB8634", brightness: 150, saturation: 150))
@@ -527,7 +527,11 @@ public struct WidgetThemeModifier: ViewModifier {
     }
     
     private func getFontSize() -> CGFloat {
-        let baseFontSize = getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+        var baseFontSize = getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+        
+        if theme == .classic {
+            baseFontSize = baseFontSize - 4
+        }
         
         if text.contains(getLateStatusTextString()) ||
            text.contains(getEarlyStatusTextString()) ||
@@ -536,12 +540,22 @@ public struct WidgetThemeModifier: ViewModifier {
         }
         
         if text.lowercased().contains("updated") {
-            return getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+            baseFontSize = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+            
+            if (theme == .classic) {
+                baseFontSize = baseFontSize - 2
+            }
         }
         
         if text.lowercased().contains("stop") {
-            return getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+            baseFontSize = getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+            
+            if (theme == .classic) {
+                baseFontSize = baseFontSize - 4
+            }
         }
+        
+
         
         return baseFontSize
     }
@@ -571,4 +585,65 @@ public extension View {
             self
         }
     }
+}
+
+struct ConditionalRefreshable: ViewModifier {
+    let isEnabled: Bool
+    let action: () async -> Void
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.refreshable {
+                await action()
+            }
+        } else {
+            content
+        }
+    }
+}
+
+
+extension CLLocationCoordinate2D: Identifiable {
+    public var id: String {
+        "\(latitude)\(getCompositKeyLinkerForDictionaries())\(longitude)"
+    }
+}
+
+
+extension Bundle {
+    var iconFileName: String? {
+        guard let icons = infoDictionary?["CFBundleIcons"] as? [String: Any],
+              let primaryIcon = icons["CFBundlePrimaryIcon"] as? [String: Any],
+              let iconFiles = primaryIcon["CFBundleIconFiles"] as? [String],
+              let iconFileName = iconFiles.last
+        else { return nil }
+        return iconFileName
+    }
+}
+
+
+public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
+    switch size {
+    case .systemLarge: return 40
+    case .systemMedium: return 35
+    case .systemSmall: return 30
+    case .accessoryRectangular: return 25
+    default: return 30
+    }
+}
+
+public func getRouteNameWidth(size: WidgetFamily) -> CGFloat {
+    switch size {
+    case .systemLarge: return 100
+    case .systemMedium: return 100
+    case .systemSmall: return 70
+    case .accessoryRectangular: return 60
+    default: return 70
+    }
+}
+
+public func shouldShowShortRouteName(_ status: String) -> Bool {
+    return status == getLateStatusTextString() ||
+           status == getEarlyStatusTextString() ||
+           status == getCancelledStatusTextString()
 }

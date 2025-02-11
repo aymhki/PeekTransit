@@ -189,7 +189,7 @@ struct VariantSelectionStep: View {
                                 if noSelectedVariants {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.white)
-                                    Text("Upcoming buses option selected. Click again to go back to variant selection or click next to proceed")
+                                    Text("Upcoming buses option selected. Click again to go back to variant selection or click continue to proceed")
                                         .foregroundColor(.white)
                                 } else {
                                     Image(systemName: "clock.fill")
@@ -198,7 +198,9 @@ struct VariantSelectionStep: View {
                                         .foregroundColor(.white)
                                 }
                             }
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                            .font(.caption2)
                             .padding()
                             .background(noSelectedVariants ? Color.red : Color.blue)
                             .cornerRadius(10)

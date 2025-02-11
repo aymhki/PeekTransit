@@ -21,7 +21,7 @@ struct BusScheduleRow: View {
             HStack(spacing: 4) {
                 Text(components[0])
                     .widgetTheme(currentTheme, text: components[0], size: size)
-                    .frame(width: getRouteNumberWidth(), alignment: .leading)
+                    .frame(width: getRouteNumberWidth(size: size), alignment: .leading)
                 
                 if !components[1].isEmpty {
                     if (size != .systemSmall && size != .accessoryRectangular) {
@@ -29,7 +29,7 @@ struct BusScheduleRow: View {
                         Text(routeName.count > getMaxBusRouteLengthForWidget() ?
                              routeName.prefix(getMaxBusRoutePrefixLengthForWidget()) + "..." : routeName)
                         .widgetTheme(currentTheme, text: components[1], size: size)
-                        .frame(width: getRouteNameWidth(), alignment: .leading)
+                        .frame(width: getRouteNameWidth(size: size), alignment: .leading)
                     } else {
                         Text("\(components[1].prefix(1)).")
                             .widgetTheme(currentTheme, text: components[1], size: size)
@@ -68,29 +68,5 @@ struct BusScheduleRow: View {
     }
     
     
-    private func getRouteNumberWidth() -> CGFloat {
-        switch size {
-        case .systemLarge: return 40
-        case .systemMedium: return 35
-        case .systemSmall: return 30
-        case .accessoryRectangular: return 25
-        default: return 30
-        }
-    }
-    
-    private func getRouteNameWidth() -> CGFloat {
-        switch size {
-        case .systemLarge: return 100
-        case .systemMedium: return 100
-        case .systemSmall: return 70
-        case .accessoryRectangular: return 60
-        default: return 70
-        }
-    }
-    
-    private func shouldShowShortRouteName(_ status: String) -> Bool {
-        return status == getLateStatusTextString() ||
-               status == getEarlyStatusTextString() ||
-               status == getCancelledStatusTextString()
-    }
+
 }

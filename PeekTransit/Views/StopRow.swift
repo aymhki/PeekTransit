@@ -36,69 +36,86 @@ struct StopRow: View {
     }
     
     var body: some View {
-        NavigationLink(destination: BusStopView(stop: stop, isDeepLink: false)) {
-            HStack(alignment: .top, spacing: 12) {
-                if let coordinate = coordinate {
-                    StopMapPreview(
-                        coordinate: coordinate,
-                        direction: stop["direction"] as? String ?? "Unknown Direction"
-                    )
-                    .id(forceUpdate)
+        if !inSaved {
+            NavigationLink(destination: BusStopView(stop: stop, isDeepLink: false)) {
+                stopRowBody()
+            }
+            .buttonStyle(PlainButtonStyle())
+            .onChange(of: themeManager.currentTheme) { _ in
+                forceUpdate = UUID()
+            }
+            .onChange(of: colorScheme) { _ in
+                forceUpdate = UUID()
+            }
+        } else {
+            stopRowBody()
+            .buttonStyle(PlainButtonStyle())
+            .onChange(of: themeManager.currentTheme) { _ in
+                forceUpdate = UUID()
+            }
+            .onChange(of: colorScheme) { _ in
+                forceUpdate = UUID()
+            }
+        }
+    }
+    
+    
+    @ViewBuilder
+    private func stopRowBody() -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            if let coordinate = coordinate {
+                StopMapPreview(
+                    coordinate: coordinate,
+                    direction: stop["direction"] as? String ?? "Unknown Direction"
+                )
+                .id(forceUpdate)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(stop["name"] as? String ?? "Unknown Stop")
+                        .font(.subheadline)
+                        .lineLimit(nil)
+                    Spacer()
+                    Text("#\(stop["number"] as? Int ?? 0)".replacingOccurrences(of: ",", with: ""))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text(stop["name"] as? String ?? "Unknown Stop")
-                            .font(.headline)
-                            .lineLimit(nil)
-                        Spacer()
-                        Text("#\(stop["number"] as? Int ?? 0)".replacingOccurrences(of: ",", with: ""))
+                if (!inSaved) {
+                    if let distances = stop["distances"] as? [String: Any],
+                       let currentDistance = distances.first,
+                       let currentDistandValueString = currentDistance.value as? String,
+                       let distanceInMeters = Double(currentDistandValueString) {
+                        
+                        if (savedStopsManager.isStopSaved(stop)) {
+                            HStack {
+                                Text(String(format: "%.0f meters away", distanceInMeters))
+                                Image(systemName: "bookmark.fill")
+                            }
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-                    }
-                    
-                    if (!inSaved) {
-                        if let distances = stop["distances"] as? [String: Any],
-                           let currentDistance = distances.first,
-                           let currentDistandValueString = currentDistance.value as? String,
-                           let distanceInMeters = Double(currentDistandValueString) {
-                            
-                            if (savedStopsManager.isStopSaved(stop)) {
-                                HStack {
-                                    Text(String(format: "%.0f meters away", distanceInMeters))
-                                    Image(systemName: "bookmark.fill")
-                                }
+                        } else {
+                            Text(String(format: "%.0f meters away", distanceInMeters))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
-                            } else {
-                                Text(String(format: "%.0f meters away", distanceInMeters))
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
                         }
-                    }
-                    
-                    ScrollView {
-                        FlowLayout(spacing: 8) {
-                            ForEach(uniqueVariants.indices, id: \.self) { index in
-                                if let route = uniqueVariants[index]["route"] as? [String: Any],
-                                   let variant = uniqueVariants[index]["variant"] as? [String: Any] {
-                                    VariantBadge(route: route, variant: variant)
-                                }
-                            }
-                        }
-                        .padding(.top)
                     }
                 }
+                
+                ScrollView {
+                    FlowLayout(spacing: 8) {
+                        ForEach(uniqueVariants.indices, id: \.self) { index in
+                            if let route = uniqueVariants[index]["route"] as? [String: Any],
+                               let variant = uniqueVariants[index]["variant"] as? [String: Any] {
+                                VariantBadge(route: route, variant: variant)
+                            }
+                        }
+                    }
+                    .padding(.top)
+                }
             }
-            .padding(.vertical, 8)
         }
-        .buttonStyle(PlainButtonStyle())
-        .onChange(of: themeManager.currentTheme) { _ in
-            forceUpdate = UUID()
-        }
-        .onChange(of: colorScheme) { _ in
-            forceUpdate = UUID()
-        }
+        .padding(.vertical, 8)
     }
 }

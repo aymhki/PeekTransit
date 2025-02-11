@@ -14,6 +14,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         locationManager = CLLocationManager()
         locationManager?.delegate = self
         locationManager?.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        locationManager?.allowsBackgroundLocationUpdates = true
     }
     
     func getCurrentLocation() async -> CLLocation? {

@@ -45,7 +45,12 @@ struct SavedStopsView: View {
                 } else {
                     List {
                         ForEach(filteredStops) { savedStop in
-                            SavedStopRowView(savedStop: savedStop, savedStopsManager: savedStopsManager)
+                            NavigationLink(destination: BusStopView(stop: savedStop.stopData, isDeepLink: false)) {
+                                SavedStopRowView(savedStop: savedStop)
+                            }
+                        }
+                        .onDelete { indexSet in
+                            savedStopsManager.removeStop(at: indexSet)
                         }
                     }
                     .searchable(text: $searchText, prompt: "Search saved stops...")
@@ -56,8 +61,8 @@ struct SavedStopsView: View {
             }
             .navigationTitle("Saved Stops")
         }
+        .onAppear {
+            savedStopsManager.loadSavedStops()
+        }
     }
-} 
-
-
-
+}

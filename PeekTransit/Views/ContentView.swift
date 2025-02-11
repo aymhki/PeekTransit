@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct ContentView: View {
     @State private var selection: Int = 0
@@ -51,7 +52,7 @@ struct ContentView: View {
                             Button(action: {
                                 deepLinkHandler.isShowingBusStop = false
                             }) {
-                                Text("Close")
+                                Text("Done")
                             }
                         )
                 } else if isLoading {
@@ -68,6 +69,9 @@ struct ContentView: View {
                     .padding()
                 }
             }
+            
+            
+        
         }
         .environmentObject(themeManager)
         .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
@@ -79,6 +83,8 @@ struct ContentView: View {
             if selection == 0 {
                 selection = defaultTab
             }
+            
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
     
@@ -97,6 +103,7 @@ struct ContentView: View {
                 self.error = error
             }
             isLoading = false
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 }

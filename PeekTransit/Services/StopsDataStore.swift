@@ -31,7 +31,7 @@ class StopsDataStore: ObservableObject {
         
         do {
             isProcessing = true
-            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation, forShort: false)
+            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation, forShort: true)
             
             for batch in stride(from: 0, to: nearbyStops.count, by: batchSize) {
                 let endIndex = min(batch + batchSize, nearbyStops.count)
@@ -89,7 +89,7 @@ class StopsDataStore: ObservableObject {
             guard !Task.isCancelled else { return }
             
             do {
-                let searchedStops = try await TransitAPI.shared.searchStops(query: query, forShort: false)
+                let searchedStops = try await TransitAPI.shared.searchStops(query: query, forShort: true)
                 
                 var enrichedSearchResults: [[String: Any]] = []
                 

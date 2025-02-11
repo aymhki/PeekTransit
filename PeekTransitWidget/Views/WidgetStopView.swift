@@ -32,13 +32,16 @@ struct WidgetStopView: View {
                 if (size == .systemSmall) {
                     Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
                         .widgetTheme(currentTheme, text: "stop", size: size)
+                        .padding(.top, 2)
                 } else if (size == .systemLarge) {
                     Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
                         .widgetTheme(currentTheme, text: "stop", size: size)
+                        .padding(.top, 2)
                 } else {
                     Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
                         .widgetTheme(currentTheme, text: "stop", size: size)
                         .padding(.bottom, 1)
+                        .padding(.top, 8)
                 }
                 
                 if ((size == .systemLarge || size == .systemSmall || (scheduleData)?.count ?? 0 < 3 ) && fullyLoaded) {
@@ -78,7 +81,7 @@ struct WidgetStopView: View {
                             BusScheduleRow(schedule: matchingSchedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                         }
                         
-                        if ( ( (size == .systemLarge || size == .systemSmall || ( (scheduleData)?.count ?? 0 <= 3 ) ) && size != .accessoryRectangular ) && fullyLoaded) {
+                        if ( ( (size == .systemLarge || size == .systemSmall || ( (scheduleData)?.count ?? 0 < 3 ) ) && size != .accessoryRectangular ) && fullyLoaded) {
                             Spacer()
                         }
                     }
@@ -88,20 +91,6 @@ struct WidgetStopView: View {
         .if(currentTheme == .classic && size != .accessoryRectangular) { view in
             view.background(.black)
         }
-    }
-    
-    private func getUniqueMatchesCount(_ scheduleData: [String]?) -> Int {
-        guard let scheduleData = scheduleData else { return 0 }
-        var uniqueMatches: Set<String> = []
-        
-        for schedule in scheduleData {
-            let components = schedule.components(separatedBy: getScheduleStringSeparator())
-            if components.count >= 2 {
-                let compositeKey = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
-                uniqueMatches.insert(compositeKey)
-            }
-        }
-        return uniqueMatches.count
     }
 
 }

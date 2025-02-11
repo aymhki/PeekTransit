@@ -42,7 +42,9 @@ struct DynamicWidgetView: View {
                     }
                 }
                 .ignoresSafeArea()
-            }
+                
+            } 
+            
             
             VStack(alignment: .leading, spacing: 4) {
                 

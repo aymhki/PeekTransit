@@ -6,7 +6,7 @@ struct BusStopView: View {
     let stop: [String: Any]
     let isDeepLink: Bool
     @StateObject private var savedStopsManager = SavedStopsManager.shared
-    @State private var isSaved: Bool = false
+
     @State private var schedules: [String] = []
     @State private var isLoading = true
     @State private var isManualRefresh = false
@@ -16,6 +16,10 @@ struct BusStopView: View {
     @State private var currentTheme: StopViewTheme = .default
     let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
     @EnvironmentObject private var themeManager: ThemeManager
+    
+    private var isSaved: Bool {
+        savedStopsManager.isStopSaved(stop)
+    }
 
     
     private var liveUpdatesKey: String {
@@ -112,12 +116,12 @@ struct BusStopView: View {
                 if isLoading && isManualRefresh {
                     VStack(spacing: 16) {
                         ProgressView()
-                            .scaleEffect(1.5)
                         Text("Loading schedules...")
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 32)
+                    .padding([.vertical, .horizontal])
+                    .font(.caption)
                     
                 } else if errorFetchingSchedule {
                     VStack(spacing: 16) {
@@ -129,12 +133,12 @@ struct BusStopView: View {
                             .foregroundStyle(.secondary)
                     }
                     .padding()
+                    .padding([.vertical, .horizontal])
                     
                     
                     
                     
-                    
-                } else if (schedules.isEmpty && !(isLoading || isManualRefresh)) {
+                } else if (schedules.isEmpty) {
                     VStack(spacing: 16) {
                         Image(systemName: "bus.fill")
                             .font(.system(size: 48))
@@ -144,7 +148,7 @@ struct BusStopView: View {
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 32)
+                    .padding([.vertical, .horizontal])
                 } else {
                     VStack(spacing: 0) {
                         Spacer()
@@ -158,19 +162,10 @@ struct BusStopView: View {
                                     let spacing: CGFloat = 0
 
                                     let columnWidths = [
-                                        // Route Key
                                         totalWidth * 0.13,
-                                        
-                                        // Route Name
-                                        totalWidth * 0.44,
-                                        
-                                        // Arrival Status
-                                        components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.36 :
-                                        totalWidth * 0.16,
-                                        
-                                        // Arrival Time
-                                        components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.0 :
-                                            totalWidth * 0.24
+                                        totalWidth * 0.42,
+                                        components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.36 : totalWidth * 0.23,
+                                        components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.0 : totalWidth * 0.25
                                     ]
 
                                     HStack(spacing: spacing) {
@@ -188,14 +183,14 @@ struct BusStopView: View {
                                             Text(components[2])
                                                 .lineLimit(nil)
                                                 .fixedSize(horizontal: false, vertical: true)
-                                                .frame(width: columnWidths[2], alignment: .trailing)
+                                                .frame(width: columnWidths[2], alignment: .center)
                                                 .stopViewTheme(themeManager.currentTheme, text: components[2])
 
                                         if (components.count > 3 && !components[2].contains(getCancelledStatusTextString())) {
                                             Text(components[3])
                                                 .lineLimit(nil)
                                                 .fixedSize(horizontal: false, vertical: true)
-                                                .frame(width: columnWidths[3], alignment: .trailing)
+                                                .frame(width: columnWidths[3], alignment: .leading)
                                         }
                                     }
                                     .padding(.vertical, 12)
@@ -210,7 +205,6 @@ struct BusStopView: View {
                     }
                     .padding(.bottom, 50)
                     .stopViewTheme(themeManager.currentTheme, text: "")
-                    //.clipShape(RoundedRectangle(cornerRadius: 12))
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
                 }
@@ -224,7 +218,6 @@ struct BusStopView: View {
             ToolbarItem(placement: isDeepLink ? .navigationBarLeading : .navigationBarTrailing) {
                 Button {
                     savedStopsManager.toggleSavedStatus(for: stop)
-                    isSaved.toggle()
                 } label: {
                     Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
                 }
@@ -254,10 +247,10 @@ struct BusStopView: View {
             await loadSchedules(isManual: true)
         })
         .onAppear {
-            isSaved = savedStopsManager.isStopSaved(stop)
             isLiveUpdatesEnabled = getLiveUpdatePreference()
+            isManualRefresh = true
             Task {
-                await loadSchedules(isManual: false)
+                await loadSchedules(isManual: true)
             }
             
             if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -275,17 +268,4 @@ struct BusStopView: View {
     }
 }
 
-struct ConditionalRefreshable: ViewModifier {
-    let isEnabled: Bool
-    let action: () async -> Void
 
-    func body(content: Content) -> some View {
-        if isEnabled {
-            content.refreshable {
-                await action()
-            }
-        } else {
-            content
-        }
-    }
-}

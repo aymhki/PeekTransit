@@ -70,12 +70,12 @@ struct StopSelectionStep: View {
                 Text("Select which bus stops you want to show on your widget from nearby stops or search for more")
                     .font(.title3)
                     .padding([.top, .horizontal])
-                
+
                 Text("You can select up to \(maxStopsAllowed) stop\(maxStopsAllowed > 1 ? "s" : "") for this widget size")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .padding(.horizontal)
-                
+
                 Button(action: {
                     withAnimation {
                         isClosestStop.toggle()
@@ -88,7 +88,7 @@ struct StopSelectionStep: View {
                         if isClosestStop {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.white)
-                            Text("Closest stop(s) based on location selected, click again to go back to stop selection or click next to proceed")
+                            Text("Closest stop(s) based on location selected, click again to go back to stop selection or click continue to proceed")
                                 .foregroundColor(.white)
                         } else {
                             Image(systemName: "location.fill")
@@ -97,13 +97,15 @@ struct StopSelectionStep: View {
                                 .foregroundColor(.white)
                         }
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
+                    .font(.caption2)
                     .padding()
                     .background(isClosestStop ? Color.red : Color.blue)
                     .cornerRadius(10)
                 }
                 .padding(.horizontal)
-                
+
                 if !isClosestStop {
                     HStack {
                         Text("Selected stops: \(selectedStops.count)/\(maxStopsAllowed)")
@@ -111,7 +113,7 @@ struct StopSelectionStep: View {
                         Spacer()
                     }
                     .padding(.horizontal)
-                    
+
                     VStack {
                         if stopsStore.isLoading {
                             ProgressView("Loading stops...")
@@ -123,7 +125,7 @@ struct StopSelectionStep: View {
                                 Text(error.localizedDescription)
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                
+
                                 Button("Retry") {
                                     let newLocation = locationManager.location
                                     if let location = newLocation {
@@ -138,15 +140,16 @@ struct StopSelectionStep: View {
                             Text("No stops found nearby")
                                 .foregroundColor(.secondary)
                         } else {
-                            List {
+                            LazyVStack(spacing: 0) {
                                 if stopsStore.isSearching {
                                     HStack {
                                         Spacer()
                                         ProgressView("Searching...")
                                         Spacer()
                                     }
+                                    .padding()
                                 }
-                                
+
                                 ForEach(filteredStops.indices, id: \.self) { index in
                                     let stop = filteredStops[index]
                                     if let variants = stop["variants"] as? [[String: Any]] {
@@ -162,39 +165,42 @@ struct StopSelectionStep: View {
                                                 }
                                             }
                                         )
+                                        if index < filteredStops.count - 1 {
+                                            Divider()
+                                        }
                                     }
                                 }
                             }
-                            .listStyle(.plain)
-                            .refreshable {
-                                let newLocation = locationManager.location
-                                if let location = newLocation {
-                                    Task {
-                                        await stopsStore.loadStops(userLocation: location)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .searchable(text: $searchText, prompt: "Search stops, routes...")
-                    .disableAutocorrection(true)
-                    .autocapitalization(.none)
-                    .onChange(of: searchText) { query in
-                        Task {
-                            await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
+                            .padding(.horizontal)
                         }
                     }
                 }
             }
-            .onAppear {
-                locationManager.requestLocation()
+        }
+        .refreshable {
+            let newLocation = locationManager.location
+            if let location = newLocation {
+                Task {
+                    await stopsStore.loadStops(userLocation: location)
+                }
             }
-            .onChange(of: locationManager.location) { newLocation in
-                if let location = newLocation,
-                   locationManager.shouldRefresh(for: location) {
-                    Task {
-                        await stopsStore.loadStops(userLocation: location)
-                    }
+        }
+        .searchable(text: $searchText, prompt: "Search stops, routes...")
+        .disableAutocorrection(true)
+        .autocapitalization(.none)
+        .onChange(of: searchText) { query in
+            Task {
+                await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
+            }
+        }
+        .onAppear {
+            locationManager.requestLocation()
+        }
+        .onChange(of: locationManager.location) { newLocation in
+            if let location = newLocation,
+               locationManager.shouldRefresh(for: location) {
+                Task {
+                    await stopsStore.loadStops(userLocation: location)
                 }
             }
         }

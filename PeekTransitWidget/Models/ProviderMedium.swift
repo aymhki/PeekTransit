@@ -99,7 +99,13 @@ struct ProviderMedium: IntentTimelineProvider {
                 )
             }
             
-            completion(timeline)
+            let nextUpdate = Calendar.current.date(byAdding: .second, value: 1, to: Date())!
+               let timelineWithShorterUpdate = Timeline(
+                   entries: timeline.entries,
+                   policy: .after(nextUpdate)
+               )
+               
+               completion(timelineWithShorterUpdate)
         }
     }
 }

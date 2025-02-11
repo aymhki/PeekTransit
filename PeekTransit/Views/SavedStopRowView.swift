@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SavedStopRowView: View {
     let savedStop: SavedStop
-    let savedStopsManager: SavedStopsManager
+    @ObservedObject private var savedStopsManager = SavedStopsManager.shared
     
     var body: some View {
         if let variants = savedStop.stopData["variants"] as? [[String: Any]] {

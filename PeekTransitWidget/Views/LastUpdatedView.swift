@@ -19,9 +19,11 @@ struct LastUpdatedView: View {
         if (size == "lockscreen" || size == "small") {
             Text("Updated at \(formattedTime)")
                 .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)", size: widgetSizeFromString(size))
+                .padding(.bottom, 2)
         } else {
             Text("Last updated at \(formattedTime)")
                 .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)", size: widgetSizeFromString(size))
+                .padding(.bottom, 8)
         }
     }
     

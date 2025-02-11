@@ -8,24 +8,53 @@ class SavedStopsManager: ObservableObject {
     @Published private(set) var isLoading = false
     
     private let userDefaultsKey = "savedStops"
+    private let queue = DispatchQueue(label: "com.app.savedstops", qos: .userInitiated)
     
     private init() {
         loadSavedStops()
     }
     
     func loadSavedStops() {
-        isLoading = true
-        defer { isLoading = false }
+        DispatchQueue.main.async {
+            self.isLoading = true
+        }
         
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-           let stops = try? JSONDecoder().decode([SavedStop].self, from: data) {
-            savedStops = stops
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            
+            if let data = UserDefaults.standard.data(forKey: self.userDefaultsKey) {
+                do {
+                    let stops = try JSONDecoder().decode([SavedStop].self, from: data)
+                    
+                    DispatchQueue.main.async {
+                        self.savedStops = stops
+                        self.isLoading = false
+                    }
+                } catch {
+                    print("Error decoding saved stops: \(error)")
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                }
+            }
         }
     }
     
     private func saveToDisk() {
-        if let encoded = try? JSONEncoder().encode(savedStops) {
-            UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
+        queue.async { [weak self] in
+            guard let self = self else { return }
+            
+            do {
+                let data = try JSONEncoder().encode(self.savedStops)
+                UserDefaults.standard.set(data, forKey: self.userDefaultsKey)
+                UserDefaults.standard.synchronize()
+            } catch {
+                print("Error saving stops: \(error)")
+            }
         }
     }
     
@@ -38,19 +67,26 @@ class SavedStopsManager: ObservableObject {
         guard let stopNumber = stop["number"] as? Int else { return }
         let stopId = "\(stopNumber)"
         
-        if let index = savedStops.firstIndex(where: { $0.id == stopId }) {
-            savedStops.remove(at: index)
-        } else {
-            savedStops.append(SavedStop(stopData: stop))
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            if let index = self.savedStops.firstIndex(where: { $0.id == stopId }) {
+                self.savedStops.remove(at: index)
+            } else {
+                self.savedStops.append(SavedStop(stopData: stop))
+            }
+            
+            self.objectWillChange.send()
+            self.saveToDisk()
         }
-        
-        saveToDisk()
     }
     
-    func saveStop(for stop: [String: Any]) {
-        if !isStopSaved(stop) {
-            savedStops.append(SavedStop(stopData: stop))
-            saveToDisk()
+    func removeStop(at indexSet: IndexSet) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.savedStops.remove(atOffsets: indexSet)
+            self.objectWillChange.send()
+            self.saveToDisk()
         }
     }
 }
