@@ -21,7 +21,7 @@
 		<string>location</string>
 	</array>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Peek Transit needs your location fetch nearby bus stops and bus times</string>
+	<string>The app needs your location fetch nearby bus stops and bus times</string>
     <key>CFBundleDisplayName</key>
     <string>Peek Transit</string>
     

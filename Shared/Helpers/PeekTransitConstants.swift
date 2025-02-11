@@ -102,11 +102,11 @@ public func getMaxBusRoutePrefixLength() -> Int {
 
 
 public func getMaxBusRouteLengthForWidget() -> Int {
-    return 15
+    return 12
 }
 
 public func getMaxBusRoutePrefixLengthForWidget() -> Int {
-    return 12
+    return 10
 }
 
 
@@ -151,7 +151,7 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
 
     if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
         if (widgetSizeStringFormat == "large") {
-            return 12
+            return 11
         } else if (widgetSizeStringFormat == "medium") {
             return 11
         } else if (widgetSizeStringFormat == "small") {
@@ -164,7 +164,7 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         
     } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
         if (widgetSizeSystemFormat == .systemLarge) {
-            return 12
+            return 11
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return 11
         } else if (widgetSizeSystemFormat == .systemSmall) {
@@ -634,8 +634,8 @@ public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
 
 public func getRouteNameWidth(size: WidgetFamily) -> CGFloat {
     switch size {
-    case .systemLarge: return 100
-    case .systemMedium: return 100
+    case .systemLarge: return 130
+    case .systemMedium: return 130
     case .systemSmall: return 70
     case .accessoryRectangular: return 60
     default: return 70

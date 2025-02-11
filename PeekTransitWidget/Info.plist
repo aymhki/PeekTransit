@@ -22,9 +22,9 @@
         <key>NSWidgetWantsLocation</key>
             <true/>
         <key>NSLocationUsageDescription</key>
-            <string>We need your location to show nearby transit stops</string>
+            <string>The widget needs your location to show nearby transit stops</string>
         <key>NSLocationWhenInUseUsageDescription</key>
-            <string>We need your location to show nearby transit stops</string>
+            <string>The widget needs your location to show nearby transit stops</string>
 
 
         <key>UIBackgroundModes</key>

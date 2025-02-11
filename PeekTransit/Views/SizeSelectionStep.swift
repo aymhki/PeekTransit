@@ -72,7 +72,7 @@ struct SizeSelectionStep: View {
                         view.background(.black)
                     }
                     .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
-                    .frame(height: getWidgetPreviewHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
+                    .frame(height: getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
                     .opacity(isLoading ? 0 : 1)
                 }
                 .padding()

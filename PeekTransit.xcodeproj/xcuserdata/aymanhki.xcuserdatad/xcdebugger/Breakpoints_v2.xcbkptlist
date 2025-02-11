@@ -30,9 +30,9 @@
             filePath = "PeekTransitWidget/Views/DynamicWidgetView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "101"
-            endingLineNumber = "101"
-            landmarkName = "selectedStopsView"
+            startingLineNumber = "120"
+            endingLineNumber = "120"
+            landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>

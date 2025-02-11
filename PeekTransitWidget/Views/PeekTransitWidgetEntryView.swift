@@ -8,6 +8,13 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     var entry: T
     @Environment(\.widgetFamily) var family
     
+    private var currentTheme: StopViewTheme {
+        if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
+           let theme = StopViewTheme(rawValue: savedTheme) {
+            return theme
+        }
+        return .default
+    }
     
     private func isWidgetFullyLoaded(widgetData: [String: Any], scheduleData: [String]?) -> Bool {
         let scheduleDataSize = scheduleData?.count ?? 0
@@ -149,6 +156,9 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     fullyLoaded: true,
                     forPreview: false
                 )
+                .if(currentTheme == .classic) { view in
+                    view.background(.black)
+                }
 
             } else {
                 DynamicWidgetView(
@@ -159,12 +169,57 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     fullyLoaded: false,
                     forPreview: false
                 )
+                .if(currentTheme == .classic) { view in
+                    view.background(.black)
+                }
 
             }
         } else {
-            Text("Select the widget configuration to start")
-                .foregroundColor(.blue)
-                .padding(.horizontal)
+            if (family != .accessoryRectangular) {
+                if(family != .systemSmall) {
+                    VStack (alignment: .center) {
+                        Spacer()
+                        
+                        Text("Peek Transit")
+                            .padding(.horizontal)
+                            .bold()
+                        
+                        Spacer()
+                        
+                        Text("Hold to edit and select a widget configuration to start")
+                            .foregroundColor(.blue)
+                            .padding(.horizontal)
+                            .font(.system(size: 12 ) )
+                        
+                        Spacer()
+                    }
+                } else {
+                    VStack {
+                        Spacer(minLength: 4)
+                        
+                        Text("Peek Transit")
+                            .padding(.horizontal)
+                            .font(.system(size: 12 ) )
+                            .bold()
+                        
+                        
+                        Spacer(minLength: 4)
+                        
+                        
+                        Text("Hold to edit and select a widget configuration to start")
+                            .foregroundColor(.blue)
+                            .padding(.horizontal)
+                            .font(.system(size: 10 ) )
+                        
+                        Spacer(minLength: 4)
+                    }
+                }
+            } else {
+                Text("Peek Transit: select a config to start")
+                    .foregroundColor(.blue)
+                    .padding(.horizontal)
+                    .font(.system(size: 10, design: .monospaced ) )
+            }
         }
     }
     

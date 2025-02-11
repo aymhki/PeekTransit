@@ -17,7 +17,7 @@ struct DynamicWidgetView: View {
         }
         return .default
     }
-
+    
     
     private func createStopURL(stopNumber: Int) -> URL? {
         var components = URLComponents()
@@ -30,61 +30,80 @@ struct DynamicWidgetView: View {
     }
     
     var body: some View {
-        ZStack {
-            
-            if (size != .accessoryRectangular) {
-                Group {
-                    switch currentTheme {
-                    case .classic:
-                        Color.black
-                    case .modern:
-                        Color(.secondarySystemGroupedBackground)
-                    }
-                }
-                .ignoresSafeArea()
-                
-            } 
-            
-            
-            VStack(alignment: .leading, spacing: 4) {
-                
-                if ( !(!fullyLoaded && size == .systemSmall) ) {
-                    content
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                
-                if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
-                    Text("Winnipeg Transit API is throtling data requests. Some bus times were not loaded. Please wait a few minutes and try again.")
-                        .foregroundColor(.red)
-                        .font(.caption)
-                        .padding(.horizontal)
-                    
-                } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular && !forPreview) {
-                    Text("Could Not fetch bus times, please wait...")
-                        .foregroundColor(.red)
-                        .font(.caption)
-                        .padding(.horizontal)
-                    
-                } else if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
-                    
-                    if (size != .accessoryRectangular) {
-                        if (size != .systemMedium || (scheduleData)?.count ?? 0 <= 3) {
-                            Spacer(minLength: 2)
+        Group {
+            if let widgetData = widgetData as? [String: Any]{
+                GeometryReader { geometry in
+                    ZStack {
+                        // Background color layer
+                        if (size != .accessoryRectangular) {
+                            switch currentTheme {
+                            case .classic:
+                                Color.black
+                                    .edgesIgnoringSafeArea(.all)
+                            case .modern:
+                                Color(.secondarySystemGroupedBackground)
+                                    .edgesIgnoringSafeArea(.all)
+                            }
                         }
+                        
+                        // Content layer
+                        VStack(alignment: .leading, spacing: 4) {
+                            if (!(!fullyLoaded && size == .systemSmall)) {
+                                content
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            
+                            if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
+                                Text("Winnipeg Transit API is throtling data requests. Some bus times were not loaded. Please wait a few minutes and try again.")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                    .padding(.horizontal)
+                                
+                            } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular && !forPreview) {
+                                Text("Could Not fetch bus times, please wait...")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                    .padding(.horizontal)
+                                
+                            } else if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
+                                if (size != .accessoryRectangular) {
+                                    if (size != .systemMedium || (scheduleData)?.count ?? 0 <= 3) {
+                                        Spacer(minLength: 2)
+                                    }
+                                }
+                                
+                                if (size != .accessoryRectangular) {
+                                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                        }
+                        .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
                     }
-                    
-                    if (size != .accessoryRectangular) {
-                        LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    } else {
-                        LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                }
+            } else {
+                Text("Select the widget configuration to start")
+                    .foregroundColor(.blue)
+                    .padding(.horizontal)
+            }
+        }
+        .widgetBackground(backgroundView: Group {
+            if (size != .accessoryRectangular) {
+                switch currentTheme {
+                case .classic:
+                    Color.black
+                case .modern:
+                    Color(.secondarySystemGroupedBackground)
                 }
             }
-            .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
-        }
+        })
     }
+    
+
     
     @ViewBuilder
     private var content: some View {
@@ -127,3 +146,14 @@ struct DynamicWidgetView: View {
     }
 }
 
+extension View {
+    func widgetBackground<Content: View>(backgroundView: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            return self.containerBackground(for: .widget) {
+                backgroundView
+            }
+        } else {
+            return self.background(backgroundView)
+        }
+    }
+}
