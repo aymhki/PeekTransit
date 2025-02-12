@@ -92,88 +92,130 @@ enum WidgetHelper {
             return (nil, widgetData)
         }
         
-        var schedulesDict: [String: String] = [:]
+        let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? false
+        var schedulesArray: [String] = []  
         var updatedWidgetData = widgetData
         var updatedStops: [[String: Any]] = []
+        var cleanedSchedule: [String] = []
+        var maxVariants = 0
+        var maxStops = 0
+        var currentStop = 0
+        
+        if (multipleEntriesPerVariant) {
+            maxVariants = getMaxVariantsAllowedForMultipleEntries(
+                widgetSizeSystemFormat: nil,
+                widgetSizeStringFormat: widgetData["size"] as? String
+            )
+            
+            maxStops = getMaxSopsAllowedForMultipleEntries(
+                widgetSizeSystemFormat: nil,
+                widgetSizeStringFormat: widgetData["size"] as? String
+            )
+        } else {
+            maxVariants = getMaxVariantsAllowedForWidget(
+                widgetSizeSystemFormat: nil,
+                widgetSizeStringFormat: widgetData["size"] as? String
+            )
+            
+            maxStops = getMaxSopsAllowedForWidget(
+                widgetSizeSystemFormat: nil,
+                widgetSizeStringFormat: widgetData["size"] as? String
+            )
+        }
         
         for var stop in stops {
-            guard let stopNumber = stop["number"] as? Int else { continue }
             
-            do {
-                let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
-                let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
-                    schedule: schedule,
-                    timeFormat: widgetData["timeFormat"] as? String == TimeFormat.clockTime.rawValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
-                )
+            if currentStop < maxStops {
                 
-                if ((isClosestStop ?? false) || widgetData["noSelectedVariants"] as? Bool == true) {
-                    let maxVariants = getMaxVariantsAllowedForWidget(
-                        widgetSizeSystemFormat: nil,
-                        widgetSizeStringFormat: widgetData["size"] as? String
-                    )
+                currentStop = currentStop + 1
+                guard let stopNumber = stop["number"] as? Int else { continue }
+                
+                do {
+                    let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
                     
-                    let maxStops = getMaxSopsAllowedForWidget(
-                        widgetSizeSystemFormat: nil,
-                        widgetSizeStringFormat: widgetData["size"] as? String
-                    )
+                    if (multipleEntriesPerVariant) {
+                        cleanedSchedule = TransitAPI.shared.cleanScheduleMixedTimeFormat(schedule: schedule)
+                    } else {
+                        cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
+                            schedule: schedule,
+                            timeFormat: widgetData["timeFormat"] as? String == TimeFormat.clockTime.rawValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
+                        )
+                    }
                     
-                    var selectedVariants: [[String: Any]] = []
-                    var usedKeys = Set<String>()
-                    
-                    for scheduleString in cleanedSchedule {
-                        let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
-                        if components.count >= 2 {
-                            let variantKey = components[0]
-                            let variantName = components[1]
-                            let compositeKey = "\(stopNumber)\(getCompositKeyLinkerForDictionaries())\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)"
-                            
-                            if !usedKeys.contains(compositeKey) {
-                                selectedVariants.append([
-                                    "key": variantKey,
-                                    "name": variantName
-                                ])
-                                usedKeys.insert(compositeKey)
-                                schedulesDict[compositeKey] = scheduleString
+                    if ((isClosestStop ?? false) || widgetData["noSelectedVariants"] as? Bool == true) {
+                        
+                        
+                        var selectedVariants: [[String: Any]] = []
+                        var processedVariants = Set<String>()
+                        
+                        for scheduleString in cleanedSchedule {
+                            let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
+                            if components.count >= 2 {
+                                let variantKey = components[0]
+                                let variantName = components[1]
+                                let variantIdentifier = "\(variantKey)-\(variantName)"
                                 
-                                if selectedVariants.count >= maxVariants {
-                                    break
+                                if !processedVariants.contains(variantIdentifier) {
+                                    let variantEntries = cleanedSchedule.filter { entry in
+                                        let entryComponents = entry.components(separatedBy: getScheduleStringSeparator())
+                                        return entryComponents.count >= 2 &&
+                                        entryComponents[0] == variantKey &&
+                                        entryComponents[1] == variantName
+                                    }
+                                    
+                                    
+                                    let entriesToAdd = multipleEntriesPerVariant ? Array(variantEntries.prefix(2)) : [variantEntries[0]]
+                                    schedulesArray.append(contentsOf: entriesToAdd)
+                                    
+                                    selectedVariants.append([
+                                        "key": variantKey,
+                                        "name": variantName
+                                    ])
+                                    processedVariants.insert(variantIdentifier)
+                                    
+                                    if selectedVariants.count >= maxVariants {
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        
+                        stop["selectedVariants"] = selectedVariants
+                    } else {
+                        if let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
+                            for variant in selectedVariants {
+                                guard let variantKey = variant["key"] as? String,
+                                      let variantName = variant["name"] as? String else {
+                                    continue
+                                }
+                                
+                                let matchingSchedules = cleanedSchedule.filter { scheduleString in
+                                    let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
+                                    return components.count >= 2 &&
+                                    components[0] == variantKey &&
+                                    components[1] == variantName
+                                }
+                                
+                                if multipleEntriesPerVariant {
+                                    schedulesArray.append(contentsOf: Array(matchingSchedules.prefix(2)))
+                                } else if let firstMatch = matchingSchedules.first {
+                                    schedulesArray.append(firstMatch)
                                 }
                             }
                         }
                     }
-                    
-                    stop["selectedVariants"] = selectedVariants
-                } else {
-                    if let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
-                        for variant in selectedVariants {
-                            guard let variantKey = variant["key"] as? String,
-                                  let variantName = variant["name"] as? String else {
-                                continue
-                            }
-                            
-                            let compositeKey = "\(stopNumber)\(getCompositKeyLinkerForDictionaries())\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)"
-                            if !schedulesDict.keys.contains(compositeKey),
-                               let firstMatchingSchedule = cleanedSchedule.first(where: { scheduleString in
-                                   let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
-                                   return components.count >= 2 &&
-                                          components[0] == variantKey &&
-                                          components[1] == variantName
-                               }) {
-                                schedulesDict[compositeKey] = firstMatchingSchedule
-                            }
-                        }
-                    }
+                } catch {
+                    print("Error fetching schedule for stop \(stopNumber): \(error)")
+                    continue
                 }
-            } catch {
-                print("Error fetching schedule for stop \(stopNumber): \(error)")
-                continue
+                
+                updatedStops.append(stop)
             }
             
-            updatedStops.append(stop)
         }
         
         updatedWidgetData["stops"] = updatedStops
-        return (schedulesDict.isEmpty ? nil : Array(schedulesDict.values), updatedWidgetData)
+        return (schedulesArray.isEmpty ? nil : schedulesArray, updatedWidgetData)
     }
     
     static func createTimeline<T: BaseEntry>(

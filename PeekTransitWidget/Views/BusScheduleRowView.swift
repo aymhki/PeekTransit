@@ -26,18 +26,22 @@ struct BusScheduleRow: View {
                 if !components[1].isEmpty {
                     if (size != .systemSmall && size != .accessoryRectangular) {
                         let routeName = components[1]
-                        Text(routeName.count > getMaxBusRouteLengthForWidget() ?
-                             routeName.prefix(getMaxBusRoutePrefixLengthForWidget()) + "..." : routeName)
+                        Text(routeName)
                         .widgetTheme(currentTheme, text: components[1], size: size)
                         .frame(width: getRouteNameWidth(size: size), alignment: .leading)
                     } else {
                         Text("\(components[1].prefix(1)).")
                             .widgetTheme(currentTheme, text: components[1], size: size)
-                        
+                            .frame(width: getRouteNameWidth(size: size), alignment: .leading)
                     }
                 }
                 
-                Spacer()
+                
+                if (size != .systemSmall && size != .accessoryRectangular) {
+                    
+                    Spacer()
+                }
+                
                 
                 if (components[2] == getLateStatusTextString() ||
                     components[2] == getEarlyStatusTextString() ||
@@ -46,9 +50,11 @@ struct BusScheduleRow: View {
                     if ( (size == .systemSmall || size == .accessoryRectangular) && components[2] != getCancelledStatusTextString()) {
                         Text("\(components[2].prefix(1)).")
                             .widgetTheme(currentTheme, text: components[2], size: size)
+                            .frame(alignment: .center)
                     } else {
                         Text(components[2])
                             .widgetTheme(currentTheme, text: components[2], size: size)
+                            .frame(alignment: .center)
                     }
                 }
                 
@@ -59,6 +65,7 @@ struct BusScheduleRow: View {
                 if (components[2] != getCancelledStatusTextString()) {
                     Text(components[3])
                         .widgetTheme(currentTheme, text: components[3], size: size)
+                        .frame(alignment: .leading)
                 }
             }
             .frame(maxWidth: .infinity)

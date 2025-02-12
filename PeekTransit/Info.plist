@@ -6,6 +6,21 @@
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).refresh</string>
 	</array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>MKDirectionsRequest</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.maps.directionsrequest</string>
+			</array>
+            <key>LSHandlerRank</key>
+                <string>Default</string>
+		</dict>
+	</array>
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <false/>
 	<key>CFBundleGetInfoString</key>
 	<string></string>
 	<key>CFBundleURLName</key>
@@ -13,6 +28,12 @@
 	<key>CFBundleURLSchemes</key>
 	<array>
 		<string>peektransit</string>
+	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>MKDirectionsApplicationSupportedModes</key>
+	<array>
+		<string>MKDirectionsModeBus</string>
 	</array>
 	<key>NSUserActivityTypes</key>
 	<array>

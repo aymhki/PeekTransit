@@ -12,6 +12,8 @@ struct PeekTransitLockscreenWidget: Widget {
         .configurationDisplayName("Transit Widget - Lock Screen")
         .description("Shows transit schedules on lock screen")
         .supportedFamilies([.accessoryRectangular])
+        .disableContentMarginsIfNeeded()
+        
     }
 }
 

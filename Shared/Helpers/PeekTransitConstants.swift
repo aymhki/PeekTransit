@@ -14,7 +14,7 @@ public func getMaxSopsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetSizeS
         } else if (widgetSizeStringFormat == "medium") {
             return 2
         } else if (widgetSizeStringFormat == "small") {
-            return 1
+            return 2
         } else if (widgetSizeStringFormat == "lockscreen") {
             return 2
         } else {
@@ -28,9 +28,45 @@ public func getMaxSopsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetSizeS
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return 2
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 1
+            return 2
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
             return 2
+        } else {
+            return 1
+        }
+        
+    } else {
+        return 1
+    }
+    
+}
+
+public func getMaxSopsAllowedForMultipleEntries(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> Int {
+    
+    if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
+        
+        if (widgetSizeStringFormat == "large") {
+            return 3
+        } else if (widgetSizeStringFormat == "medium") {
+            return 2
+        } else if (widgetSizeStringFormat == "small") {
+            return 1
+        } else if (widgetSizeStringFormat == "lockscreen") {
+            return 1
+        } else {
+            return 1
+        }
+        
+    } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
+        
+        if (widgetSizeSystemFormat == .systemLarge) {
+            return 3
+        } else if (widgetSizeSystemFormat == .systemMedium) {
+            return 2
+        } else if (widgetSizeSystemFormat == .systemSmall) {
+            return 1
+        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
+            return 1
         } else {
             return 1
         }
@@ -51,7 +87,7 @@ public func getMaxVariantsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetS
         } else if (widgetSizeStringFormat == "medium") {
             return 2
         } else if (widgetSizeStringFormat == "small") {
-            return 2
+            return 1
         } else if (widgetSizeStringFormat == "lockscreen") {
             return 1
         } else {
@@ -65,7 +101,44 @@ public func getMaxVariantsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetS
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return 2
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 2
+            return 1
+        } else if (widgetSizeSystemFormat == .accessoryRectangular) {
+            return 1
+        } else {
+            return 1
+        }
+        
+    } else {
+        return 1
+    }
+    
+}
+
+
+public func getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> Int {
+    
+    if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
+        
+        if (widgetSizeStringFormat == "large") {
+            return 1
+        } else if (widgetSizeStringFormat == "medium") {
+            return 1
+        } else if (widgetSizeStringFormat == "small") {
+            return 1
+        } else if (widgetSizeStringFormat == "lockscreen") {
+            return 1
+        } else {
+            return 1
+        }
+        
+    } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
+        
+        if (widgetSizeSystemFormat == .systemLarge) {
+            return 1
+        } else if (widgetSizeSystemFormat == .systemMedium) {
+            return 1
+        } else if (widgetSizeSystemFormat == .systemSmall) {
+            return 1
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
             return 1
         } else {
@@ -102,7 +175,7 @@ public func getMaxBusRoutePrefixLength() -> Int {
 
 
 public func getMaxBusRouteLengthForWidget() -> Int {
-    return 12
+    return 10
 }
 
 public func getMaxBusRoutePrefixLengthForWidget() -> Int {
@@ -124,7 +197,7 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
         } else if (widgetSizeStringFormat == "small") {
             return 12
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 11
+            return 10
         } else {
             return 10
         }
@@ -137,12 +210,12 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
         } else if (widgetSizeSystemFormat == .systemSmall) {
             return 12
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 11
+            return 10
         } else {
             return 10
         }
     } else {
-        return 11
+        return 10
     }
     
 }
@@ -155,9 +228,9 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeStringFormat == "medium") {
             return 11
         } else if (widgetSizeStringFormat == "small") {
-            return 11
+            return 8
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 11
+            return 8
         } else {
             return 8
         }
@@ -168,9 +241,9 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return 11
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 11
+            return 8
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 11
+            return 8
         } else {
             return 8
         }
@@ -226,11 +299,11 @@ public func getWidgetPreviewHeightForSize(widgetSizeSystemFormat: WidgetFamily?,
         if (widgetSizeStringFormat == "large") {
             return 300
         } else if (widgetSizeStringFormat == "medium") {
-            return 170
+            return 180
         } else if (widgetSizeStringFormat == "small") {
-            return 170
+            return 180
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 80
+            return 90
         } else {
             return 300
         }
@@ -239,11 +312,11 @@ public func getWidgetPreviewHeightForSize(widgetSizeSystemFormat: WidgetFamily?,
         if (widgetSizeSystemFormat == .systemLarge) {
             return 300
         } else if (widgetSizeSystemFormat == .systemMedium) {
-            return 170
+            return 180
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 170
+            return 180
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 80
+            return 90
         } else {
             return 300
         }
@@ -258,9 +331,9 @@ public func getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: WidgetFamil
         if (widgetSizeStringFormat == "large") {
             return 380
         } else if (widgetSizeStringFormat == "medium") {
-            return 180
+            return 190
         } else if (widgetSizeStringFormat == "small") {
-            return 180
+            return 190
         } else if (widgetSizeStringFormat == "lockscreen") {
             return 100
         } else {
@@ -291,9 +364,9 @@ public func getWidgetPreviewWidthForSize(widgetSizeSystemFormat: WidgetFamily?, 
         } else if (widgetSizeStringFormat == "medium") {
             return .infinity
         } else if (widgetSizeStringFormat == "small") {
-            return 170
+            return 180
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 170
+            return 180
         } else {
             return .infinity
         }
@@ -304,9 +377,9 @@ public func getWidgetPreviewWidthForSize(widgetSizeSystemFormat: WidgetFamily?, 
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return .infinity
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 170
+            return 180
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 170
+            return 180
         } else {
             return .infinity
         }
@@ -424,11 +497,10 @@ public struct ThemeModifier: ViewModifier {
                 .foregroundStyle(foregroundColor(for: text))
         case .classic:
             content
-                .font(.custom("LCDDot", size: 10)).bold()
+                .font(.custom("LCDDot", fixedSize: 13)).bold()
                 .fontWeight(.black)
                 .background(.black)
-                .foregroundStyle(Color(hex: "#EB8634", brightness: 150, saturation: 150))
-                //.shadow(color: Color(hex: "#EB8634", brightness: 2).opacity(0.5), radius: 4)
+                .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))
         }
     }
     
@@ -518,48 +590,37 @@ public struct WidgetThemeModifier: ViewModifier {
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))
         case .classic:
-            content
-                .font(.custom("LCDDot", size: getFontSize())).bold()
-                .fontWeight(.black)
-                .background(widgetSize == .accessoryRectangular ? .clear : .black)
-                .foregroundStyle(Color(hex: "#EB8634", brightness: 150, saturation: 150))
+            if(widgetSize == .accessoryRectangular ) {
+                content
+                    .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
+                    .fontWeight(.black)
+                    .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))
+            } else {
+                content
+                    .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
+                    .fontWeight(.black)
+                    .background(widgetSize == .accessoryRectangular ? Color(.secondarySystemGroupedBackground) : .black)
+                    .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))
+            }
         }
     }
     
     private func getFontSize() -> CGFloat {
         var baseFontSize = getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
-        
-        if theme == .classic {
-            baseFontSize = baseFontSize - 4
-        } else {
-            baseFontSize = baseFontSize - 2
-        }
-        
-        if text.contains(getLateStatusTextString()) ||
-           text.contains(getEarlyStatusTextString()) ||
-           text.contains(getCancelledStatusTextString()) {
-            return baseFontSize - 2
-        }
-        
+            
+    
         if text.lowercased().contains("updated") {
             baseFontSize = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
             
-           
             baseFontSize = baseFontSize - 2
-            
+
         }
         
         if text.lowercased().contains("stop") {
             baseFontSize = getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
-            
-            if (theme == .classic) {
-                baseFontSize = baseFontSize - 4
-            } else {
-                baseFontSize = baseFontSize - 2
-            }
+        
         }
         
-
         
         return baseFontSize
     }
@@ -587,6 +648,28 @@ public extension View {
             transform(self)
         } else {
             self
+        }
+    }
+}
+
+extension WidgetConfiguration {
+    func disableContentMarginsIfNeeded() -> some WidgetConfiguration {
+        if #available(iOSApplicationExtension 17.0, *) {
+            return self.contentMarginsDisabled()
+        } else {
+            return self
+        }
+    }
+}
+
+extension View {
+    func widgetBackground<Content: View>(backgroundView: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            return self.containerBackground(for: .widget) {
+                backgroundView
+            }
+        } else {
+            return self.background(backgroundView)
         }
     }
 }
@@ -630,18 +713,18 @@ public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
     switch size {
     case .systemLarge: return 40
     case .systemMedium: return 35
-    case .systemSmall: return 30
-    case .accessoryRectangular: return 25
+    case .systemSmall: return 25
+    case .accessoryRectangular: return 21
     default: return 30
     }
 }
 
 public func getRouteNameWidth(size: WidgetFamily) -> CGFloat {
     switch size {
-    case .systemLarge: return 110
-    case .systemMedium: return 110
-    case .systemSmall: return 70
-    case .accessoryRectangular: return 60
+    case .systemLarge: return 100
+    case .systemMedium: return 100
+    case .systemSmall: return 21
+    case .accessoryRectangular: return 16
     default: return 70
     }
 }

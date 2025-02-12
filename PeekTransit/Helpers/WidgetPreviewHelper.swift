@@ -1,10 +1,8 @@
 import SwiftUI
 import WidgetKit
-import SwiftUI
-import WidgetKit
 
 enum PreviewHelper {
-    static func generatePreviewSchedule(from widgetData: [String: Any], noConfig: Bool, timeFormat: TimeFormat, showLastUpdatedStatus: Bool) -> ([String]?, [String: Any]?)? {
+    static func generatePreviewSchedule(from widgetData: [String: Any], noConfig: Bool, timeFormat: TimeFormat, showLastUpdatedStatus: Bool, multipleEntriesPerVariant: Bool) -> ([String]?, [String: Any]?)? {
         var previewSchedules: [String] = []
         var updatedWidgetData: [String: Any] = widgetData
         let timeFormatTextToUse = timeFormat.brief
@@ -19,13 +17,26 @@ enum PreviewHelper {
                             for variant in variants {
                                 if let key = variant["key"] as? String,
                                    let name = variant["name"] as? String {
-                                    previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                                    
+                                    if (multipleEntriesPerVariant) {
+                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                                    } else {
+                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                                    }
                                 }
                             }
                         }
                     } else {
                         let widgetSize = widgetData["size"] as? String ?? "medium"
-                        let maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                        var maxVariants = 0
+                        
+                        if (multipleEntriesPerVariant) {
+                            maxVariants = getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                           
+                        } else {
+                            maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                        }
                         
                         var selectedVariants: [[String: Any]] = []
                         for _ in 0..<maxVariants {
@@ -34,7 +45,12 @@ enum PreviewHelper {
                                 "name": getWidgetTextPlaceholder()
                             ]
                             selectedVariants.append(variant)
-                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                            if (multipleEntriesPerVariant) {
+                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                            } else {
+                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                            }
                         }
                         
                         var updatedStop = stop
@@ -49,8 +65,22 @@ enum PreviewHelper {
                 }
             } else {
                 let widgetSize = widgetData["size"] as? String ?? "medium"
-                let maxStops = getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
-                let maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                var maxStops = 0
+                var maxVariants = 0
+
+                
+                if (multipleEntriesPerVariant) {
+                    maxStops = getMaxSopsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                } else {
+                    maxStops = getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                }
+                
+                
+                if (multipleEntriesPerVariant) {
+                    maxVariants = getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                } else {
+                    maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+                }
                 
                 var generatedStops: [[String: Any]] = []
                 
@@ -63,7 +93,12 @@ enum PreviewHelper {
                             "name": getWidgetTextPlaceholder()
                         ]
                         selectedVariants.append(variant)
-                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                        if (multipleEntriesPerVariant) {
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                        } else {
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                        }
                     }
                     
                     let stop: [String: Any] = [
@@ -80,8 +115,22 @@ enum PreviewHelper {
             }
         } else {
             let widgetSize = widgetData["size"] as? String ?? "medium"
-            let maxStops = getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
-            let maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            var maxStops = 0
+            var maxVariants = 0
+
+            
+            if (multipleEntriesPerVariant) {
+                maxStops = getMaxSopsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            } else {
+                maxStops = getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            }
+            
+            
+            if (multipleEntriesPerVariant) {
+                maxVariants = getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            } else {
+                maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            }
             
             var generatedStops: [[String: Any]] = []
             
@@ -94,7 +143,12 @@ enum PreviewHelper {
                         "name": getWidgetTextPlaceholder()
                     ]
                     selectedVariants.append(variant)
-                    previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                    if (multipleEntriesPerVariant) {
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                    } else {
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                    }
                 }
                 
                 let stop: [String: Any] = [
@@ -113,7 +167,6 @@ enum PreviewHelper {
         }
         
         updatedWidgetData["showLastUpdatedStatus"] = showLastUpdatedStatus
-        
         
         return (previewSchedules.isEmpty ? nil : previewSchedules, updatedWidgetData)
     }

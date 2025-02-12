@@ -31,10 +31,9 @@ struct DynamicWidgetView: View {
     
     var body: some View {
         Group {
-            if let widgetData = widgetData as? [String: Any]{
+            if let widgetData = widgetData as? [String: Any] {
                 GeometryReader { geometry in
                     ZStack {
-                        // Background color layer
                         if (size != .accessoryRectangular) {
                             switch currentTheme {
                             case .classic:
@@ -46,11 +45,17 @@ struct DynamicWidgetView: View {
                             }
                         }
                         
-                        // Content layer
                         VStack(alignment: .leading, spacing: 4) {
                             if (!(!fullyLoaded && size == .systemSmall)) {
-                                content
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                
+                                if(size == .accessoryRectangular) {
+                                    content
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                } else {
+                                    content
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                }
+                                    
                             }
                             
                             if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
@@ -77,13 +82,14 @@ struct DynamicWidgetView: View {
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
                                     LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
-                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .frame(maxWidth: .infinity, alignment: .center)
                                 }
                             }
                         }
                         .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
                     }
                     .frame(width: geometry.size.width, height: geometry.size.height)
+                    .ignoresSafeArea(.all)
                 }
             } else {
                 Text("Select the widget configuration to start")
@@ -118,18 +124,20 @@ struct DynamicWidgetView: View {
                 ForEach(Array(stops.prefix(maxStops)).indices, id: \.self) { stopIndex in
                     let stop = stops[stopIndex]
                     let stopNumber = stop["number"] as? Int ?? 0
+                    let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? false
                     let destinationUrl = createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!
                     Link(destination: destinationUrl ) {
                         if (size == .accessoryRectangular || size == .systemSmall) {
-                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant)
                                 .widgetURL(destinationUrl)
                         } else {
-                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
+                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant)
                         }
                     }
                     
                     
-                    if (stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && fullyLoaded ) {
+                    if ( stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && size != .systemSmall && fullyLoaded )
+                    {
                         Divider()
                     }
                 }
@@ -146,14 +154,4 @@ struct DynamicWidgetView: View {
     }
 }
 
-extension View {
-    func widgetBackground<Content: View>(backgroundView: Content) -> some View {
-        if #available(iOS 17.0, *) {
-            return self.containerBackground(for: .widget) {
-                backgroundView
-            }
-        } else {
-            return self.background(backgroundView)
-        }
-    }
-}
+

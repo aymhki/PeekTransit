@@ -13,9 +13,8 @@ struct PeekTransitSmallWidget: Widget {
         .configurationDisplayName("Transit Widget - Small")
         .description("Shows transit schedules in small size")
         .supportedFamilies([.systemSmall])
-        .onBackgroundURLSessionEvents { identifier, completion in
-            completion()
-        }
+        .disableContentMarginsIfNeeded()
     
     }
+    
 }

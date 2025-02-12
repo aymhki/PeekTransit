@@ -23,6 +23,7 @@ struct WidgetSetupView: View {
     @State private var showNoServiceAlert = false
     @State private var stopsWithoutService: [Int] = []
     @State private var noSelectedVariants: Bool = false
+    @State private var multipleEntriesPerVariant: Bool = false
     let editingWidget: WidgetModel?
 
     
@@ -38,6 +39,7 @@ struct WidgetSetupView: View {
             _selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
             _widgetName = State(initialValue: "")
             _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
+            _multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? false)
             
             if let stops = widget.widgetData["stops"] as? [[String: Any]] {
                 var variants: [String: [[String: Any]]] = [:]
@@ -86,7 +88,8 @@ struct WidgetSetupView: View {
             "name": widgetName.isEmpty ? generateDefaultWidgetName() : widgetName,
             "timeFormat": selectedTimeFormat.rawValue,
             "showLastUpdatedStatus": showLastUpdatedStatus,
-            "noSelectedVariants": noSelectedVariants
+            "noSelectedVariants": noSelectedVariants,
+            "multipleEntriesPerVariant": multipleEntriesPerVariant
         ]
         
         if isClosestStop {
@@ -210,11 +213,19 @@ struct WidgetSetupView: View {
     }
     
     private var maxStopsAllowed: Int {
-        return getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        if (multipleEntriesPerVariant) {
+            return getMaxSopsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        } else {
+            return getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        }
     }
     
     private var maxVariantsPerStop: Int {
-        return getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        if (multipleEntriesPerVariant) {
+            return getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        } else {
+            return getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        }
         
     }
     
@@ -225,7 +236,7 @@ struct WidgetSetupView: View {
                     switch currentStep {
                     case 1:
                         VStack {
-                            SizeSelectionStep(selectedSize: $widgetSize, selectedTimeFormat: $selectedTimeFormat, showLastUpdatedStatus: $showLastUpdatedStatus)
+                            SizeSelectionStep(selectedSize: $widgetSize, selectedTimeFormat: $selectedTimeFormat, showLastUpdatedStatus: $showLastUpdatedStatus, multipleEntriesPerVariant: $multipleEntriesPerVariant)
                             
                             ContinueButton(
                                 title: "Continue",

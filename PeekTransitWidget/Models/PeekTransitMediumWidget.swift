@@ -13,5 +13,6 @@ struct PeekTransitMediumWidget: Widget {
         .configurationDisplayName("Transit Widget - Medium")
         .description("Shows transit schedules in medium size")
         .supportedFamilies([.systemMedium])
+        .disableContentMarginsIfNeeded()
     }
 }

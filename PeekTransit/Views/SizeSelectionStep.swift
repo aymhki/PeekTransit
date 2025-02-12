@@ -4,7 +4,9 @@ struct SizeSelectionStep: View {
     @Binding var selectedSize: String
     @Binding var selectedTimeFormat: TimeFormat
     @Binding var showLastUpdatedStatus: Bool
+    @Binding var multipleEntriesPerVariant: Bool
     @State private var isLoading = false
+    
     
     private let availableSizes = [
         "small",
@@ -50,7 +52,7 @@ struct SizeSelectionStep: View {
                             .fill(Color(currentTheme == .classic ? .black : .secondarySystemGroupedBackground))
                             .shadow(radius: 2)
                         
-                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus) ?? ([], [:])
+                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize, "multipleEntriesPerVariant": multipleEntriesPerVariant], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant) ?? ([], [:])
 
                         
                         DynamicWidgetView(
@@ -74,8 +76,75 @@ struct SizeSelectionStep: View {
                     .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
                     .frame(height: getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
                     .opacity(isLoading ? 0 : 1)
+                    
+
                 }
                 .padding()
+                
+                Text("Note that the preview is filled with placeholder data. Some text might be smooshed or cut off. The real appearance of the widget will depend on your device's screen size and orientation when you add the widget in your home/lock screen.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal)
+                
+                
+
+                
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Bus Variants Per Stop")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    
+                    Text("Choose between seeing multiple arrival times for a single bus variant in each bus stop or seeing a single arrival time for multiple bus variants in each bus stop\n\nNote that some widget sizes will only allow you to select one bus variant even if you selected the 'multiple variants' option as the space available on the widget is limited.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                    
+                    VStack(spacing: 12) {
+                        
+                        Button(action: {
+                            multipleEntriesPerVariant = false
+                        }) {
+                            HStack(alignment: .center, spacing: 8) {
+                                CircularCheckbox(isSelected: multipleEntriesPerVariant == false)
+                                    .frame(width: 24)
+                                
+                            Text("Single arrival time for multiple bus variants in each bus stop")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                                
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
+                        
+                        Button(action: {
+                            multipleEntriesPerVariant = true
+                        }) {
+                            HStack(alignment: .center, spacing: 8) {
+                                CircularCheckbox(isSelected: multipleEntriesPerVariant == true)
+                                    .frame(width: 24)
+                                
+                            Text("Multiple arrival times for a single bus variant in each bus stop")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                                
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
+                        
+
+                    }
+                    .padding(.horizontal)
+                    
+                }
                 
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Time Format")
@@ -162,6 +231,8 @@ struct SizeSelectionStep: View {
                     .padding(.horizontal)
                     
                 }
+                
+
                 
                 Spacer(minLength: 50)
             }

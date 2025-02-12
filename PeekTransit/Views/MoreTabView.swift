@@ -28,8 +28,6 @@ struct MoreTabView: View {
                             ForEach(DefaultTab.allCases) { tab in
                                 HStack(spacing: 12) {
                                     Image(systemName: tab.icon)
-                                        .imageScale(.small)
-                                        .padding(.trailing, 10)
                                     Text(tab.name)
                                 }
                                 .tag(tab.rawValue)
@@ -37,8 +35,6 @@ struct MoreTabView: View {
                             }
                         }
                         .pickerStyle(.menu)
-                        .font(.caption)
-                        .scaleEffect(0.9)
                     }
                 }
                 

@@ -470,6 +470,7 @@ class TransitAPI {
             let timeA = componentsA[3]
             let timeB = componentsB[3]
             
+            // Handle "Due" cases first
             if timeA == getDueStatusTextString() && timeB != getDueStatusTextString() {
                 return true
             }
@@ -480,6 +481,7 @@ class TransitAPI {
                 return true
             }
             
+            // Handle minute-based times
             let isMinutesA = timeA.hasSuffix("min.")
             let isMinutesB = timeB.hasSuffix("min.")
             
@@ -507,6 +509,7 @@ class TransitAPI {
             if isMinutesA { return true }
             if isMinutesB { return false }
             
+            // Handle clock times (HH:MM AM/PM)
             let timeComponentsA = timeA.components(separatedBy: " ")
             let timeComponentsB = timeB.components(separatedBy: " ")
             
@@ -521,16 +524,33 @@ class TransitAPI {
                 let isAMA = timeComponentsA[1] == "AM"
                 let isAMB = timeComponentsB[1] == "AM"
                 
+                // Get current hour in 24-hour format
+                let calendar = Calendar.current
+                let currentDate = Date()
+                let currentHour = calendar.component(.hour, from: currentDate)
+                
+                // Convert to 24-hour format
                 if !isAMA && hourA != 12 { hourA += 12 }
                 if isAMA && hourA == 12 { hourA = 0 }
                 if !isAMB && hourB != 12 { hourB += 12 }
                 if isAMB && hourB == 12 { hourB = 0 }
                 
-                let totalMinutesA = hourA * 60 + minuteA
-                let totalMinutesB = hourB * 60 + minuteB
+                // Calculate total minutes since midnight
+                var totalMinutesA = hourA * 60 + minuteA
+                var totalMinutesB = hourB * 60 + minuteB
                 
-                if abs(totalMinutesA - totalMinutesB) > 18 * 60 {
-                    return totalMinutesA > totalMinutesB
+                // If current time is PM and we see an AM time, it must be for tomorrow
+                if currentHour >= 12 {
+                    if isAMA {
+                        totalMinutesA += 24 * 60  // Add 24 hours worth of minutes
+                    }
+                    if isAMB {
+                        totalMinutesB += 24 * 60
+                    }
+                }
+                // If current time is AM and we see a PM time, it must be for today
+                else if currentHour < 12 {
+                    // No adjustment needed as PM times are already later in the day
                 }
                 
                 return totalMinutesA < totalMinutesB
@@ -539,7 +559,180 @@ class TransitAPI {
             return false
         })
     }
+    
+    
+    func cleanScheduleMixedTimeFormat(schedule: [String: Any]) -> [String] {
+        var busScheduleList: [String] = []
+        let currentDate = Date()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        var variantMinutesAdded: [String: Bool] = [:]
+        var tempScheduleEntries: [(key: String, name: String, state: String, time: String, sortValue: Int)] = []
+        
+        if let stopSchedule = schedule["stop-schedule"] as? [String: Any],
+           let routeSchedules = stopSchedule["route-schedules"] as? [[String: Any]] {
+            
+            for routeSchedule in routeSchedules {
+                if let scheduledStops = routeSchedule["scheduled-stops"] as? [[String: Any]] {
+                    for stop in scheduledStops {
+                        if let variant = stop["variant"] as? [String: Any],
+                           var variantKey = variant["key"] as? String,
+                           var variantName = variant["name"] as? String,
+                           let cancelled = stop["cancelled"] as? String,
+                           let times = stop["times"] as? [String: Any],
+                           let arrival = times["departure"] as? [String: Any] {
+                            
+                            let estimatedTime = arrival["estimated"] as? String
+                            let scheduledTime = arrival["scheduled"] as? String
+                            var finalArrivalText = ""
+                            var arrivalState = "Ok"
+                            var sortValue = 0
+                            
+                            if let estimatedTimeStr = estimatedTime,
+                               let scheduledTimeStr = scheduledTime {
+                                
+                                let estimatedTimeParsedDateAndTime = estimatedTimeStr.components(separatedBy: "T")
+                                let scheduledTimeParsedDateAndTime = scheduledTimeStr.components(separatedBy: "T")
+                                let estimatedTimeParsedDate = estimatedTimeParsedDateAndTime[0].components(separatedBy: "-")
+                                let estimatedTimeParsedTime = estimatedTimeParsedDateAndTime[1].components(separatedBy: ":")
+                                let scheduledTimeParsedDate = scheduledTimeParsedDateAndTime[0].components(separatedBy: "-")
+                                let scheduledTimeParsedTime = scheduledTimeParsedDateAndTime[1].components(separatedBy: ":")
+                                
+                                let estimatedTotalMinutes = (Int(estimatedTimeParsedDate[0])! * 525600) +
+                                                          (Int(estimatedTimeParsedDate[1])! * 43800) +
+                                                          (Int(estimatedTimeParsedDate[2])! * 1440) +
+                                                          (Int(estimatedTimeParsedTime[0])! * 60) +
+                                                          Int(estimatedTimeParsedTime[1])!
+                                let scheduledTotalMinutes = (Int(scheduledTimeParsedDate[0])! * 525600) +
+                                                          (Int(scheduledTimeParsedDate[1])! * 43800) +
+                                                          (Int(scheduledTimeParsedDate[2])! * 1440) +
+                                                          (Int(scheduledTimeParsedTime[0])! * 60) +
+                                                          Int(scheduledTimeParsedTime[1])!
+                                
+                                let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: currentDate)
+                                let currentTotalMinutes = (currentDateComponents.year! * 525600) +
+                                                        (currentDateComponents.month! * 43800) +
+                                                        (currentDateComponents.day! * 1440) +
+                                                        (currentDateComponents.hour! * 60) +
+                                                        currentDateComponents.minute!
+                                
+                                var timeDifference = 0.0
+                                
+                                if ((estimatedTotalMinutes - currentTotalMinutes) < 0) {
+                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
+                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0) {
+                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
+                                }
+                                
+                                let delay = estimatedTotalMinutes - scheduledTotalMinutes
+                                
+                                if timeDifference < -1 {
+                                    continue
+                                }
+                                
+                                if cancelled == "true" {
+                                    arrivalState = getCancelledStatusTextString()
+                                    finalArrivalText = ""
+                                    sortValue = Int.max
+                                } else {
+                                    var timeIn12HourFormat = ""
+                                    var timeInMinutes = ""
+                                    var finalHour = Int(estimatedTimeParsedTime[0])!
+                                    let am = finalHour < 12
+                                    
+                                    if finalHour == 0 {
+                                        finalHour = 12
+                                    } else if finalHour > 12 {
+                                        finalHour -= 12
+                                    }
+                                    
+                                    timeIn12HourFormat = "\(finalHour):\(estimatedTimeParsedTime[1]) \(am ? "AM" : "PM")"
+                                    
+                                    if timeDifference < 15 {
+                                        timeInMinutes = "\(Int(timeDifference)) min."
+                                    }
+                                    
+                                    if (delay > 0 && timeDifference < 15) {
+                                        arrivalState = getLateStatusTextString()
+                                    } else if delay < 0 && timeDifference < 15 {
+                                        arrivalState = getEarlyStatusTextString()
+                                    } else {
+                                        arrivalState = getOKStatusTextString()
+                                    }
+                                    
+                                    if (timeDifference == 0 || (timeDifference > 1 && timeDifference < -1)) {
+                                        timeInMinutes = getDueStatusTextString()
+                                        sortValue = -1
+                                    } else {
+                                        sortValue = Int(timeDifference)
+                                    }
+                                    
+                                    // Standardize variant key
+                                    if let firstPart = variantKey.split(separator: "-").first {
+                                        variantKey = String(firstPart)
+                                    }
+                                    
+                                    if (variantKey.contains("BLUE")) {
+                                        variantKey = "B"
+                                    }
+                                    
+                                    let variantIdentifier = "\(variantKey)\(getScheduleStringSeparator())\(variantName)"
+                                    
+                                    // Determine which time format to use
+                                    if !variantMinutesAdded[variantIdentifier, default: false] && timeDifference < 15 {
+                                        finalArrivalText = timeInMinutes
+                                        variantMinutesAdded[variantIdentifier] = true
+                                    } else {
+                                        finalArrivalText = timeIn12HourFormat
+                                    }
+                                }
+                            } else {
+                                finalArrivalText = "Time Unavailable"
+                                sortValue = Int.max
+                            }
+                            
+                            tempScheduleEntries.append((
+                                key: variantKey,
+                                name: variantName,
+                                state: arrivalState,
+                                time: finalArrivalText,
+                                sortValue: sortValue
+                            ))
+                        }
+                    }
+                }
+            }
+        }
+        
+        let sortedEntries = tempScheduleEntries.sorted { entry1, entry2 in
+            // Handle "Due" entries first
+            if entry1.time == getDueStatusTextString() {
+                return true
+            }
+            if entry2.time == getDueStatusTextString() {
+                return false
+            }
+            
+            if entry1.sortValue != entry2.sortValue {
+                return entry1.sortValue < entry2.sortValue
+            }
+            
+            if let route1 = Int(entry1.key), let route2 = Int(entry2.key) {
+                return route1 < route2
+            }
+            
+            return entry1.key < entry2.key
+        }
+        
+        busScheduleList = sortedEntries.map { entry in
+            "\(entry.key)\(getScheduleStringSeparator())\(entry.name)\(getScheduleStringSeparator())\(entry.state)\(getScheduleStringSeparator())\(entry.time)"
+        }
+        
+        return busScheduleList
+    }
 }
+
+
 
 
 
