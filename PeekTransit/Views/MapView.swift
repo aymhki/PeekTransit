@@ -67,7 +67,6 @@ struct MapView: View {
         }
         .onAppear {
             locationManager.requestLocation()
-            refreshStops()
         }
         .onChange(of: locationManager.location) { newLocation in
             guard let location = newLocation else { return }
