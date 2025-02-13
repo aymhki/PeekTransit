@@ -23,7 +23,7 @@ struct WidgetSetupView: View {
     @State private var showNoServiceAlert = false
     @State private var stopsWithoutService: [Int] = []
     @State private var noSelectedVariants: Bool = false
-    @State private var multipleEntriesPerVariant: Bool = false
+    @State private var multipleEntriesPerVariant: Bool = true
     let editingWidget: WidgetModel?
 
     
@@ -39,7 +39,7 @@ struct WidgetSetupView: View {
             _selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
             _widgetName = State(initialValue: "")
             _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
-            _multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? false)
+            _multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? true)
             
             if let stops = widget.widgetData["stops"] as? [[String: Any]] {
                 var variants: [String: [[String: Any]]] = [:]

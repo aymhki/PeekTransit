@@ -48,9 +48,9 @@ struct VariantSelectionStep: View {
         var uniqueVariants = Set<UniqueVariant>()
         
         for variantRouteObjects in variants {
-            guard var variant = variantRouteObjects["variant"] as? [String: Any],
+            guard let variant = variantRouteObjects["variant"] as? [String: Any],
                   var key = variant["key"] as? String,
-                  var name = variant["name"] as? String else { continue }
+                  let name = variant["name"] as? String else { continue }
             
             
                     if let firstPart = key.split(separator: "-").first {

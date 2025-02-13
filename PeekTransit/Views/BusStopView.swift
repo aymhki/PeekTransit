@@ -14,8 +14,14 @@ struct BusStopView: View {
     @State private var errorText = ""
     @State private var isLiveUpdatesEnabled: Bool = false
     @State private var currentTheme: StopViewTheme = .default
-    let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
+    let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
     @EnvironmentObject private var themeManager: ThemeManager
+    @State private var isRefreshCooldown = false
+    private let cooldownDuration: TimeInterval = 1.0
+    
+    private var isRefreshDisabled: Bool {
+        isLoading || isRefreshCooldown
+    }
     
     private var isSaved: Bool {
         savedStopsManager.isStopSaved(stop)
@@ -48,7 +54,13 @@ struct BusStopView: View {
     private func loadSchedules(isManual: Bool) async {
         if isManual {
             isLoading = true
+            isRefreshCooldown = true
+                        
+            DispatchQueue.main.asyncAfter(deadline: .now() + cooldownDuration) {
+                isRefreshCooldown = false
+            }
         }
+        
         defer { isLoading = false }
         
         do {
@@ -235,14 +247,16 @@ struct BusStopView: View {
                     .bold()
                     .foregroundStyle(.white)
                     .padding()
-                    .background(.blue)
+                    .background(isRefreshDisabled ? Color.gray : .blue)
                     .clipShape(Circle())
                     .shadow(radius: 4)
             }
             .padding()
-            .disabled(isLoading)
+            .disabled(isRefreshDisabled)
+            .animation(.easeInOut, value: isRefreshDisabled)
         }
         .modifier(ConditionalRefreshable(isEnabled: !isDeepLink) {
+            guard !isRefreshCooldown else { return }
             isManualRefresh = true
             await loadSchedules(isManual: true)
         })
@@ -261,6 +275,7 @@ struct BusStopView: View {
         .onReceive(timer) { _ in
             guard isLiveUpdatesEnabled else { return }
             isManualRefresh = false
+            
             Task {
                 await loadSchedules(isManual: false)
             }

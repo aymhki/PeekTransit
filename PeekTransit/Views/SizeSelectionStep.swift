@@ -73,6 +73,7 @@ struct SizeSelectionStep: View {
                     .if(currentTheme == .classic) { view in
                         view.background(.black)
                     }
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                     .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
                     .frame(height: getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: selectedSize))
                     .opacity(isLoading ? 0 : 1)
@@ -103,25 +104,6 @@ struct SizeSelectionStep: View {
                     VStack(spacing: 12) {
                         
                         Button(action: {
-                            multipleEntriesPerVariant = false
-                        }) {
-                            HStack(alignment: .center, spacing: 8) {
-                                CircularCheckbox(isSelected: multipleEntriesPerVariant == false)
-                                    .frame(width: 24)
-                                
-                            Text("Single arrival time for multiple bus variants in each bus stop")
-                                    .foregroundColor(.primary)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .multilineTextAlignment(.leading)
-                                
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .cornerRadius(10)
-                        }
-                        
-                        Button(action: {
                             multipleEntriesPerVariant = true
                         }) {
                             HStack(alignment: .center, spacing: 8) {
@@ -140,7 +122,24 @@ struct SizeSelectionStep: View {
                             .cornerRadius(10)
                         }
                         
-
+                        Button(action: {
+                            multipleEntriesPerVariant = false
+                        }) {
+                            HStack(alignment: .center, spacing: 8) {
+                                CircularCheckbox(isSelected: multipleEntriesPerVariant == false)
+                                    .frame(width: 24)
+                                
+                            Text("Single arrival time for multiple bus variants in each bus stop")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                                
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
                     }
                     .padding(.horizontal)
                     
@@ -157,12 +156,14 @@ struct SizeSelectionStep: View {
                         .padding(.horizontal)
                     
                     VStack(spacing: 12) {
+                        
                         ForEach(TimeFormat.allCases, id: \.self) { format in
+                            
                             Button(action: {
                                 selectedTimeFormat = format
                             }) {
                                 HStack(alignment: .center, spacing: 8) {
-                                    CircularCheckbox(isSelected: selectedTimeFormat == format)
+                                    CircularCheckbox(isSelected: (selectedTimeFormat == format && !multipleEntriesPerVariant))
                                         .frame(width: 24)
                                     Text(format.description)
                                         .foregroundColor(.primary)
@@ -174,7 +175,28 @@ struct SizeSelectionStep: View {
                                 .background(Color(.secondarySystemGroupedBackground))
                                 .cornerRadius(10)
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            .disabled(multipleEntriesPerVariant)
+                            
                         }
+                        
+                        Button(action: {}) {
+                            HStack(alignment: .center, spacing: 8) {
+                                CircularCheckbox(isSelected: multipleEntriesPerVariant)
+                                    .frame(width: 24)
+                                Text("Mixed format, one entry in minutes and one in clock format (Available only for the 'Multiple Varaints' option)")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .disabled(!multipleEntriesPerVariant)
+                        
                     }
                     .padding(.horizontal)
                 }

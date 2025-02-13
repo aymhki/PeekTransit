@@ -5,6 +5,16 @@ import Combine
 import CoreLocation
 
 
+public func isLargeDevice() -> Bool {
+    #if os(macOS)
+        return true
+    #else
+        let screenSize = UIScreen.main.bounds.size
+        let minDimension = min(screenSize.width, screenSize.height)
+        return minDimension >= 768
+    #endif
+}
+
 public func getMaxSopsAllowed(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> Int {
     
     if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
@@ -358,11 +368,14 @@ public func getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: WidgetFamil
 }
 
 public func getWidgetPreviewWidthForSize(widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> CGFloat {
+    
+    let isInLargeScren = isLargeDevice()
+    
     if (widgetSizeSystemFormat == nil && widgetSizeStringFormat != nil) {
         if (widgetSizeStringFormat == "large") {
-            return .infinity
+            return isInLargeScren ? 380 : .infinity
         } else if (widgetSizeStringFormat == "medium") {
-            return .infinity
+            return isInLargeScren ? 380 : .infinity
         } else if (widgetSizeStringFormat == "small") {
             return 180
         } else if (widgetSizeStringFormat == "lockscreen") {
@@ -370,12 +383,11 @@ public func getWidgetPreviewWidthForSize(widgetSizeSystemFormat: WidgetFamily?, 
         } else {
             return .infinity
         }
-        
     } else if (widgetSizeStringFormat == nil && widgetSizeSystemFormat != nil) {
         if (widgetSizeSystemFormat == .systemLarge) {
-            return .infinity
+            return isInLargeScren ? 380 : .infinity
         } else if (widgetSizeSystemFormat == .systemMedium) {
-            return .infinity
+            return isInLargeScren ? 380 : .infinity
         } else if (widgetSizeSystemFormat == .systemSmall) {
             return 180
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
@@ -487,17 +499,20 @@ public struct ThemeModifier: ViewModifier {
     let theme: StopViewTheme
     let text: String
     
+    let sizeFactor = isLargeDevice() ? 1.5 : 1.0
+
+    
     public func body(content: Content) -> some View {
         switch theme {
         case .modern:
             content
-                .font(.system(size: 14, design: .monospaced).bold())
+                .font(.system(size: 14 * sizeFactor, design: .monospaced).bold())
                 .background(Color(.secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))
         case .classic:
             content
-                .font(.custom("LCDDot", fixedSize: 13)).bold()
+                .font(.custom("LCDDot", fixedSize: 13 * sizeFactor)).bold()
                 .fontWeight(.black)
                 .background(.black)
                 .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))

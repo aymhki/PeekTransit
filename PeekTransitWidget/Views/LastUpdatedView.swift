@@ -14,7 +14,6 @@ struct LastUpdatedView: View {
     }
     
     var body: some View {
-        let fontSizeToUse = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: size)
         
         if (size == "lockscreen" || size == "small") {
             Text("Updated at \(formattedTime)")

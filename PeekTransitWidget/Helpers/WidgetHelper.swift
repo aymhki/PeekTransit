@@ -92,8 +92,8 @@ enum WidgetHelper {
             return (nil, widgetData)
         }
         
-        let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? false
-        var schedulesArray: [String] = []  
+        let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? true
+        var schedulesArray: [String] = []
         var updatedWidgetData = widgetData
         var updatedStops: [[String: Any]] = []
         var cleanedSchedule: [String] = []
@@ -153,7 +153,7 @@ enum WidgetHelper {
                             if components.count >= 2 {
                                 let variantKey = components[0]
                                 let variantName = components[1]
-                                let variantIdentifier = "\(variantKey)-\(variantName)"
+                                let variantIdentifier = "\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)"
                                 
                                 if !processedVariants.contains(variantIdentifier) {
                                     let variantEntries = cleanedSchedule.filter { entry in

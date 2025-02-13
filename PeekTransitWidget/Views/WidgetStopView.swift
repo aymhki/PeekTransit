@@ -9,6 +9,7 @@ struct WidgetStopView: View {
     let fullyLoaded: Bool
     let forPreview: Bool
     let multipleEntriesPerVariant: Bool
+    let showLastUpdatedStatus: Bool
 
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -84,7 +85,7 @@ struct WidgetStopView: View {
                         ForEach(Array(schedulesToShow.enumerated()), id: \.element) { (scheduleIndex, schedule) in
                             if (size == .systemSmall || size == .accessoryRectangular) {
                                 BusScheduleRow(schedule: schedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                                    .padding(.bottom, 2)
+                                    .padding(.bottom, showLastUpdatedStatus ? 4 : 6)
                             } else if (size == .systemLarge) {
                                 BusScheduleRow(schedule: schedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                                     .padding(.horizontal, 2)

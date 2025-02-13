@@ -124,14 +124,14 @@ struct DynamicWidgetView: View {
                 ForEach(Array(stops.prefix(maxStops)).indices, id: \.self) { stopIndex in
                     let stop = stops[stopIndex]
                     let stopNumber = stop["number"] as? Int ?? 0
-                    let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? false
+                    let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? true
                     let destinationUrl = createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!
                     Link(destination: destinationUrl ) {
                         if (size == .accessoryRectangular || size == .systemSmall) {
-                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant)
+                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetData["showLastUpdatedStatus"] as? Bool ?? true)
                                 .widgetURL(destinationUrl)
                         } else {
-                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant)
+                            WidgetStopView(stop: stop, scheduleData: scheduleData, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetData["showLastUpdatedStatus"] as? Bool ?? true)
                         }
                     }
                     

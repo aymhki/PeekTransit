@@ -26,19 +26,7 @@ struct StopMapPreview: View {
             imageName = "DefaultBall"
         }
         
-        let color: UIColor
-        switch direction.lowercased() {
-        case "southbound":
-            color = .systemGreen
-        case "northbound":
-            color = .systemOrange
-        case "eastbound":
-            color = .systemRed
-        case "westbound":
-            color = .systemBlue
-        default:
-            color = .systemGray
-        }
+
         
         return UIImage(named: imageName)
     }

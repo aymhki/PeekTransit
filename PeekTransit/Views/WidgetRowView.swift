@@ -12,7 +12,7 @@ struct WidgetRowView: View {
         let showLastUpdatedStatus = widgetData["showLastUpdatedStatus"] as? Bool ?? true
         let timeFormatSelected = widgetData["timeFormat"] as? String ?? TimeFormat.default.rawValue
         let timeFormatSelectedFinal = timeFormatSelected == TimeFormat.clockTime.rawValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
-        let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? false
+        let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? true
         let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: widgetData, noConfig: false, timeFormat: timeFormatSelectedFinal, showLastUpdatedStatus:showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant ) ?? ([], [:])
         
         HStack(spacing: 12) {
@@ -40,11 +40,12 @@ struct WidgetRowView: View {
                     .if(themeManager.currentTheme == .classic) { view in
                         view.background(.black)
                     }
-                    .padding()
+                    //.padding()
                 }
                 .if(themeManager.currentTheme == .classic) { view in
                     view.background(.black)
                 }
+                .clipShape(RoundedRectangle(cornerRadius: 12))
                 .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: currentSize))
                 .frame(height: getPreviewHeight())
                 
@@ -53,17 +54,16 @@ struct WidgetRowView: View {
                 Text(widgetData["name"] as? String ?? "Unnamed Widget")
                     .font(.subheadline)
                     .foregroundColor(.primary)
+                    .padding()
                 
-                Divider()
             }
+            .padding()
         }
+        .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
     }
     
     private func getPreviewHeight() -> CGFloat {

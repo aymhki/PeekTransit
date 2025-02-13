@@ -305,7 +305,7 @@ class TransitAPI {
         startOfNextDayComponents.second = 0
 
         let periodOfTimeLater = calendar.date(from: periodAllowedForBusRoutes)!
-        let startOfNextDay = calendar.date(from: startOfNextDayComponents)!
+        // let startOfNextDay = calendar.date(from: startOfNextDayComponents)!
         let endDate = periodOfTimeLater // periodOfTimeLater < startOfNextDay ? periodOfTimeLater : startOfNextDay
 
         func formatToISO8601String(from components: DateComponents) -> String {
@@ -356,7 +356,7 @@ class TransitAPI {
                     for stop in scheduledStops {
                         if let variant = stop["variant"] as? [String: Any],
                            var variantKey = variant["key"] as? String,
-                           var variantName = variant["name"] as? String,
+                           let variantName = variant["name"] as? String,
                            let cancelled = stop["cancelled"] as? String,
                            let times = stop["times"] as? [String: Any],
                            let arrival = times["departure"] as? [String: Any] {
@@ -390,7 +390,7 @@ class TransitAPI {
                                     timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
                                 }
                                 
-                                var delay = estimatedTotalMinutes - scheduledTotalMinutes
+                                let delay = estimatedTotalMinutes - scheduledTotalMinutes
                                 
 //                                if ( (estimatedTotalMinutes - scheduledTotalMinutes) < 0 ) {
 //                                    delay = floor(Double(estimatedTotalMinutes - scheduledTotalMinutes))
@@ -577,7 +577,7 @@ class TransitAPI {
                     for stop in scheduledStops {
                         if let variant = stop["variant"] as? [String: Any],
                            var variantKey = variant["key"] as? String,
-                           var variantName = variant["name"] as? String,
+                           let variantName = variant["name"] as? String,
                            let cancelled = stop["cancelled"] as? String,
                            let times = stop["times"] as? [String: Any],
                            let arrival = times["departure"] as? [String: Any] {
@@ -616,13 +616,13 @@ class TransitAPI {
                                                         (currentDateComponents.hour! * 60) +
                                                         currentDateComponents.minute!
                                 
-                                var timeDifference = 0.0
+                                var timeDifference = estimatedTotalMinutes - currentTotalMinutes
                                 
-                                if ((estimatedTotalMinutes - currentTotalMinutes) < 0) {
-                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
-                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0) {
-                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
-                                }
+//                                if ((estimatedTotalMinutes - currentTotalMinutes) < 0) {
+//                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
+//                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0) {
+//                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
+//                                }
                                 
                                 let delay = estimatedTotalMinutes - scheduledTotalMinutes
                                 

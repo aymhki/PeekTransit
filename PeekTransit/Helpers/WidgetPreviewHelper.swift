@@ -19,8 +19,8 @@ enum PreviewHelper {
                                    let name = variant["name"] as? String {
                                     
                                     if (multipleEntriesPerVariant) {
-                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
-                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                                     } else {
                                         previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                                     }
@@ -46,8 +46,8 @@ enum PreviewHelper {
                             ]
                             selectedVariants.append(variant)
                             if (multipleEntriesPerVariant) {
-                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
-                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                             } else {
                                 previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                             }
@@ -94,8 +94,8 @@ enum PreviewHelper {
                         ]
                         selectedVariants.append(variant)
                         if (multipleEntriesPerVariant) {
-                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
-                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                         } else {
                             previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                         }
@@ -144,8 +144,8 @@ enum PreviewHelper {
                     ]
                     selectedVariants.append(variant)
                     if (multipleEntriesPerVariant) {
-                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
-                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())")
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                     } else {
                         previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                     }
