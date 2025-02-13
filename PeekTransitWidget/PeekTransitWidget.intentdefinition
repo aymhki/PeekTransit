@@ -21,6 +21,8 @@
 			<string>information</string>
 			<key>INIntentClassName</key>
 			<string>ConfigurationLargeIntent</string>
+			<key>INIntentDescription</key>
+			<string>Select Configuration</string>
 			<key>INIntentDescriptionID</key>
 			<string>X6AzsT</string>
 			<key>INIntentEligibleForWidgets</key>
@@ -99,6 +101,8 @@
 		<dict>
 			<key>INIntentCategory</key>
 			<string>information</string>
+			<key>INIntentDescription</key>
+			<string>Select Configuration</string>
 			<key>INIntentDescriptionID</key>
 			<string>nzWArS</string>
 			<key>INIntentEligibleForWidgets</key>
@@ -177,6 +181,8 @@
 		<dict>
 			<key>INIntentCategory</key>
 			<string>information</string>
+			<key>INIntentDescription</key>
+			<string>Select Configuration</string>
 			<key>INIntentDescriptionID</key>
 			<string>UkcXgT</string>
 			<key>INIntentEligibleForWidgets</key>
@@ -255,6 +261,8 @@
 		<dict>
 			<key>INIntentCategory</key>
 			<string>information</string>
+			<key>INIntentDescription</key>
+			<string>Select Configuration</string>
 			<key>INIntentDescriptionID</key>
 			<string>Epu8CJ</string>
 			<key>INIntentEligibleForWidgets</key>
