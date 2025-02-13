@@ -61,9 +61,9 @@ struct MoreTabView: View {
                 Section("Info") {
                     NavigationLink(destination: AboutView()) {
                         SettingsRow(
-                            icon: "person.fill",
+                            icon: "info.circle",
                             iconColor: .red,
-                            text: "Author"
+                            text: "About"
                         )
                     }
                 }

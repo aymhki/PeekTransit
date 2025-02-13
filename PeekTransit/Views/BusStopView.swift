@@ -205,6 +205,7 @@ struct BusStopView: View {
                                                 .frame(width: columnWidths[3], alignment: .leading)
                                         }
                                     }
+                                    .draggable(schedule)
                                     .padding(.vertical, 12)
                                     .padding(.horizontal, 1)
                                 }

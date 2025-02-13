@@ -207,7 +207,7 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
         } else if (widgetSizeStringFormat == "small") {
             return 12
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 10
+            return 12
         } else {
             return 10
         }
@@ -220,7 +220,7 @@ public func getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamily?
         } else if (widgetSizeSystemFormat == .systemSmall) {
             return 12
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 10
+            return 12
         } else {
             return 10
         }
@@ -238,9 +238,9 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeStringFormat == "medium") {
             return 11
         } else if (widgetSizeStringFormat == "small") {
-            return 8
+            return 9
         } else if (widgetSizeStringFormat == "lockscreen") {
-            return 8
+            return 9
         } else {
             return 8
         }
@@ -251,9 +251,9 @@ public func getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: WidgetFamil
         } else if (widgetSizeSystemFormat == .systemMedium) {
             return 11
         } else if (widgetSizeSystemFormat == .systemSmall) {
-            return 8
+            return 9
         } else if (widgetSizeSystemFormat == .accessoryRectangular) {
-            return 8
+            return 9
         } else {
             return 8
         }
@@ -614,7 +614,7 @@ public struct WidgetThemeModifier: ViewModifier {
                 content
                     .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                     .fontWeight(.black)
-                    .background(widgetSize == .accessoryRectangular ? Color(.secondarySystemGroupedBackground) : .black)
+                    .background(.black)
                     .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))
             }
         }
@@ -623,17 +623,12 @@ public struct WidgetThemeModifier: ViewModifier {
     private func getFontSize() -> CGFloat {
         var baseFontSize = getNormalFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
             
-    
         if text.lowercased().contains("updated") {
             baseFontSize = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
-            
-            baseFontSize = baseFontSize - 2
-
         }
         
         if text.lowercased().contains("stop") {
             baseFontSize = getStopNameFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
-        
         }
         
         
@@ -726,21 +721,21 @@ extension Bundle {
 
 public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
     switch size {
-    case .systemLarge: return 40
-    case .systemMedium: return 35
-    case .systemSmall: return 25
-    case .accessoryRectangular: return 21
-    default: return 30
+        case .systemLarge: return 40
+        case .systemMedium: return 35
+        case .systemSmall: return 25
+        case .accessoryRectangular: return 24
+        default: return 30
     }
 }
 
 public func getRouteNameWidth(size: WidgetFamily) -> CGFloat {
     switch size {
-    case .systemLarge: return 100
-    case .systemMedium: return 100
-    case .systemSmall: return 21
-    case .accessoryRectangular: return 16
-    default: return 70
+        case .systemLarge: return 100
+        case .systemMedium: return 100
+        case .systemSmall: return 21
+        case .accessoryRectangular: return 18
+        default: return 70
     }
 }
 

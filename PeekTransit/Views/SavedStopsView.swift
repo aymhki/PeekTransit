@@ -48,6 +48,7 @@ struct SavedStopsView: View {
                             NavigationLink(destination: BusStopView(stop: savedStop.stopData, isDeepLink: false)) {
                                 SavedStopRowView(savedStop: savedStop)
                             }
+
                         }
                         .onDelete { indexSet in
                             savedStopsManager.removeStop(at: indexSet)

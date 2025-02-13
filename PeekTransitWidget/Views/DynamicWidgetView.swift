@@ -82,7 +82,7 @@ struct DynamicWidgetView: View {
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
                                     LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
-                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
                         }

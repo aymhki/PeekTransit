@@ -382,13 +382,13 @@ class TransitAPI {
                                 let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: currentDate)
                                 let currentTotalMinutes = (currentDateComponents.year! * 525600) + (currentDateComponents.month! * 43800) + (currentDateComponents.day! * 1440) + (currentDateComponents.hour! * 60) + currentDateComponents.minute!
                                 
-                                var timeDifference = 0.0 //estimatedTotalMinutes - currentTotalMinutes
+                                var timeDifference = estimatedTotalMinutes - currentTotalMinutes //estimatedTotalMinutes - currentTotalMinutes
                                 
-                                if ( (estimatedTotalMinutes - currentTotalMinutes) < 0 ) {
-                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
-                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0 ) {
-                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
-                                }
+//                                if ( (estimatedTotalMinutes - currentTotalMinutes) < 0 ) {
+//                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
+//                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0 ) {
+//                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
+//                                }
                                 
                                 let delay = estimatedTotalMinutes - scheduledTotalMinutes
                                 
@@ -398,7 +398,7 @@ class TransitAPI {
 //                                    delay = ceil(Double(estimatedTotalMinutes - scheduledTotalMinutes))
 //                                }
 
-                                if timeDifference < -1 {
+                                if timeDifference < -3 {
                                     continue
                                 }
                                 
@@ -616,7 +616,7 @@ class TransitAPI {
                                                         (currentDateComponents.hour! * 60) +
                                                         currentDateComponents.minute!
                                 
-                                var timeDifference = estimatedTotalMinutes - currentTotalMinutes
+                                let timeDifference = estimatedTotalMinutes - currentTotalMinutes
                                 
 //                                if ((estimatedTotalMinutes - currentTotalMinutes) < 0) {
 //                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
@@ -626,7 +626,7 @@ class TransitAPI {
                                 
                                 let delay = estimatedTotalMinutes - scheduledTotalMinutes
                                 
-                                if timeDifference < -1 {
+                                if timeDifference < -3 {
                                     continue
                                 }
                                 

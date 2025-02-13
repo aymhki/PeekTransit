@@ -41,6 +41,18 @@ struct StopRow: View {
                 stopRowBody()
             }
             .buttonStyle(PlainButtonStyle())
+            .contextMenu(menuItems: {
+                Button(action: {
+                    savedStopsManager.toggleSavedStatus(for: stop)
+                }) {
+                    Label(
+                        savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
+                        systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
+                    )
+                }
+            }, preview: {
+                BusStopPreviewProvider(stop: stop)
+            })
             .onChange(of: themeManager.currentTheme) { _ in
                 forceUpdate = UUID()
             }
@@ -50,6 +62,18 @@ struct StopRow: View {
         } else {
             stopRowBody()
             .buttonStyle(PlainButtonStyle())
+            .contextMenu(menuItems: {
+                Button(action: {
+                    savedStopsManager.toggleSavedStatus(for: stop)
+                }) {
+                    Label(
+                        savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
+                        systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
+                    )
+                }
+            }, preview: {
+                BusStopPreviewProvider(stop: stop)
+            })
             .onChange(of: themeManager.currentTheme) { _ in
                 forceUpdate = UUID()
             }
@@ -119,3 +143,5 @@ struct StopRow: View {
         .padding(.vertical, 8)
     }
 }
+
+
