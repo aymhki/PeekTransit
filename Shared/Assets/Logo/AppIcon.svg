@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+    <defs>
+        <!-- Colors -->
+        <style type="text/css">
+            :root {
+            --primary-color: #007AFF;
+            --background-color: white;
+            --text-color: #007AFF;
+            --highlight-color: white;
+            }
+        </style>
+
+        <!-- Reusable bus component -->
+        <g id="busIcon">
+            <!-- Bus body -->
+            <rect x="0" y="0" width="32" height="32" rx="6" fill="var(--primary-color)"/>
+            <!-- Windshield -->
+            <rect x="4" y="4" width="24" height="12" rx="2" fill="var(--highlight-color)" opacity="0.9"/>
+            <!-- Headlights -->
+            <rect x="4" y="20" width="7" height="6" rx="1" fill="var(--highlight-color)"/>
+            <rect x="21" y="20" width="7" height="6" rx="1" fill="var(--highlight-color)"/>
+            <!-- Wheels -->
+            <circle cx="8" cy="32" r="4" fill="var(--primary-color)"/>
+            <circle cx="24" cy="32" r="4" fill="var(--primary-color)"/>
+        </g>
+
+        <!-- Reusable clock component -->
+        <g id="clockIcon">
+            <circle cx="200" cy="16" r="12" fill="var(--primary-color)"/>
+        </g>
+
+        <!-- Reusable connecting line -->
+        <g id="connectingLine">
+            <path d="M42 16 H180" stroke="var(--primary-color)" stroke-width="6" stroke-linecap="round"/>
+        </g>
+
+        <!-- Reusable eye component -->
+        <g id="eye">
+            <ellipse cx="0" cy="0" rx="7" ry="10" fill="none" stroke="var(--primary-color)" stroke-width="1"/>
+            <ellipse cx="-3" cy="0" rx="4" ry="4" fill="var(--primary-color)"/>
+            <ellipse cx="-5" cy="0" rx="1" ry="1" fill="var(--highlight-color)" stroke="var(--highlight-color)" stroke-width="1" opacity="0.9"/>
+        </g>
+    </defs>
+
+    <!-- Background -->
+    <rect x="0" y="0" width="1024" height="1024" rx="64" fill="var(--primary-color)"/>
+
+    <!-- Widget Frame -->
+    <rect x="32" y="32" width="960" height="960" rx="48" fill="var(--background-color)" opacity="0.95"/>
+
+    <!-- Lines -->
+    <g transform="translate(100, 100) scale(3.8)">
+        <!-- Line 1 -->
+        <g transform="translate(0, -10)">
+            <use href="#busIcon"/>
+            <use href="#connectingLine"/>
+            <use href="#clockIcon"/>
+            <path d="M200 8 L200 16 L208 16" stroke="var(--highlight-color)" stroke-width="2" fill="none"/>
+        </g>
+
+        <!-- Peek Logo -->
+        <g transform="translate(20, 80) scale(2.5)">
+            <text font-family="SFProText-Black" font-size="24" fill="var(--text-color)" font-weight="bold">
+                <tspan x="6" y="0">P</tspan>
+            </text>
+
+            <!-- Eyes -->
+            <g transform="translate(30, -8)">
+                <use href="#eye"/>
+            </g>
+            <g transform="translate(44, -8)">
+                <use href="#eye"/>
+            </g>
+
+            <text font-family="SFProText-Black" font-size="24" fill="var(--text-color)" font-weight="bold">
+                <tspan x="52" y="0">k</tspan>
+            </text>
+        </g>
+
+        <!-- Line 2 -->
+        <g transform="translate(0, 95) scale(1)">
+            <use href="#busIcon"/>
+            <use href="#connectingLine"/>
+            <use href="#clockIcon"/>
+            <path d="M200 8 L200 16 L194 12" stroke="var(--highlight-color)" stroke-width="2" fill="none"/>
+        </g>
+
+        <!-- Transit Text -->
+        <g transform="translate(0, 185) scale(2.5)">
+            <text font-family="SFProText-Black" font-size="24" fill="var(--text-color)" font-weight="bolder">
+                <tspan x="0" y="0">Transit</tspan>
+            </text>
+        </g>
+
+        <!-- Line 3 -->
+        <g transform="translate(0, 195)">
+            <use href="#busIcon"/>
+            <use href="#connectingLine"/>
+            <use href="#clockIcon"/>
+            <path d="M200 8 L200 16 L196 20" stroke="var(--highlight-color)" stroke-width="2" fill="none"/>
+        </g>
+    </g>
+</svg>

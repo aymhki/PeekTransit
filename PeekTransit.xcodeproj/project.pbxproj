@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		2FBB709C2D500E0C008998C8 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FBB709B2D500E0C008998C8 /* WidgetKit.framework */; };
 		2FBB709E2D500E0C008998C8 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FBB709D2D500E0C008998C8 /* SwiftUI.framework */; };
-		2FBB70AC2D500E0D008998C8 /* PeekTransitWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2FBB70AC2D500E0D008998C8 /* PeekTransitWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2FBB71232D501CC0008998C8 /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FBB71222D501CC0008998C8 /* Intents.framework */; };
-		2FBB712A2D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2FBB712A2D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +66,32 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2F2E798E2D5FC1E6005C12A0 /* Exceptions for "Shared" folder in "Peek Transit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Assets/IPad App Preview Screens/IMG_0007.PNG",
+				"Assets/IPad App Preview Screens/IMG_0008.PNG",
+				"Assets/IPad App Preview Screens/IMG_0009.PNG",
+				"Assets/IPad App Preview Screens/IMG_0010.PNG",
+				"Assets/IPad App Preview Screens/IMG_0011.PNG",
+				"Assets/IPad App Preview Screens/IMG_0012.PNG",
+				"Assets/IPad App Preview Screens/IMG_0013.PNG",
+				"Assets/IPad App Preview Screens/IMG_0014.PNG",
+				"Assets/IPad App Preview Screens/IMG_0015.PNG",
+				"Assets/IPad App Preview Screens/IMG_0016.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0010.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0011.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0012.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0013.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0014.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0016.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0017.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0018.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0019.PNG",
+				"Assets/IPhone App Preview Screens/IMG_0020.PNG",
+			);
+			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
+		};
 		2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -147,6 +173,7 @@
 				"Assets/Fonts/Doto-Thin.ttf",
 				"Assets/Fonts/Doto-VariableFont_ROND,wght.ttf",
 				Assets/Fonts/LCDDot.ttf,
+				"Assets/Fonts/SF-Pro-Text-Black.otf",
 				Helpers/PeekTransitConstants.swift,
 				Helpers/TimeFormat.swift,
 				Helpers/TransitError.swift,
@@ -199,6 +226,7 @@
 				"Assets/Fonts/Doto-Thin.ttf",
 				"Assets/Fonts/Doto-VariableFont_ROND,wght.ttf",
 				Assets/Fonts/LCDDot.ttf,
+				"Assets/Fonts/SF-Pro-Text-Black.otf",
 				Helpers/PeekTransitConstants.swift,
 				Helpers/TimeFormat.swift,
 				Helpers/TransitError.swift,
@@ -220,6 +248,7 @@
 		2F200FCD2D4EBCEE009E18AE /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				2F2E798E2D5FC1E6005C12A0 /* Exceptions for "Shared" folder in "Peek Transit" target */,
 				2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */,
 				2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
@@ -485,11 +514,13 @@
 /* Begin PBXTargetDependency section */
 		2FBB70AB2D500E0D008998C8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
 			targetProxy = 2FBB70AA2D500E0D008998C8 /* PBXContainerItemProxy */;
 		};
 		2FBB71292D501CC0008998C8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
 			targetProxy = 2FBB71282D501CC0008998C8 /* PBXContainerItemProxy */;
 		};
@@ -504,7 +535,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -513,7 +544,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PeekTransit needs access to your location to fetch nearby bus stops and stop schedules.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to show nearby transit stops and provide directions";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -523,9 +554,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -540,7 +574,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -549,7 +583,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PeekTransit needs access to your location to fetch nearby bus stops and stop schedules.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to show nearby transit stops and provide directions";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -559,9 +593,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -788,6 +825,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -815,6 +853,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -12,9 +12,11 @@ struct SettingsRow: View {
                 .frame(width: 28, height: 28)
                 .background(iconColor)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+                .font(.subheadline)
             
             Text(text)
                 .foregroundColor(.primary)
+                .font(.subheadline)
         }
     }
 }

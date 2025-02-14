@@ -40,8 +40,9 @@ struct WidgetRowView: View {
                     .if(themeManager.currentTheme == .classic) { view in
                         view.background(.black)
                     }
-                    //.padding()
+                    
                 }
+                
                 .if(themeManager.currentTheme == .classic) { view in
                     view.background(.black)
                 }

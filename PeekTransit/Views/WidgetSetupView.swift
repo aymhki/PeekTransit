@@ -56,7 +56,7 @@ struct WidgetSetupView: View {
 
     private func generateDefaultWidgetName() -> String {
         if isClosestStop {
-            return "Closest Stop - \(widgetSize) - \(selectedTimeFormat.rawValue) - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
+            return "Closest Stop - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.rawValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         } else {
             let stopNumbers = selectedStops.compactMap { stop -> String? in
                 guard let number = stop["number"] as? Int else { return nil }
@@ -73,7 +73,7 @@ struct WidgetSetupView: View {
                 variantKeys = "Up Coming Buses"
             }
             
-            return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(selectedTimeFormat.rawValue) - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
+            return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.rawValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         }
     }
 
