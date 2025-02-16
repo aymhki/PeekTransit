@@ -29,7 +29,7 @@ struct SizeSelectionStep: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                Text("Select widget size, time format, and last updated status")
+                Text("Select the widget configuration options")
                     .font(.title3)
                     .padding([.top, .horizontal])
                 
@@ -51,6 +51,10 @@ struct SizeSelectionStep: View {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color(currentTheme == .classic ? .black : .secondarySystemGroupedBackground))
                             .shadow(radius: 2)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                            )
                         
                         let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize, "multipleEntriesPerVariant": multipleEntriesPerVariant], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant) ?? ([], [:])
 
@@ -64,11 +68,15 @@ struct SizeSelectionStep: View {
                             forPreview: true
                             
                         )
+                        
                         .if(currentTheme == .classic) { view in
                             view.background(.black)
                         }
+                        
                         .padding(8)
                         .foregroundColor(Color.primary)
+                        
+                    
                     }
                     .if(currentTheme == .classic) { view in
                         view.background(.black)
@@ -82,10 +90,10 @@ struct SizeSelectionStep: View {
                 }
                 .padding()
                 
-                Text("Note that the preview is filled with placeholder data. Some text might be smooshed or cut off. The real appearance of the widget will depend on your device's screen size and orientation when you add the widget in your home/lock screen.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal)
+//                Text("Note that the preview is filled with placeholder data. Some text might be smooshed or cut off. The real appearance of the widget will depend on your device's screen size and orientation when you add the widget in your home/lock screen.")
+//                    .font(.subheadline)
+//                    .foregroundColor(.secondary)
+//                    .padding(.horizontal)
                 
                 
 
@@ -96,10 +104,10 @@ struct SizeSelectionStep: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
-                    Text("Choose between seeing multiple arrival times for a single bus variant in each bus stop or seeing a single arrival time for multiple bus variants in each bus stop\n\nNote that some widget sizes will only allow you to select one bus variant even if you selected the 'multiple variants' option as the space available on the widget is limited.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
+//                    Text("Choose between seeing multiple arrival times for a single bus variant in each bus stop or seeing a single arrival time for multiple bus variants in each bus stop\n\nNote that some widget sizes will only allow you to select one bus variant even if you selected the 'multiple variants' option as the space available on the widget is limited.")
+//                        .font(.subheadline)
+//                        .foregroundColor(.secondary)
+//                        .padding(.horizontal)
                     
                     VStack(spacing: 12) {
                         
@@ -150,10 +158,10 @@ struct SizeSelectionStep: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
-                    Text(timeFormatExplainationText)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
+//                    Text(timeFormatExplainationText)
+//                        .font(.subheadline)
+//                        .foregroundColor(.secondary)
+//                        .padding(.horizontal)
                     
                     VStack(spacing: 12) {
                         
@@ -206,10 +214,10 @@ struct SizeSelectionStep: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
-                    Text("Do you want your widget to show when it was last updated under the bus arrival times?\n\nExample: Last updated 12:34 PM\n\nNote that this text will always be in HH:MM AM/PM format")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
+//                    Text("Do you want your widget to show when it was last updated under the bus arrival times?\n\nExample: Last updated 12:34 PM\n\nNote that this text will always be in HH:MM AM/PM format")
+//                        .font(.subheadline)
+//                        .foregroundColor(.secondary)
+//                        .padding(.horizontal)
                     
                     VStack(spacing: 12) {
                         Button(action: {

@@ -27,7 +27,7 @@ struct ProviderSmall: IntentTimelineProvider {
                                 widgetSizeSystemFormat: .systemSmall,
                                 widgetSizeStringFormat: nil
                             )
-                            finalWidgetData["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
+                            finalWidgetData["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops, widgetData: widget.widgetData)
                             let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData, isClosestStop: true)
                             finalWidgetData = updatedWidgetData
                             
@@ -76,7 +76,7 @@ struct ProviderSmall: IntentTimelineProvider {
                             widgetSizeSystemFormat: .systemSmall,
                             widgetSizeStringFormat: nil
                         )
-                        widgetData?["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops)
+                        widgetData?["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops, widgetData: widget?.widgetData)
                         let (_, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(widgetData ?? [:], isClosestStop: true)
                         widgetData = updatedWidgetData
                     } else {

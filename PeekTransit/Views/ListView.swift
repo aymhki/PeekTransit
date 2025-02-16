@@ -115,6 +115,8 @@ struct ListView: View {
                                 await stopsStore.loadStops(userLocation: location)
                             }
                         }
+                        
+                        searchText = ""
                     }
                 }
             }

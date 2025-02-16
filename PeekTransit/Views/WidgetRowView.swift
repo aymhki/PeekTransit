@@ -16,7 +16,9 @@ struct WidgetRowView: View {
         let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: widgetData, noConfig: false, timeFormat: timeFormatSelectedFinal, showLastUpdatedStatus:showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant ) ?? ([], [:])
         
         HStack(spacing: 12) {
+            
             if isEditing {
+                Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? .blue : .gray)
                     .font(.title2)
@@ -28,6 +30,10 @@ struct WidgetRowView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color(themeManager.currentTheme == .classic ? .black : .secondarySystemGroupedBackground))
                         .shadow(radius: 2)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
                     
                     DynamicWidgetView(
                         widgetData: newWidgetData ?? [:],
@@ -37,9 +43,12 @@ struct WidgetRowView: View {
                         fullyLoaded: true,
                         forPreview: true
                     )
+                    
                     .if(themeManager.currentTheme == .classic) { view in
                         view.background(.black)
                     }
+                    .padding(8)
+                    .foregroundColor(Color.primary)
                     
                 }
                 

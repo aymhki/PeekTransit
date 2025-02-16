@@ -181,7 +181,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                         
                         Spacer()
                         
-                        Text("Hold to edit and select a widget configuration to start")
+                        Text("Hold to edit and tap to select a widget configuration to start")
                             .foregroundColor(.blue)
                             .padding(.horizontal)
                             .font(.system(size: 12 ) )
@@ -201,7 +201,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                         Spacer(minLength: 4)
                         
                         
-                        Text("Hold to edit and select a widget configuration to start")
+                        Text("Hold to edit and tap select a widget configuration to start")
                             .foregroundColor(.blue)
                             .padding(.horizontal)
                             .font(.system(size: 10 ) )
@@ -210,7 +210,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     }
                 }
             } else {
-                Text("Peek Transit: select a config to start")
+                Text("Peek Transit: Tap in edit to select a config to start")
                     .foregroundColor(.blue)
                     .padding(.horizontal)
                     .font(.system(size: 10, design: .monospaced ) )

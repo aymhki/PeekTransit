@@ -169,6 +169,7 @@ struct BusStopView: View {
                             
  
                             if components.count > 1 {
+
                                 GeometryReader { geometry in
                                     let totalWidth = geometry.size.width
                                     let spacing: CGFloat = 0
@@ -205,7 +206,6 @@ struct BusStopView: View {
                                                 .frame(width: columnWidths[3], alignment: .leading)
                                         }
                                     }
-                                    .draggable(schedule)
                                     .padding(.vertical, 12)
                                     .padding(.horizontal, 1)
                                 }

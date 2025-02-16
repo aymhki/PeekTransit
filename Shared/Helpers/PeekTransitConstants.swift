@@ -744,3 +744,7 @@ public func shouldShowShortRouteName(_ status: String) -> Bool {
            status == getEarlyStatusTextString() ||
            status == getCancelledStatusTextString()
 }
+
+public func getMaxPerferredstopsInClosestStops() -> Int {
+    return 3
+}

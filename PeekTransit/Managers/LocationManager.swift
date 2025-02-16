@@ -3,7 +3,7 @@ import WidgetKit
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     let manager: CLLocationManager
-    private let minimumDistanceThreshold: CLLocationDistance = (getStopsDistanceRadius() / 4)
+    private let minimumDistanceThreshold: CLLocationDistance = (getStopsDistanceRadius() / 2)
     
     @Published var location: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus?

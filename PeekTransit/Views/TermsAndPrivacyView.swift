@@ -23,13 +23,13 @@ struct TermsAndPrivacyView: View {
                 Group {
                     Text("Privacy Policy")
                         .font(.headline)
-                    Text("• We do not collect or store any personal information\n• Your favorite routes and stops are stored locally on your device\n• No analytics or tracking services are implemented\n• No data is shared with third parties")
+                    Text("• Peek Transit does not collect or store any personal information\n• Your saved widgets and stops are stored locally on your device\n• No analytics or tracking services are implemented\n• No data is shared with third parties")
                 }
                 
                 Group {
                     Text("Disclaimer")
                         .font(.headline)
-                    Text("This application is provided 'as is' without warranty of any kind. While we strive to provide accurate and timely information, we cannot guarantee the accuracy of the data as it is directly sourced from Winnipeg Transit's API.")
+                    Text("This application is provided 'as is' without warranty of any kind. While Peek Transit strive to provide accurate and timely information, it cannot guarantee the accuracy of the data as it is directly sourced from Winnipeg Transit's API.")
                 }
                 
                 Group {

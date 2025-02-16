@@ -4,11 +4,14 @@ import WidgetKit
 struct StopSelectionStep: View {
     @Binding var selectedStops: [[String: Any]]
     @Binding var isClosestStop: Bool
+    @Binding var selectedPerferredStopsInClosestStops: Bool
     let maxStopsAllowed: Int
+    
     
     @StateObject private var locationManager = LocationManager()
     @StateObject private var stopsStore = StopsDataStore.shared
     @State private var searchText = ""
+    @State private var maxPerferredstopsInClosestStops: Int = getMaxPerferredstopsInClosestStops()
     
     var combinedStops: [[String: Any]] {
         var combined = stopsStore.stops
@@ -52,6 +55,14 @@ struct StopSelectionStep: View {
         }
     }
     
+    var getWhichMaxStopsToUse: Int {
+        if selectedPerferredStopsInClosestStops {
+            return maxPerferredstopsInClosestStops
+        } else {
+            return maxStopsAllowed
+        }
+    }
+    
     private func isStopSelected(_ stop: [String: Any]) -> Bool {
         selectedStops.contains(where: { ($0["number"] as? Int) == (stop["number"] as? Int) })
     }
@@ -59,148 +70,177 @@ struct StopSelectionStep: View {
     private func toggleStopSelection(_ stop: [String: Any]) {
         if let index = selectedStops.firstIndex(where: { ($0["number"] as? Int) == (stop["number"] as? Int) }) {
             selectedStops.remove(at: index)
-        } else if selectedStops.count < maxStopsAllowed {
+        } else if selectedStops.count < getWhichMaxStopsToUse {
             selectedStops.append(stop)
         }
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                Text("Select which bus stops you want to show on your widget from nearby stops or search for more")
-                    .font(.title3)
-                    .padding([.top, .horizontal])
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 16) {
+                    Text("Select the widget bus stops")
+                        .font(.title3)
+                        .padding([.top, .horizontal])
 
-                Text("You can select up to \(maxStopsAllowed) stop\(maxStopsAllowed > 1 ? "s" : "") for this widget size")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal)
-
-                Button(action: {
-                    withAnimation {
-                        isClosestStop.toggle()
-                        if isClosestStop {
-                            selectedStops = []
+                    Button(action: {
+                        withAnimation {
+                            isClosestStop.toggle()
+                            if isClosestStop {
+                                selectedStops = []
+                            } else {
+                                selectedPerferredStopsInClosestStops = false
+                            }
                         }
-                    }
-                }) {
-                    HStack {
-                        if isClosestStop {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white)
-                            Text("Closest stop(s) based on location selected, click again to go back to stop selection or click continue to proceed")
-                                .foregroundColor(.white)
-                        } else {
-                            Image(systemName: "location.fill")
-                                .foregroundColor(.white)
-                            Text("Click here to use closest stop\(maxStopsAllowed > 1 ? "s" : "") based on your location at the time of viewing the widget")
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .multilineTextAlignment(.leading)
-                    .font(.caption2)
-                    .padding()
-                    .background(isClosestStop ? Color.red : Color.blue)
-                    .cornerRadius(10)
-                }
-                .padding(.horizontal)
-
-                if !isClosestStop {
-                    HStack {
-                        Text("Selected stops: \(selectedStops.count)/\(maxStopsAllowed)")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-
-                    VStack {
-                        if stopsStore.isLoading {
-                            ProgressView("Loading stops...")
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        } else if let error = stopsStore.error {
-                            VStack {
-                                Text("Error loading stops")
-                                    .font(.headline)
-                                Text(error.localizedDescription)
+                    }) {
+                        HStack(alignment: .center, spacing: 10) {
+                            Image(systemName: isClosestStop ? "checkmark.square.fill" : "square")
+                                .foregroundColor(isClosestStop ? .blue : .secondary)
+                                .font(.system(size: 28))
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Use closest stop\(getWhichMaxStopsToUse > 1 ? "s" : "") based on location")
                                     .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Text("Updates automatically when viewing widget")
+                                    .font(.caption)
                                     .foregroundColor(.secondary)
-
-                                Button("Retry") {
-                                    let newLocation = locationManager.location
-                                    if let location = newLocation {
-                                        Task {
-                                            await stopsStore.loadStops(userLocation: location)
-                                        }
-                                    }
-                                }
-                                .buttonStyle(.bordered)
                             }
-                        } else if combinedStops.isEmpty {
-                            Text("No stops found nearby")
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.horizontal)
+                    
+                    
+                    if isClosestStop {
+                        Button(action: {
+                            withAnimation {
+                                selectedPerferredStopsInClosestStops.toggle()
+                            }
+                        })
+                         {
+                            HStack(alignment: .center, spacing: 10) {
+                                Image(systemName: selectedPerferredStopsInClosestStops ? "checkmark.square.fill" : "square")
+                                    .foregroundColor(selectedPerferredStopsInClosestStops ? .blue : .secondary)
+                                    .font(.system(size: 28))
+                                
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Select preferred stops")
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    
+                                    Text("Allow selection to filter from closest stops")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.horizontal)
+                    }
+
+                    if (!isClosestStop || selectedPerferredStopsInClosestStops) {
+                        HStack {
+                            Text("Selected stops: \(selectedStops.count)/\(getWhichMaxStopsToUse)")
                                 .foregroundColor(.secondary)
-                        } else {
-                            LazyVStack(spacing: 0) {
-                                if stopsStore.isSearching {
-                                    HStack {
-                                        Spacer()
-                                        ProgressView("Searching...")
-                                        Spacer()
-                                    }
-                                    .padding()
-                                }
+                            Spacer()
+                        }
+                        .padding(.horizontal)
 
-                                ForEach(filteredStops.indices, id: \.self) { index in
-                                    let stop = filteredStops[index]
-                                    if let variants = stop["variants"] as? [[String: Any]] {
-                                        SelectableStopRow(
-                                            stop: stop,
-                                            variants: variants,
-                                            selectedStops: selectedStops,
-                                            isSelected: isStopSelected(stop),
-                                            maxStops: maxStopsAllowed,
-                                            onSelect: {
-                                                withAnimation {
-                                                    toggleStopSelection(stop)
-                                                }
+                        VStack {
+                            if stopsStore.isLoading {
+                                ProgressView("Loading stops...")
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            } else if let error = stopsStore.error {
+                                VStack {
+                                    Text("Error loading stops")
+                                        .font(.headline)
+                                    Text(error.localizedDescription)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+
+                                    Button("Retry") {
+                                        let newLocation = locationManager.location
+                                        if let location = newLocation {
+                                            Task {
+                                                await stopsStore.loadStops(userLocation: location)
                                             }
-                                        )
-                                        if index < filteredStops.count - 1 {
-                                            Divider()
+                                        }
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+                            } else if combinedStops.isEmpty {
+                                Text("No stops found nearby")
+                                    .foregroundColor(.secondary)
+                            } else {
+                                LazyVStack(spacing: 0) {
+                                    if stopsStore.isSearching {
+                                        HStack {
+                                            Spacer()
+                                            ProgressView("Searching...")
+                                            Spacer()
+                                        }
+                                        .padding()
+                                    }
+
+                                    ForEach(filteredStops.indices, id: \.self) { index in
+                                        let stop = filteredStops[index]
+                                        if let variants = stop["variants"] as? [[String: Any]] {
+                                            SelectableStopRow(
+                                                stop: stop,
+                                                variants: variants,
+                                                selectedStops: selectedStops,
+                                                isSelected: isStopSelected(stop),
+                                                maxStops: getWhichMaxStopsToUse,
+                                                onSelect: {
+                                                    withAnimation {
+                                                        toggleStopSelection(stop)
+                                                    }
+                                                }
+                                            )
+                                            if index < filteredStops.count - 1 {
+                                                Divider()
+                                            }
                                         }
                                     }
                                 }
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
                         }
                     }
                 }
             }
-        }
-        .refreshable {
-            let newLocation = locationManager.location
-            if let location = newLocation {
+            .searchable(text: $searchText, prompt: "Search stops, routes...")
+            .disableAutocorrection(true)
+            .autocapitalization(.none)
+            .refreshable {
+                let newLocation = locationManager.location
+                if let location = newLocation {
+                    Task {
+                        await stopsStore.loadStops(userLocation: location)
+                    }
+                }
+                
+                searchText = ""
+            }
+            .onChange(of: searchText) { query in
                 Task {
-                    await stopsStore.loadStops(userLocation: location)
+                    await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
                 }
             }
-        }
-        .searchable(text: $searchText, prompt: "Search stops, routes...")
-        .disableAutocorrection(true)
-        .autocapitalization(.none)
-        .onChange(of: searchText) { query in
-            Task {
-                await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
+            .onAppear {
+                locationManager.requestLocation()
             }
-        }
-        .onAppear {
-            locationManager.requestLocation()
-        }
-        .onChange(of: locationManager.location) { newLocation in
-            if let location = newLocation,
-               locationManager.shouldRefresh(for: location) {
-                Task {
-                    await stopsStore.loadStops(userLocation: location)
+            .onChange(of: locationManager.location) { newLocation in
+                if let location = newLocation,
+                   locationManager.shouldRefresh(for: location) {
+                    Task {
+                        await stopsStore.loadStops(userLocation: location)
+                    }
                 }
             }
         }

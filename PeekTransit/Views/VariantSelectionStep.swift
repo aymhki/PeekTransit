@@ -168,44 +168,39 @@ struct VariantSelectionStep: View {
             } else {
                 ScrollView {
                     VStack(spacing: 20) {
-                        Text("Select which bus variants you want to show on your widget")
+                        Text("Select the widget bus variants")
                             .font(.title3)
                             .padding([.top, .horizontal])
+                    
                         
-                        Text("You can select up to \(maxVariantsPerStop) variant\(maxVariantsPerStop > 1 ? "s" : "") per stop")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
                         
                         Button(action: {
                             withAnimation {
                                 noSelectedVariants.toggle()
                                 if noSelectedVariants {
-                                    selectedVariants  = [:]
+                                    selectedVariants = [:]
                                 }
                             }
                         }) {
-                            HStack {
-                                if noSelectedVariants {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.white)
-                                    Text("Upcoming buses option selected. Click again to go back to variant selection or click continue to proceed")
-                                        .foregroundColor(.white)
-                                } else {
-                                    Image(systemName: "clock.fill")
-                                        .foregroundColor(.white)
-                                    Text("Click here to only show the upcoming buses for your stops at the time of viewing the widget instead of selecting certain bus variants")
-                                        .foregroundColor(.white)
+                            HStack(alignment: .center, spacing: 10) {
+                                Image(systemName: noSelectedVariants ? "checkmark.square.fill" : "square")
+                                    .foregroundColor(noSelectedVariants ? .blue : .secondary)
+                                    .font(.system(size: 28))
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Don't want to selected variants")
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    Text("Will show the upcoming buses instead of the selected ones")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .multilineTextAlignment(.leading)
-                            .font(.caption2)
-                            .padding()
-                            .background(noSelectedVariants ? Color.red : Color.blue)
-                            .cornerRadius(10)
                         }
+                        .buttonStyle(PlainButtonStyle())
                         .padding(.horizontal)
+                        
                         
                         if !noSelectedVariants {
                             

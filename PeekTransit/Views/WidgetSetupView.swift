@@ -24,6 +24,7 @@ struct WidgetSetupView: View {
     @State private var stopsWithoutService: [Int] = []
     @State private var noSelectedVariants: Bool = false
     @State private var multipleEntriesPerVariant: Bool = true
+    @State private var selectedPerferredStopsInClosestStops = false
     let editingWidget: WidgetModel?
 
     
@@ -35,28 +36,29 @@ struct WidgetSetupView: View {
             _widgetSize = State(initialValue: widget.widgetData["size"] as? String ?? "medium")
             _selectedTimeFormat = State(initialValue: TimeFormat(rawValue: widget.widgetData["timeFormat"] as? String ?? "") ?? .default)
             _showLastUpdatedStatus = State(initialValue: widget.widgetData["showLastUpdatedStatus"] as? Bool ?? true)
-            _isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
-            _selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
+            //_isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
+            //_selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
             _widgetName = State(initialValue: "")
-            _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
-            _multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? true)
+            //_noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
+            //_multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? true)
+            //_selectedPerferredStopsInClosestStops = State(initialValue: widget.widgetData["selectedPerferredStopsInClosestStops"] as? Bool ?? false)
             
-            if let stops = widget.widgetData["stops"] as? [[String: Any]] {
-                var variants: [String: [[String: Any]]] = [:]
-                for stop in stops {
-                    if let number = stop["number"] as? Int,
-                       let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
-                        variants[String(number)] = selectedVariants
-                    }
-                }
-                _selectedVariants = State(initialValue: variants)
-            }
+            //if let stops = widget.widgetData["stops"] as? [[String: Any]] {
+             //   var variants: [String: [[String: Any]]] = [:]
+             //   for stop in stops {
+             //       if let number = stop["number"] as? Int,
+             //          let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
+             //           variants[String(number)] = selectedVariants
+             //       }
+             //   }
+             //   _selectedVariants = State(initialValue: variants)
+            //}
         }
     }
 
     private func generateDefaultWidgetName() -> String {
         if isClosestStop {
-            return "Closest Stop - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.rawValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
+            return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.rawValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         } else {
             let stopNumbers = selectedStops.compactMap { stop -> String? in
                 guard let number = stop["number"] as? Int else { return nil }
@@ -89,26 +91,29 @@ struct WidgetSetupView: View {
             "timeFormat": selectedTimeFormat.rawValue,
             "showLastUpdatedStatus": showLastUpdatedStatus,
             "noSelectedVariants": noSelectedVariants,
-            "multipleEntriesPerVariant": multipleEntriesPerVariant
+            "multipleEntriesPerVariant": multipleEntriesPerVariant,
+            "selectedPerferredStopsInClosestStops": selectedPerferredStopsInClosestStops
         ]
         
         if isClosestStop {
             widgetData["type"] = "closest_stop"
         } else {
-            var stopsData: [[String: Any]] = []
-            
-            for stop in selectedStops {
-                var stopData = stop
-                if let stopNumber = stop["number"] as? Int,
-                   let variants = selectedVariants[String(stopNumber)] {
-                    stopData["selectedVariants"] = variants
-                }
-                stopsData.append(stopData)
-            }
-            
-            widgetData["stops"] = stopsData
+
             widgetData["type"] = "multi_stop"
         }
+        
+        var stopsData: [[String: Any]] = []
+        
+        for stop in selectedStops {
+            var stopData = stop
+            if let stopNumber = stop["number"] as? Int,
+               let variants = selectedVariants[String(stopNumber)] {
+                stopData["selectedVariants"] = variants
+            }
+            stopsData.append(stopData)
+        }
+        
+        widgetData[selectedPerferredStopsInClosestStops ? "perferredStops" : "stops"] = stopsData
         
         return widgetData
     }
@@ -149,9 +154,6 @@ struct WidgetSetupView: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             if currentStep == 1 {
-                if selectedStops.count > maxStopsAllowed {
-                    selectedStops = Array(selectedStops.prefix(maxStopsAllowed))
-                }
                 selectedVariants = [:]
             }
             
@@ -179,6 +181,7 @@ struct WidgetSetupView: View {
                 selectedStops = []
                 selectedVariants = [:]
                 isClosestStop = false
+                selectedPerferredStopsInClosestStops = false
             default:
                 break
             }
@@ -198,9 +201,9 @@ struct WidgetSetupView: View {
         case 1:
             return widgetSize.isEmpty
         case 2:
-            return selectedStops.isEmpty && !isClosestStop
+            return (selectedStops.isEmpty && !isClosestStop) || (selectedPerferredStopsInClosestStops && selectedStops.isEmpty)
         case 3:
-            if isClosestStop {
+            if isClosestStop && !selectedPerferredStopsInClosestStops {
                 return false
             }
             return !selectedStops.allSatisfy { stop in
@@ -249,6 +252,7 @@ struct WidgetSetupView: View {
                             StopSelectionStep(
                                 selectedStops: $selectedStops,
                                 isClosestStop: $isClosestStop,
+                                selectedPerferredStopsInClosestStops: $selectedPerferredStopsInClosestStops,
                                 maxStopsAllowed: maxStopsAllowed
                             )
                             
@@ -259,7 +263,7 @@ struct WidgetSetupView: View {
                             )
                         }
                     case 3:
-                        if !isClosestStop {
+                        if !isClosestStop || selectedPerferredStopsInClosestStops {
                             VStack {
                                 VariantSelectionStep(
                                     selectedStops: selectedStops,
