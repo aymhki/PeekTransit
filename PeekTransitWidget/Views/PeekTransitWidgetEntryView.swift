@@ -136,16 +136,9 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
             
             if widgetData["noStopsFound"] as? Bool == true {
                 
-                if (family != .accessoryRectangular) {
-                    Text("Could not fetch nearby bus stops \(String(format: "(within %.0fm)", getStopsDistanceRadius())), please wait a few minutes or move closer to a bus stop.")
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                } else {
-                    Text("Could not nearby fetch stops \(String(format: "(%.0fm)", getStopsDistanceRadius())), please wait...")
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
-                }
-                    
+                Text("Please wait or opne the app to refresh")
+                    .foregroundColor(.red)
+                    .padding(.horizontal)
                     
             } else if (isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData))  {
                 DynamicWidgetView(
@@ -201,7 +194,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                         Spacer(minLength: 4)
                         
                         
-                        Text("Hold to edit and tap select a widget configuration to start")
+                        Text("Hold to edit and tap to select a widget configuration to start")
                             .foregroundColor(.blue)
                             .padding(.horizontal)
                             .font(.system(size: 10 ) )
@@ -210,7 +203,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     }
                 }
             } else {
-                Text("Peek Transit: Tap in edit to select a config to start")
+                Text("Peek Transit: Tap in edit to select a config and start")
                     .foregroundColor(.blue)
                     .padding(.horizontal)
                     .font(.system(size: 10, design: .monospaced ) )
@@ -221,96 +214,3 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
 }
 
 
-
-//#if DEBUG
-//struct PreviewEntry: BaseEntry {
-//    let date: Date
-//    let scheduleData: [String]?
-//    let widgetData: [String: Any]?
-//    
-//    init(date: Date, scheduleData: [String]?, widgetData: [String: Any]?) {
-//        self.date = date
-//        self.scheduleData = scheduleData
-//        self.widgetData = widgetData
-//    }
-//}
-//
-//struct PeekTransitWidgetEntryView_Previews: PreviewProvider {
-//    static let mockScheduleData = [
-//        "671_Downtown_LATE_10 min.",
-//        "671_Downtown_LATE_12 59 PM",
-//        "751_University_LATE_2:03 AM",
-//        "161_Osborne_EARLY_12:59 PM",
-//        "47_Downtown_EARLY_5 min."
-//    ].map { $0.replacingOccurrences(of: "_", with: getScheduleStringSeparator()) }
-//    
-//    static let mockStops: [[String: Any]] = [
-//        [
-//            "number": 10234,
-//            "name": "Westbound Graham at Donald",
-//            "selectedVariants": [
-//                ["key": "671", "name": "Downtown"],
-//                ["key": "751", "name": "University"]
-//            ]
-//        ],
-//        [
-//            "number": 10456,
-//            "name": "Northbound Osborne at River",
-//            "selectedVariants": [
-//                ["key": "161", "name": "Osborne"],
-//                ["key": "47", "name": "Downtown"]
-//            ]
-//        ]
-//    ]
-//    
-//    static let mockWidgetData: [String: Any] = [
-//        "size": "medium",
-//        "id": "preview-id",
-//        "createdAt": ISO8601DateFormatter().string(from: Date()),
-//        "isClosestStop": false,
-//        "name": "Preview Widget",
-//        "timeFormat": "12h",
-//        "showLastUpdatedStatus": true,
-//        "noSelectedVariants": false,
-//        "multipleEntriesPerVariant": true,
-//        "stops": mockStops,
-//        "type": "multi_stop"
-//    ]
-//    
-//    static var previews: some View {
-//        Group {
-//            PeekTransitWidgetEntryView(entry: PreviewEntry(
-//                date: Date(),
-//                scheduleData: mockScheduleData,
-//                widgetData: mockWidgetData
-//            ))
-//            .previewContext(WidgetPreviewContext(family: .systemSmall))
-//            .previewDisplayName("Small Widget")
-//            
-//            PeekTransitWidgetEntryView(entry: PreviewEntry(
-//                date: Date(),
-//                scheduleData: mockScheduleData,
-//                widgetData: mockWidgetData
-//            ))
-//            .previewContext(WidgetPreviewContext(family: .systemMedium))
-//            .previewDisplayName("Medium Widget")
-//            
-//            PeekTransitWidgetEntryView(entry: PreviewEntry(
-//                date: Date(),
-//                scheduleData: mockScheduleData,
-//                widgetData: mockWidgetData
-//            ))
-//            .previewContext(WidgetPreviewContext(family: .systemLarge))
-//            .previewDisplayName("Large Widget")
-//            
-//            PeekTransitWidgetEntryView(entry: PreviewEntry(
-//                date: Date(),
-//                scheduleData: mockScheduleData,
-//                widgetData: mockWidgetData
-//            ))
-//            .previewContext(WidgetPreviewContext(family: .accessoryRectangular))
-//            .previewDisplayName("Lock Screen Widget")
-//        }
-//    }
-//}
-//#endif

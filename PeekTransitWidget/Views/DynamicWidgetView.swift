@@ -59,13 +59,13 @@ struct DynamicWidgetView: View {
                             }
                             
                             if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
-                                Text("Winnipeg Transit API is throtling data requests. Some bus times were not loaded. Please wait a few minutes and try again.")
+                                Text("Please wait or opne the app to refresh")
                                     .foregroundColor(.red)
                                     .font(.caption)
                                     .padding(.horizontal)
                                 
                             } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular && !forPreview) {
-                                Text("Could Not fetch bus times, please wait...")
+                                Text("Please wait or opne the app to refresh")
                                     .foregroundColor(.red)
                                     .font(.caption)
                                     .padding(.horizontal)
