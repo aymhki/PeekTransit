@@ -99,7 +99,7 @@ struct StopSelectionStep: View {
                                 .font(.system(size: 28))
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("Use closest stop\(getWhichMaxStopsToUse > 1 ? "s" : "") based on location")
+                                Text("Use closest stops based on location")
                                     .font(.subheadline)
                                     .foregroundColor(.primary)
                                 Text("Updates automatically when viewing widget")
