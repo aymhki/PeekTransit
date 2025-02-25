@@ -2,6 +2,21 @@ import Foundation
 import CoreLocation
 import WidgetKit
 
+actor RequestRateLimiter {
+    private var lastRequestTime: Date = Date()
+    private let minimumRequestInterval: TimeInterval = 1.0
+    
+    func waitIfNeeded() async {
+        let currentTime = Date()
+        let timeSinceLastRequest = currentTime.timeIntervalSince(lastRequestTime)
+        
+        if timeSinceLastRequest < minimumRequestInterval {
+            try? await Task.sleep(nanoseconds: UInt64((minimumRequestInterval - timeSinceLastRequest) * 1_000_000_000))
+        }
+        
+        lastRequestTime = Date()
+    }
+}
 
 
 class TransitAPI {
@@ -9,6 +24,8 @@ class TransitAPI {
     private let baseURL = "https://api.winnipegtransit.com/v3"
     static let shared = TransitAPI()
     @Published private(set) var isLoading = false
+    private let rateLimiter = RequestRateLimiter()
+
     
     init() {}
     
@@ -40,8 +57,15 @@ class TransitAPI {
     }
     
     func fetchData(from url: URL) async throws -> Data {
+       // await rateLimiter.waitIfNeeded()
+
+        
         isLoading = true
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+        }
+        
+        
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
@@ -77,36 +101,34 @@ class TransitAPI {
             throw TransitError.parseError("Invalid stops data format")
         }
         
-        var mutableStops = stops
-        if forShort {
-            for (index, var stop) in mutableStops.enumerated() {
-                if let name = stop["name"] as? String {
-                    stop["name"] = name.replacingOccurrences(of: "@", with: " @ ")
-                    mutableStops[index] = stop
-                }
+        // Process and extract distance values in a single pass
+        var processedStops: [(stop: [String: Any], distance: Double)] = []
+        
+        for var stop in stops {
+            // Handle name replacement if needed
+            if forShort, let name = stop["name"] as? String {
+                stop["name"] = name.replacingOccurrences(of: "@", with: " @ ")
             }
+            
+            // Extract distance value
+            var distanceValue: Double = Double.infinity
+            if let distances = stop["distances"] as? [String: Any],
+               let firstDistance = distances.first,
+               let distanceString = firstDistance.value as? String,
+               let distance = Double(distanceString) {
+                distanceValue = distance
+            }
+            
+            processedStops.append((stop: stop, distance: distanceValue))
         }
         
-        return mutableStops
+        // Sort once based on pre-calculated distances
+        let sortedStops = processedStops
+            .sorted { $0.distance < $1.distance }
+            .prefix(getMaxStopsAllowedToFetch())
+            .map { $0.stop }
         
-            .sorted { stop1, stop2 in
-                guard let distances1 = stop1["distances"] as? [String: Any],
-                      let distances2 = stop2["distances"] as? [String: Any],
-                      let firstDistance1 = distances1.first,
-                      let firstDistance2 = distances2.first,
-                      let distanceString1 = firstDistance1.value as? String,
-                      let distanceString2 = firstDistance2.value as? String,
-                      let distanceValue1 = Double(distanceString1),
-                      let distanceValue2 = Double(distanceString2)
-                else {
-                    return false
-                }
-                
-                return distanceValue1 < distanceValue2
-            }
-        .prefix(getMaxStopsAllowedToFetch()).map{$0}
-
-
+        return sortedStops
     }
     
     func searchStops(query: String, forShort: Bool) async throws -> [[String: Any]] {
@@ -226,7 +248,7 @@ class TransitAPI {
                 if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
                     stopVariants = cachedVariants
                 } else {
-                    stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: true)
+                    stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
                     VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
                 }
                 
@@ -244,7 +266,7 @@ class TransitAPI {
             }
         }
         
-        let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate, forShort: true)
+        let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
         
         if !cachesValid {
             VariantsCacheManager.shared.clearAllCaches()
@@ -265,7 +287,7 @@ class TransitAPI {
             if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
                 stopVariants = cachedVariants
             } else {
-                stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: true)
+                stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
                 VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
             }
             

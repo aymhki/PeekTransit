@@ -275,16 +275,16 @@ enum WidgetHelper {
         widgetData: [String: Any]?,
         createEntry: @escaping (Date, Any, [String: Any]?, [String]?) -> T
     ) async -> Timeline<T> {
+        let nextUpdate = Calendar.current.date(byAdding: .second, value: getRefreshWidgetTimelineAfterHowManySeconds(), to: currentDate)!
 
         
         guard let widgetData = widgetData else {
             let entry = createEntry(currentDate, configuration, nil, nil)
-            return Timeline(entries: [entry], policy: .atEnd)
+            return Timeline(entries: [entry], policy: .after(nextUpdate))
         }
         
         let schedule = await getScheduleForWidget(widgetData)
         let entry = createEntry(currentDate, configuration, schedule.1, schedule.0)
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 1, to: currentDate)!
         return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
     

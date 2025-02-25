@@ -14,7 +14,7 @@ class StopsDataStore: ObservableObject {
     @Published var isSearching = false
     @Published var searchError: Error?
     
-    private let batchSize = 25
+    private let batchSize = 30
     private var isProcessing = false
     
     private init() {}
@@ -31,7 +31,7 @@ class StopsDataStore: ObservableObject {
         
         do {
             isProcessing = true
-            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation, forShort: true)
+            let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation, forShort: getGlobalAPIForShortUsage())
             
             for batch in stride(from: 0, to: nearbyStops.count, by: batchSize) {
                 let endIndex = min(batch + batchSize, nearbyStops.count)
@@ -44,7 +44,7 @@ class StopsDataStore: ObservableObject {
                         self.stops.append(contentsOf: enrichedBatch)
                     }
                     
-                    try await Task.sleep(nanoseconds: 100_000_000)
+                    // try await Task.sleep(nanoseconds: 100_000_000)
                 } catch {
                     print("Error processing batch: \(error.localizedDescription)")
                     continue
@@ -89,7 +89,7 @@ class StopsDataStore: ObservableObject {
             guard !Task.isCancelled else { return }
             
             do {
-                let searchedStops = try await TransitAPI.shared.searchStops(query: query, forShort: true)
+                let searchedStops = try await TransitAPI.shared.searchStops(query: query, forShort: getGlobalAPIForShortUsage())
                 
                 var enrichedSearchResults: [[String: Any]] = []
                 

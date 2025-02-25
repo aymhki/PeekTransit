@@ -162,7 +162,7 @@ public func getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: Widg
 }
 
 public func getStopsDistanceRadius() -> Double {
-    return 500
+    return 550
 }
 
 
@@ -747,4 +747,14 @@ public func shouldShowShortRouteName(_ status: String) -> Bool {
 
 public func getMaxPerferredstopsInClosestStops() -> Int {
     return 3
+}
+
+
+public func getRefreshWidgetTimelineAfterHowManySeconds()->Int{
+    return 3
+}
+
+
+public func getGlobalAPIForShortUsage() -> Bool {
+    return true
 }

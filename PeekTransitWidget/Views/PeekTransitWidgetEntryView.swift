@@ -133,14 +133,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
            let filledScheduleData = getFilledScheduleData(widgetData: widgetData, scheduleData: entry.scheduleData)
                 
             
-            
-            if widgetData["noStopsFound"] as? Bool == true {
-                
-                Text("Please wait or opne the app to refresh")
-                    .foregroundColor(.red)
-                    .padding(.horizontal)
-                    
-            } else if (isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData))  {
+            if (isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData))  {
                 DynamicWidgetView(
                     widgetData: widgetData,
                     scheduleData: filledScheduleData,
@@ -149,7 +142,6 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     fullyLoaded: true,
                     forPreview: false
                 )
-
 
             } else {
                 DynamicWidgetView(

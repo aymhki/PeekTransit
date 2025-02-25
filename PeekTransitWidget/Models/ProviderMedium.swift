@@ -22,7 +22,7 @@ struct ProviderMedium: IntentTimelineProvider {
                 
                 if widget.widgetData["isClosestStop"] as? Bool == true {
                     if let location = await LocationManager.shared.getCurrentLocation() {
-                        let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: true)
+                        let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: getGlobalAPIForShortUsage())
                         if let stops = nearbyStops, !stops.isEmpty {
                             let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(
                                 widgetSizeSystemFormat: .systemMedium,
@@ -37,14 +37,6 @@ struct ProviderMedium: IntentTimelineProvider {
                                 configuration: configuration,
                                 widgetData: finalWidgetData,
                                 scheduleData: schedule
-                            ))
-                        } else {
-                            finalWidgetData["noStopsFound"] = true
-                            completion(SimpleEntryMedium(
-                                date: Date(),
-                                configuration: configuration,
-                                widgetData: finalWidgetData,
-                                scheduleData: nil
                             ))
                         }
                     }
@@ -71,7 +63,7 @@ struct ProviderMedium: IntentTimelineProvider {
             
             if widget?.widgetData["isClosestStop"] as? Bool == true {
                 if let location = await LocationManager.shared.getCurrentLocation() {
-                    let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: true)
+                    let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: getGlobalAPIForShortUsage())
                     if let stops = nearbyStops, !stops.isEmpty {
                         let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(
                             widgetSizeSystemFormat: .systemMedium,
@@ -80,9 +72,7 @@ struct ProviderMedium: IntentTimelineProvider {
                         widgetData?["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops, widgetData: widget?.widgetData)
                         let (_, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(widgetData ?? [:], isClosestStop: true)
                         widgetData = updatedWidgetData
-                    } else {
-                        widgetData?["noStopsFound"] = true
-                    }
+                    } 
                 }
             }
             
@@ -99,7 +89,7 @@ struct ProviderMedium: IntentTimelineProvider {
                 )
             }
             
-            let nextUpdate = Calendar.current.date(byAdding: .second, value: 1, to: Date())!
+            let nextUpdate = Calendar.current.date(byAdding: .second, value: getRefreshWidgetTimelineAfterHowManySeconds(), to: Date())!
                let timelineWithShorterUpdate = Timeline(
                    entries: timeline.entries,
                    policy: .after(nextUpdate)

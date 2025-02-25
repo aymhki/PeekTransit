@@ -165,6 +165,24 @@ struct SizeSelectionStep: View {
                     
                     VStack(spacing: 12) {
                         
+                        Button(action: {}) {
+                            HStack(alignment: .center, spacing: 8) {
+                                CircularCheckbox(isSelected: multipleEntriesPerVariant)
+                                    .frame(width: 24)
+                                Text("Mixed format, one entry in minutes and one in clock format (Available only for the 'Multiple Varaints' option)")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .disabled(!multipleEntriesPerVariant)
+                        
+                        
                         ForEach(TimeFormat.allCases, id: \.self) { format in
                             
                             Button(action: {
@@ -188,22 +206,7 @@ struct SizeSelectionStep: View {
                             
                         }
                         
-                        Button(action: {}) {
-                            HStack(alignment: .center, spacing: 8) {
-                                CircularCheckbox(isSelected: multipleEntriesPerVariant)
-                                    .frame(width: 24)
-                                Text("Mixed format, one entry in minutes and one in clock format (Available only for the 'Multiple Varaints' option)")
-                                    .foregroundColor(.primary)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding()
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .cornerRadius(10)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .disabled(!multipleEntriesPerVariant)
+
                         
                     }
                     .padding(.horizontal)

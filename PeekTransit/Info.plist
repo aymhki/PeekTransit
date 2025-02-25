@@ -63,8 +63,8 @@
 	</dict>
     <key>NSLocationUsageDescription</key>
     <string>Peek Transit needs access your location to find nearby stops.</string>
-    <key>NSLocationDefaultAccuracyReduced</key>
-    <true/>
+
+    
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Peek Transit needs access to your location to find nearby stops.</string>
 </dict>

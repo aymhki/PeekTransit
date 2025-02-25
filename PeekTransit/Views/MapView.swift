@@ -7,7 +7,7 @@ struct MapView: View {
     @StateObject private var stopsStore = StopsDataStore.shared
     @State private var region = MKCoordinateRegion()
     @State private var selectedStop: [String: Any]?
-    @State private var showLoadingIndicator = true
+    @State private var showLoadingIndicator = false
     @State private var centerMapOnUser = true
     
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
@@ -70,9 +70,11 @@ struct MapView: View {
         }
         .onChange(of: locationManager.location) { newLocation in
             guard let location = newLocation else { return }
+            showLoadingIndicator = true
             if locationManager.shouldRefresh(for: location) {
                 Task {
                     await stopsStore.loadStops(userLocation: location)
+                    showLoadingIndicator = false
                 }
             }
         }

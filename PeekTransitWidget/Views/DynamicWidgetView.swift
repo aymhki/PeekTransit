@@ -46,31 +46,20 @@ struct DynamicWidgetView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            if (!(!fullyLoaded && size == .systemSmall)) {
+                           
+                            content
+                                .frame(maxWidth: .infinity, alignment: .center)
                                 
-                                if(size == .accessoryRectangular) {
-                                    content
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                } else {
-                                    content
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                }
                                     
-                            }
+                            if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && !forPreview) {
+                                Text("Please wait or opne the app to refresh")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                    .padding(.horizontal)
+                                
+                            } 
                             
-                            if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size != .accessoryRectangular && !forPreview) {
-                                Text("Please wait or opne the app to refresh")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                    .padding(.horizontal)
-                                
-                            } else if((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && size == .accessoryRectangular && !forPreview) {
-                                Text("Please wait or opne the app to refresh")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                    .padding(.horizontal)
-                                
-                            } else if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
+                            if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
                                 if (size != .accessoryRectangular) {
                                     if (size != .systemMedium || (scheduleData)?.count ?? 0 <= 3) {
                                         Spacer(minLength: 2)

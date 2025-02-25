@@ -10,11 +10,9 @@ class WidgetUpdateManager {
     }
     
     private func setupTimer() {
-        // Invalidate existing timer if any
         timer?.invalidate()
         
-        // Create a new timer that fires every minute
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
             self?.refreshWidgets()
         }
     }
