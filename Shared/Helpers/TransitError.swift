@@ -8,6 +8,10 @@ enum TransitError: LocalizedError {
     case serviceDown
     case parseError(String)
     case batchProcessingError(String)
+    case custom(String)
+    
+    static let maxRetriesExceeded = TransitError.custom("Maximum retry attempts exceeded")
+
     
     var errorDescription: String? {
         switch self {
@@ -25,6 +29,8 @@ enum TransitError: LocalizedError {
             return "Data parsing error: \(message)"
         case .batchProcessingError(let message):
             return "Error processing stops: \(message)"
+        case .custom(let message):
+            return message
         }
     }
 }

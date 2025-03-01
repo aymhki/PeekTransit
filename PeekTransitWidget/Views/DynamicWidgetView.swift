@@ -9,6 +9,7 @@ struct DynamicWidgetView: View {
     let updatedAt: Date
     let fullyLoaded: Bool
     let forPreview: Bool
+    let isLoading: Bool
     
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -52,11 +53,10 @@ struct DynamicWidgetView: View {
                                 
                                     
                             if ((!fullyLoaded || scheduleData == nil || widgetData.isEmpty || scheduleData?.isEmpty ?? false) && !forPreview) {
-                                Text("Please wait or opne the app to refresh")
+                                Text("Open app to refresh")
                                     .foregroundColor(.red)
                                     .font(.caption)
                                     .padding(.horizontal)
-                                
                             } 
                             
                             if (widgetData["showLastUpdatedStatus"] as? Bool ?? true) {
@@ -67,10 +67,10 @@ struct DynamicWidgetView: View {
                                 }
                                 
                                 if (size != .accessoryRectangular) {
-                                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen")
+                                    LastUpdatedView(updatedAt: updatedAt, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 }
                             }

@@ -104,7 +104,7 @@ enum PreviewHelper {
                     let stop: [String: Any] = [
                         "id": "preview_stop_\(stopIndex)",
                         "name": getWidgetTextPlaceholder(),
-                        "number": Int.random(in: 1000...9999),
+                        "number": getWidgetTextPlaceholder(),
                         "selectedVariants": selectedVariants
                     ]
                     
@@ -154,7 +154,7 @@ enum PreviewHelper {
                 let stop: [String: Any] = [
                     "id": "preview_stop_\(stopIndex)",
                     "name": getWidgetTextPlaceholder(),
-                    "number": Int.random(in: 1000...9999),
+                    "number": getWidgetTextPlaceholder(),
                     "selectedVariants": selectedVariants
                 ]
                 

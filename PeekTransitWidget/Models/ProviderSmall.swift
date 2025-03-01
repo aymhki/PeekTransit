@@ -14,42 +14,88 @@ struct ProviderSmall: IntentTimelineProvider {
     
     func getSnapshot(for configuration: ConfigurationSmallIntent, in context: Context, completion: @escaping (SimpleEntrySmall) -> Void) {
         Task {
-            if let widgetId = configuration.widgetConfig?.identifier,
+            let widgetId = configuration.widgetConfig?.identifier
+            
+            // First return cached data with loading state
+            if let widgetId = widgetId,
+               let cachedData = WidgetHelper.getCachedEntry(forId: widgetId) {
+                completion(SimpleEntrySmall(
+                    date: Date(),
+                    configuration: configuration,
+                    widgetData: cachedData,
+                    isLoading: true
+                ))
+            }
+            
+            // Then fetch new data
+            if let widgetId = widgetId,
                let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
                 
                 var finalWidgetData = widget.widgetData
                 
-                if widget.widgetData["isClosestStop"] as? Bool == true {
-                    if let location = await LocationManager.shared.getCurrentLocation() {
-                        let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: getGlobalAPIForShortUsage())
-                        if let stops = nearbyStops, !stops.isEmpty {
-                            let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(
-                                widgetSizeSystemFormat: .systemSmall,
-                                widgetSizeStringFormat: nil
-                            )
-                            finalWidgetData["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops, widgetData: widget.widgetData)
-                            let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData, isClosestStop: true)
-                            finalWidgetData = updatedWidgetData
-                            
+                do {
+                    if widget.widgetData["isClosestStop"] as? Bool == true {
+                        if let location = await LocationManager.shared.getCurrentLocation() {
+                            let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: getGlobalAPIForShortUsage())
+                            if let stops = nearbyStops, !stops.isEmpty {
+                                let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(
+                                    widgetSizeSystemFormat: .systemSmall,
+                                    widgetSizeStringFormat: nil
+                                )
+                                finalWidgetData["stops"] = await WidgetHelper.getFilteredStopsForWidget(stops, maxStops: maxStops, widgetData: widget.widgetData)
+                                let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData, isClosestStop: true)
+                                finalWidgetData = updatedWidgetData
+                                
+                                // Cache successful result
+                                WidgetHelper.cacheEntry(id: widgetId, data: finalWidgetData)
+                                
+                                completion(SimpleEntrySmall(
+                                    date: Date(),
+                                    configuration: configuration,
+                                    widgetData: finalWidgetData,
+                                    scheduleData: schedule,
+                                    isLoading: false
+                                ))
+                            }
+                        } else {
                             completion(SimpleEntrySmall(
                                 date: Date(),
                                 configuration: configuration,
                                 widgetData: finalWidgetData,
-                                scheduleData: schedule
+                                isLoading: false,
+                                errorMessage: "Location access required"
                             ))
                         }
+                    } else {
+                        let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData)
+                        
+                        // Cache successful result
+                        WidgetHelper.cacheEntry(id: widgetId, data: updatedWidgetData)
+                        
+                        completion(SimpleEntrySmall(
+                            date: Date(),
+                            configuration: configuration,
+                            widgetData: updatedWidgetData,
+                            scheduleData: schedule,
+                            isLoading: false
+                        ))
                     }
-                } else {
-                    let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData)
+                } catch {
                     completion(SimpleEntrySmall(
                         date: Date(),
                         configuration: configuration,
-                        widgetData: updatedWidgetData,
-                        scheduleData: schedule
+                        widgetData: finalWidgetData,
+                        isLoading: false,
+                        errorMessage: "Failed to fetch data"
                     ))
                 }
             } else {
-                completion(SimpleEntrySmall(date: Date(), configuration: configuration))
+                completion(SimpleEntrySmall(
+                    date: Date(),
+                    configuration: configuration,
+                    isLoading: false
+                    
+                ))
             }
         }
     }

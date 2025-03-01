@@ -6,18 +6,24 @@ struct SimpleEntrySmall: BaseEntry {
     let configuration: ConfigurationSmallIntent
     var widgetData: [String: Any]?
     var scheduleData: [String]?
-    let relevance: TimelineEntryRelevance? 
+    let relevance: TimelineEntryRelevance?
+    var isLoading: Bool
+    var errorMessage: String?
     
     init(
         date: Date,
         configuration: ConfigurationSmallIntent,
         widgetData: [String: Any]? = nil,
-        scheduleData: [String]? = nil
+        scheduleData: [String]? = nil,
+        isLoading: Bool = false,
+        errorMessage: String? = nil
     ) {
         self.date = date
         self.configuration = configuration
         self.widgetData = widgetData
         self.scheduleData = scheduleData
-        self.relevance = TimelineRelevance.createRelevance() 
+        self.isLoading = isLoading
+        self.errorMessage = errorMessage
+        self.relevance = TimelineRelevance.createRelevance()
     }
 }

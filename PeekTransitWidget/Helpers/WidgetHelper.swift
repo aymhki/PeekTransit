@@ -7,6 +7,23 @@ import Foundation
 
 
 enum WidgetHelper {
+    static func retryRequest<T>(maxAttempts: Int = 3, operation: () async throws -> T) async throws -> T {
+        var lastError: Error?
+        
+        for attempt in 1...maxAttempts {
+            do {
+                return try await operation()
+            } catch {
+                lastError = error
+                if attempt < maxAttempts {
+                    // try? await Task.sleep(nanoseconds: UInt64(1_000_000))
+                }
+            }
+        }
+        
+        throw lastError!
+    }
+    
     static func getWidgetFromDefaults(withId id: String) -> WidgetModel? {
         guard let sharedDefaults = SharedDefaults.userDefaults,
               let data = sharedDefaults.data(forKey: SharedDefaults.widgetsKey),
@@ -40,7 +57,12 @@ enum WidgetHelper {
                 do {
                     
                     matchingNearbyStop = preferredStop
-                    let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: preferredStopNumber)
+                    
+                    let schedule = try await retryRequest {
+                        try await TransitAPI.shared.getStopSchedule(stopNumber: preferredStopNumber)
+                    }
+                    
+                    
                     let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                         schedule: schedule,
                         timeFormat: .default
@@ -78,7 +100,10 @@ enum WidgetHelper {
                 }
                 
                 do {
-                    let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                    let schedule = try await retryRequest {
+                        try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                    }
+                    
                     let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                         schedule: schedule,
                         timeFormat: .default
@@ -183,7 +208,9 @@ enum WidgetHelper {
                 guard let stopNumber = stop["number"] as? Int else { continue }
                 
                 do {
-                    let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                    let schedule = try await retryRequest {
+                        try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                    }
                     
                     if (multipleEntriesPerVariant) {
                         cleanedSchedule = TransitAPI.shared.cleanScheduleMixedTimeFormat(schedule: schedule)
@@ -288,6 +315,16 @@ enum WidgetHelper {
         return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
     
+    
+    static func getCachedEntry(forId id: String) -> [String: Any]? {
+        guard let sharedDefaults = SharedDefaults.userDefaults else { return nil }
+        return sharedDefaults.dictionary(forKey: "widget_cache_\(id)")
+    }
+    
+    static func cacheEntry(id: String, data: [String: Any]) {
+        guard let sharedDefaults = SharedDefaults.userDefaults else { return }
+        sharedDefaults.set(data, forKey: "widget_cache_\(id)")
+    }
     
     
     

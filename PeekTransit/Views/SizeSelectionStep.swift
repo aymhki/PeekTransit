@@ -65,8 +65,8 @@ struct SizeSelectionStep: View {
                             size: PreviewHelper.getWidgetSize(from: selectedSize),
                             updatedAt: Date(),
                             fullyLoaded: true,
-                            forPreview: true
-                            
+                            forPreview: true,
+                            isLoading: false
                         )
                         
                         .if(currentTheme == .classic) { view in

@@ -625,6 +625,10 @@ public struct WidgetThemeModifier: ViewModifier {
             
         if text.lowercased().contains("updated") {
             baseFontSize = getLastSeenFontSizeForWidgetSize(widgetSizeSystemFormat: widgetSize, widgetSizeStringFormat: nil)
+            
+            if text.lowercased().contains("updating") && widgetSize == .accessoryRectangular {
+                baseFontSize = baseFontSize - 3
+            }
         }
         
         if text.lowercased().contains("stop") {

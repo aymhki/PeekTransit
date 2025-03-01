@@ -41,7 +41,8 @@ struct WidgetRowView: View {
                         size: PreviewHelper.getWidgetSize(from: widgetData["size"] as? String ?? "medium"),
                         updatedAt: Date(),
                         fullyLoaded: true,
-                        forPreview: true
+                        forPreview: true,
+                        isLoading: false
                     )
                     
                     .if(themeManager.currentTheme == .classic) { view in

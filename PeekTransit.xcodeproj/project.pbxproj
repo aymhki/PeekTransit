@@ -114,6 +114,7 @@
 				Views/BusScheduleRowView.swift,
 				Views/DynamicWidgetView.swift,
 				Views/LastUpdatedView.swift,
+				Views/WidgetErrorView.swift,
 				Views/WidgetStopView.swift,
 			);
 			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
@@ -132,6 +133,7 @@
 				Views/BusScheduleRowView.swift,
 				Views/DynamicWidgetView.swift,
 				Views/LastUpdatedView.swift,
+				Views/WidgetErrorView.swift,
 				Views/WidgetStopView.swift,
 			);
 			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
@@ -554,7 +556,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -593,7 +595,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

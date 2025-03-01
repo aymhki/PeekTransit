@@ -7,7 +7,6 @@ struct PeekTransitApp: App {
     @StateObject private var themeManager = ThemeManager.shared
 
 
-    
     init() {
         WidgetRefreshManager.shared.startPeriodicRefresh()
     }

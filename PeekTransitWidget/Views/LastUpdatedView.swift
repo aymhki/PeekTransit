@@ -4,6 +4,7 @@ import WidgetKit
 struct LastUpdatedView: View {
     let updatedAt: Date
     let size: String
+    let isLoading: Bool
     
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -16,12 +17,12 @@ struct LastUpdatedView: View {
     var body: some View {
         
         if (size == "lockscreen" || size == "small") {
-            Text("Updated at \(formattedTime)")
-                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)", size: widgetSizeFromString(size))
+            Text("Updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")")
+                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")", size: widgetSizeFromString(size))
                 .padding(.bottom, 2)
         } else {
-            Text("Last updated at \(formattedTime)")
-                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)", size: widgetSizeFromString(size))
+            Text("Last updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")")
+                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")", size: widgetSizeFromString(size))
                 .padding(.bottom, 8)
         }
     }

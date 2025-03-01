@@ -140,8 +140,10 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     size: family,
                     updatedAt: entry.date,
                     fullyLoaded: true,
-                    forPreview: false
+                    forPreview: false,
+                    isLoading: entry.isLoading
                 )
+                
 
             } else {
                 DynamicWidgetView(
@@ -150,11 +152,15 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     size: family,
                     updatedAt: entry.date,
                     fullyLoaded: false,
-                    forPreview: false
+                    forPreview: false,
+                    isLoading: entry.isLoading
                 )
+        
 
             }
-        } else {
+        } else if let error = entry.errorMessage {
+            WidgetErrorView(message: error)
+        }else {
             if (family != .accessoryRectangular) {
                 if(family != .systemSmall) {
                     VStack (alignment: .center) {
@@ -204,5 +210,4 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     }
     
 }
-
 

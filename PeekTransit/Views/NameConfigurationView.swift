@@ -37,6 +37,9 @@ struct NameConfigurationStep: View {
                                     .fill(colorScheme == .dark ? Color(UIColor.systemGray6) : Color(UIColor.systemBackground))
                             )
                     )
+                    .onAppear() {
+                        widgetName = defaultName
+                    }
                     .frame(maxWidth: 300)
                 
                 Text("Default name: \(defaultName)")

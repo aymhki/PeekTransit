@@ -41,15 +41,15 @@ struct WidgetStopView: View {
 
             if ( size != .accessoryRectangular && ( !(size == .systemSmall && !multipleEntriesPerVariant) || size == .systemSmall && (scheduleData)?.count ?? 0 <= 1)  && fullyLoaded) {
                 if (size == .systemSmall) {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == 0 ? getWidgetTextPlaceholder() : String(stopNumber) )")
                         .widgetTheme(currentTheme, text: "stop", size: size)
                         .padding(.top, 2)
                 } else if (size == .systemLarge) {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == 0 ? getWidgetTextPlaceholder() : String(stopNumber) )")
                         .widgetTheme(currentTheme, text: "stop", size: size)
                         .padding(.top, 2)
                 } else {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber)")
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == 0 ? getWidgetTextPlaceholder() : String(stopNumber) )")
                         .widgetTheme(currentTheme, text: "stop", size: size)
                         .padding(.bottom, 1)
                         .padding(.top, 8)
