@@ -22,7 +22,8 @@ struct ProviderMedium: IntentTimelineProvider {
                 completion(SimpleEntryMedium(
                     date: Date(),
                     configuration: configuration,
-                    widgetData: cachedData,
+                    widgetData: cachedData.0,
+                    scheduleData: cachedData.1,
                     isLoading: true
                 ))
             }
@@ -46,8 +47,9 @@ struct ProviderMedium: IntentTimelineProvider {
                                 let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData, isClosestStop: true)
                                 finalWidgetData = updatedWidgetData
                                 
-                                // Cache successful result
-                                WidgetHelper.cacheEntry(id: widgetId, data: finalWidgetData)
+                                if !finalWidgetData.isEmpty, schedule != nil, let schedule = schedule, !schedule.isEmpty {
+                                    WidgetHelper.cacheEntry(id: widgetId, widgetData: finalWidgetData, scheduleData: schedule, lastUpdatedTime: Date())
+                                }
                                 
                                 completion(SimpleEntryMedium(
                                     date: Date(),
@@ -69,8 +71,9 @@ struct ProviderMedium: IntentTimelineProvider {
                     } else {
                         let (schedule, updatedWidgetData) = await WidgetHelper.getScheduleForWidget(finalWidgetData)
                         
-                        // Cache successful result
-                        WidgetHelper.cacheEntry(id: widgetId, data: updatedWidgetData)
+                        if !finalWidgetData.isEmpty, schedule != nil, let schedule = schedule, !schedule.isEmpty {
+                            WidgetHelper.cacheEntry(id: widgetId, widgetData: updatedWidgetData, scheduleData: schedule, lastUpdatedTime: Date())
+                        }
                         
                         completion(SimpleEntryMedium(
                             date: Date(),
@@ -122,6 +125,7 @@ struct ProviderMedium: IntentTimelineProvider {
             }
             
             let timeline = await WidgetHelper.createTimeline(
+                widgetId: widgetId ?? nil,
                 currentDate: Date(),
                 configuration: configuration,
                 widgetData: widgetData
@@ -133,14 +137,8 @@ struct ProviderMedium: IntentTimelineProvider {
                     scheduleData: schedule
                 )
             }
-            
-            let nextUpdate = Calendar.current.date(byAdding: .second, value: getRefreshWidgetTimelineAfterHowManySeconds(), to: Date())!
-               let timelineWithShorterUpdate = Timeline(
-                   entries: timeline.entries,
-                   policy: .after(nextUpdate)
-               )
                
-               completion(timelineWithShorterUpdate)
+            completion(timeline)
         }
     }
 }

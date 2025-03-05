@@ -5,6 +5,7 @@ struct LastUpdatedView: View {
     let updatedAt: Date
     let size: String
     let isLoading: Bool
+    let usingCached: Bool
     
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -17,12 +18,12 @@ struct LastUpdatedView: View {
     var body: some View {
         
         if (size == "lockscreen" || size == "small") {
-            Text("Updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")")
-                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")", size: widgetSizeFromString(size))
+            Text("Updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "O." : "")" )
+                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "O." : "")", size: widgetSizeFromString(size))
                 .padding(.bottom, 2)
         } else {
-            Text("Last updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")")
-                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "(Updating...)" : "")", size: widgetSizeFromString(size))
+            Text("Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "Old." : "")" )
+                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "Old." : "")", size: widgetSizeFromString(size))
                 .padding(.bottom, 8)
         }
     }

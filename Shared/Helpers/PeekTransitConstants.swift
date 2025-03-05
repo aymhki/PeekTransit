@@ -629,6 +629,11 @@ public struct WidgetThemeModifier: ViewModifier {
             if text.lowercased().contains("updating") && widgetSize == .accessoryRectangular {
                 baseFontSize = baseFontSize - 3
             }
+            
+            if text.lowercased().contains("o.") && widgetSize == .accessoryRectangular {
+                baseFontSize = baseFontSize - 1
+            }
+            
         }
         
         if text.lowercased().contains("stop") {
@@ -755,7 +760,7 @@ public func getMaxPerferredstopsInClosestStops() -> Int {
 
 
 public func getRefreshWidgetTimelineAfterHowManySeconds()->Int{
-    return 3
+    return 59
 }
 
 

@@ -297,6 +297,7 @@ enum WidgetHelper {
     }
     
     static func createTimeline<T: BaseEntry>(
+        widgetId: String?,
         currentDate: Date,
         configuration: Any,
         widgetData: [String: Any]?,
@@ -311,19 +312,36 @@ enum WidgetHelper {
         }
         
         let schedule = await getScheduleForWidget(widgetData)
+        
+        if let widgetId = widgetId, let finalScheduleDataToCache = schedule.0,  !finalScheduleDataToCache.isEmpty, !schedule.1.isEmpty {
+            cacheEntry(id: widgetId, widgetData: schedule.1, scheduleData: finalScheduleDataToCache, lastUpdatedTime: currentDate)
+        }
+        
         let entry = createEntry(currentDate, configuration, schedule.1, schedule.0)
         return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
     
     
-    static func getCachedEntry(forId id: String) -> [String: Any]? {
+    static func getCachedEntry(forId id: String) -> ([String: Any]?, [String]?, Date?)? {
         guard let sharedDefaults = SharedDefaults.userDefaults else { return nil }
-        return sharedDefaults.dictionary(forKey: "widget_cache_\(id)")
+        
+        let cachedWidgetData: [String: Any]? = sharedDefaults.dictionary(forKey: "widget_cache_data_\(id)")
+        let cachedScheduleData = sharedDefaults.array(forKey: "widget_cache_schedule_\(id)") as? [String]
+        let cachedUpdatedAt = sharedDefaults.object(forKey: "widget_cache_updated_time_\(id)") as? Date
+        
+        return (cachedWidgetData, cachedScheduleData, cachedUpdatedAt)
     }
     
-    static func cacheEntry(id: String, data: [String: Any]) {
+    static func cacheEntry(id: String, widgetData: [String: Any], scheduleData: [String], lastUpdatedTime: Date?) {
         guard let sharedDefaults = SharedDefaults.userDefaults else { return }
-        sharedDefaults.set(data, forKey: "widget_cache_\(id)")
+        sharedDefaults.set(widgetData, forKey: "widget_cache_data_\(id)")
+        sharedDefaults.set(scheduleData, forKey: "widget_cache_schedule_\(id)")
+        
+        if let lastUpdatedTime = lastUpdatedTime {
+            sharedDefaults.set(lastUpdatedTime, forKey: "widget_cache_updated_time_\(id)")
+        } else {
+            sharedDefaults.set(Date(), forKey: "widget_cache_updated_time_\(id)")
+        }
     }
     
     

@@ -109,7 +109,9 @@
 		2FBB711C2D50131A008998C8 /* Exceptions for "PeekTransitWidget" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Helpers/WidgetHelper.swift,
 				Managers/WidgetRefreshManager.swift,
+				Models/BaseEntry.swift,
 				PeekTransitWidget.intentdefinition,
 				Views/BusScheduleRowView.swift,
 				Views/DynamicWidgetView.swift,
@@ -129,6 +131,8 @@
 		2FBB71302D501CF1008998C8 /* Exceptions for "PeekTransitWidget" folder in "PeekTransitWidgetIntentHelper" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Helpers/WidgetHelper.swift,
+				Models/BaseEntry.swift,
 				PeekTransitWidget.intentdefinition,
 				Views/BusScheduleRowView.swift,
 				Views/DynamicWidgetView.swift,
@@ -556,7 +560,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -595,7 +599,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
