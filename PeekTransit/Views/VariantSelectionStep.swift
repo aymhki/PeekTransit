@@ -188,10 +188,10 @@ struct VariantSelectionStep: View {
                                     .font(.system(size: 28))
                                 
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text("Don't want to select variants")
+                                    Text("Just show the next upcoming busees")
                                         .font(.subheadline)
                                         .foregroundColor(.primary)
-                                    Text("Will show the upcoming buses instead of the selected ones")
+                                    Text("No need to select specific variant(s)")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }

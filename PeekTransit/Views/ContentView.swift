@@ -60,13 +60,27 @@ struct ContentView: View {
                         .padding()
                 } else if let error = error {
                     VStack(spacing: 16) {
-                        Text("Error loading stop")
+                        Text("Error getting stop info")
                             .font(.headline)
                         Text(error.localizedDescription)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
+                        
+                        
+                        Button("Retry") {
+                            Task {
+                                if let stopNumber = deepLinkHandler.selectedStopNumber {
+                                   
+                                    await loadStop(number: stopNumber)
+                                    
+                                }
+                            }
+                        }
+                        .buttonStyle(.bordered)
                     }
                     .padding()
+                    
+
                 }
             }
             
@@ -77,7 +91,11 @@ struct ContentView: View {
         .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
         .onChange(of: deepLinkHandler.selectedStopNumber) { stopNumber in
             guard let stopNumber = stopNumber else { return }
-            loadStop(number: stopNumber)
+            Task {
+               
+                await loadStop(number: stopNumber)
+                
+            }
         }
         .onAppear {
             if selection == 0 {
@@ -88,7 +106,7 @@ struct ContentView: View {
         }
     }
     
-    private func loadStop(number: Int) {
+    private func loadStop(number: Int) async {
         isLoading = true
         error = nil
         selectedStop = nil

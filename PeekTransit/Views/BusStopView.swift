@@ -67,7 +67,6 @@ struct BusStopView: View {
             errorFetchingSchedule = false
             errorText = ""
             
-            // If we successfully fetch the schedule and user preferred live updates, re-enable them
             if userPreferredLiveUpdates {
                 isLiveUpdatesEnabled = true
             }
@@ -75,7 +74,6 @@ struct BusStopView: View {
             print("Error loading schedules: \(error)")
             errorText = "Error loading schedules: \(error.localizedDescription)"
             errorFetchingSchedule = true
-            // Temporarily disable live updates but don't change user preference
             isLiveUpdatesEnabled = false
         }
     }
@@ -257,7 +255,6 @@ struct BusStopView: View {
             await loadSchedules(isManual: true)
         })
         .onAppear {
-            // Initialize both the active state and user preference
             userPreferredLiveUpdates = getLiveUpdatePreference()
             isLiveUpdatesEnabled = userPreferredLiveUpdates
             isManualRefresh = true
