@@ -28,7 +28,6 @@ struct ProviderMedium: IntentTimelineProvider {
                 ))
             }
             
-            // Then fetch new data
             if let widgetId = widgetId,
                let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
                 

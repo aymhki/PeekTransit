@@ -14,7 +14,6 @@ struct SavedStop: Identifiable, Codable, Equatable {
         self.stopData = stopData
     }
     
-    // Required for Codable conformance since [String: Any] isn't naturally Codable
     enum CodingKeys: String, CodingKey {
         case id
         case stopData
@@ -24,7 +23,6 @@ struct SavedStop: Identifiable, Codable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
         
-        // Decode the dictionary as [String: AnyCodable]
         let anyContainer = try container.decode([String: AnyCodable].self, forKey: .stopData)
         stopData = anyContainer.mapValues { $0.value }
     }
@@ -33,7 +31,6 @@ struct SavedStop: Identifiable, Codable, Equatable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
         
-        // Encode the dictionary using AnyCodable
         let codableDict = stopData.mapValues { AnyCodable($0) }
         try container.encode(codableDict, forKey: .stopData)
     }

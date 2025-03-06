@@ -97,7 +97,6 @@ struct BusStopView: View {
                     
                     Toggle("Live Updates", isOn: $isLiveUpdatesEnabled)
                         .onChange(of: isLiveUpdatesEnabled) { newValue in
-                            // Only update UserDefaults if this is a user action (not error-related)
                             if !errorFetchingSchedule {
                                 UserDefaults.standard.set(newValue, forKey: liveUpdatesKey)
                                 userPreferredLiveUpdates = newValue

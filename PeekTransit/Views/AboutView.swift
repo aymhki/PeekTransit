@@ -37,7 +37,6 @@ struct AboutView: View {
                 }
                 
                 LazyVGrid(columns: columns, spacing: 20) {
-                    // Email Link
                     Link(destination: URL(string: "mailto:agamyahk@myumanitoba.ca")!) {
                         LinkItem(iconSystemName: "envelope.fill", text: "Email")
                     }

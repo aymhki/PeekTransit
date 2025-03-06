@@ -16,7 +16,6 @@ struct ProviderSmall: IntentTimelineProvider {
         Task {
             let widgetId = configuration.widgetConfig?.identifier
             
-            // First return cached data with loading state
             if let widgetId = widgetId,
                let cachedData = WidgetHelper.getCachedEntry(forId: widgetId) {
                 completion(SimpleEntrySmall(
@@ -28,7 +27,6 @@ struct ProviderSmall: IntentTimelineProvider {
                 ))
             }
             
-            // Then fetch new data
             if let widgetId = widgetId,
                let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
                 

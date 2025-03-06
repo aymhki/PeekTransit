@@ -3,25 +3,31 @@ import CoreLocation
 
 struct StopRow: View {
     let stop: [String: Any]
-    let variants: [[String: Any]]
+    let variants: [[String: Any]]?
     let inSaved: Bool
+    let visibilityAction: ((Bool) -> Void)?
+    
     @ObservedObject private var savedStopsManager = SavedStopsManager.shared
     @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) var colorScheme
     @State private var forceUpdate = UUID()
     
-    private var uniqueVariants: [[String: Any]] {
+    private var uniqueVariants: [[String: Any]]? {
         var seenKeys = Set<String>()
-        return variants.filter { item in
-            guard let variant = item["variant"] as? [String: Any],
-                  let key = variant["key"] as? String else {
-                return false
+        if let variants = variants {
+            return variants.filter { item in
+                guard let variant = item["variant"] as? [String: Any],
+                      let key = variant["key"] as? String else {
+                    return false
+                }
+                if seenKeys.contains(key.split(separator: "-")[0].description) {
+                    return false
+                }
+                seenKeys.insert(key.split(separator: "-")[0].description)
+                return true
             }
-            if seenKeys.contains(key.split(separator: "-")[0].description) {
-                return false
-            }
-            seenKeys.insert(key.split(separator: "-")[0].description)
-            return true
+        } else {
+            return nil
         }
     }
     
@@ -36,50 +42,58 @@ struct StopRow: View {
     }
     
     var body: some View {
-        if !inSaved {
-            NavigationLink(destination: BusStopView(stop: stop, isDeepLink: false)) {
+        Group {
+            if !inSaved {
+                NavigationLink(destination: BusStopView(stop: stop, isDeepLink: false)) {
+                    stopRowBody()
+                }
+                .buttonStyle(PlainButtonStyle())
+                .contextMenu(menuItems: {
+                    Button(action: {
+                        savedStopsManager.toggleSavedStatus(for: stop)
+                    }) {
+                        Label(
+                            savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
+                            systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
+                        )
+                    }
+                }, preview: {
+                    BusStopPreviewProvider(stop: stop)
+                })
+                .onChange(of: themeManager.currentTheme) { _ in
+                    forceUpdate = UUID()
+                }
+                .onChange(of: colorScheme) { _ in
+                    forceUpdate = UUID()
+                }
+            } else {
                 stopRowBody()
+                    .buttonStyle(PlainButtonStyle())
+                    .contextMenu(menuItems: {
+                        Button(action: {
+                            savedStopsManager.toggleSavedStatus(for: stop)
+                        }) {
+                            Label(
+                                savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
+                                systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
+                            )
+                        }
+                    }, preview: {
+                        BusStopPreviewProvider(stop: stop)
+                    })
+                    .onChange(of: themeManager.currentTheme) { _ in
+                        forceUpdate = UUID()
+                    }
+                    .onChange(of: colorScheme) { _ in
+                        forceUpdate = UUID()
+                    }
             }
-            .buttonStyle(PlainButtonStyle())
-            .contextMenu(menuItems: {
-                Button(action: {
-                    savedStopsManager.toggleSavedStatus(for: stop)
-                }) {
-                    Label(
-                        savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
-                        systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
-                    )
-                }
-            }, preview: {
-                BusStopPreviewProvider(stop: stop)
-            })
-            .onChange(of: themeManager.currentTheme) { _ in
-                forceUpdate = UUID()
-            }
-            .onChange(of: colorScheme) { _ in
-                forceUpdate = UUID()
-            }
-        } else {
-            stopRowBody()
-            .buttonStyle(PlainButtonStyle())
-            .contextMenu(menuItems: {
-                Button(action: {
-                    savedStopsManager.toggleSavedStatus(for: stop)
-                }) {
-                    Label(
-                        savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
-                        systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
-                    )
-                }
-            }, preview: {
-                BusStopPreviewProvider(stop: stop)
-            })
-            .onChange(of: themeManager.currentTheme) { _ in
-                forceUpdate = UUID()
-            }
-            .onChange(of: colorScheme) { _ in
-                forceUpdate = UUID()
-            }
+        }
+        .onAppear {
+            visibilityAction?(true)
+        }
+        .onDisappear {
+            visibilityAction?(false)
         }
     }
     
@@ -100,6 +114,7 @@ struct StopRow: View {
                     Text(stop["name"] as? String ?? "Unknown Stop")
                         .font(.subheadline)
                         .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                     Text("#\(stop["number"] as? Int ?? 0)".replacingOccurrences(of: ",", with: ""))
                         .font(.subheadline)
@@ -125,18 +140,28 @@ struct StopRow: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                } else {
+                    HStack {
+                        Image(systemName: "bookmark.fill")
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
                 }
                 
                 ScrollView {
-                    FlowLayout(spacing: 8) {
-                        ForEach(uniqueVariants.indices, id: \.self) { index in
-                            if let route = uniqueVariants[index]["route"] as? [String: Any],
-                               let variant = uniqueVariants[index]["variant"] as? [String: Any] {
-                                VariantBadge(route: route, variant: variant)
+                    if let variants = variants, let uniqueVariants = uniqueVariants {
+                        
+                        FlowLayout(spacing: 8) {
+                            ForEach(uniqueVariants.indices, id: \.self) { index in
+                                if let route = uniqueVariants[index]["route"] as? [String: Any],
+                                   let variant = uniqueVariants[index]["variant"] as? [String: Any] {
+                                    VariantBadge(route: route, variant: variant)
+                                }
                             }
                         }
+                        .padding(.top)
+                        
                     }
-                    .padding(.top)
                 }
             }
         }

@@ -72,9 +72,9 @@ struct WidgetRowView: View {
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
-        .onTapGesture {
-            onTap()
-        }
+//        .onTapGesture {
+//            onTap()
+//        }
     }
     
     private func getPreviewHeight() -> CGFloat {

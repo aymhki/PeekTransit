@@ -10,7 +10,7 @@ struct WidgetsView: View {
     @State private var selectedWidgets: Set<String> = []
     @State private var showingDeleteAlert = false
     @State private var widgetToDelete: WidgetModel? = nil
-    @StateObject private var themeManager = ThemeManager.shared // Add this line
+    @StateObject private var themeManager = ThemeManager.shared 
 
     
     var body: some View {

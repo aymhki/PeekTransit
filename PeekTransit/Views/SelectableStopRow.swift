@@ -11,6 +11,9 @@ struct SelectableStopRow: View {
     let maxStops: Int
     let onSelect: () -> Void
     @ObservedObject private var savedStopsManager = SavedStopsManager.shared
+    @EnvironmentObject private var themeManager: ThemeManager
+    @Environment(\.colorScheme) var colorScheme
+    @State private var forceUpdate = UUID()
 
     
     private var uniqueVariants: [[String: Any]] {
@@ -49,6 +52,7 @@ struct SelectableStopRow: View {
                         coordinate: coordinate,
                         direction: stop["direction"] as? String ?? "Unknown Direction"
                     )
+                    .id(forceUpdate)
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {
@@ -96,6 +100,12 @@ struct SelectableStopRow: View {
                 }
             }
             .padding(.vertical, 8)
+        }
+        .onChange(of: themeManager.currentTheme) { _ in
+            forceUpdate = UUID()
+        }
+        .onChange(of: colorScheme) { _ in
+            forceUpdate = UUID()
         }
         .buttonStyle(PlainButtonStyle())
         .disabled(selectedStops.count >= maxStops && !isSelected)

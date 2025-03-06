@@ -19,7 +19,8 @@ struct SavedStopRowView: View {
                 return true
             }
             
-            StopRow(stop: savedStop.stopData, variants: uniqueVariants, inSaved: true)
+            StopRow(stop: savedStop.stopData, variants: uniqueVariants, inSaved: true, visibilityAction: nil)
+            
         }
     }
 }

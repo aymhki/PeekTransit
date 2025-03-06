@@ -167,7 +167,7 @@ struct StopSelectionStep: View {
                                         let newLocation = locationManager.location
                                         if let location = newLocation {
                                             Task {
-                                                await stopsStore.loadStops(userLocation: location)
+                                                await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: true)
                                             }
                                         }
                                     }
@@ -221,7 +221,7 @@ struct StopSelectionStep: View {
                 let newLocation = locationManager.location
                 if let location = newLocation {
                     Task {
-                        await stopsStore.loadStops(userLocation: location)
+                        await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: true)
                     }
                 }
                 
@@ -239,7 +239,7 @@ struct StopSelectionStep: View {
                 if let location = newLocation,
                    locationManager.shouldRefresh(for: location) {
                     Task {
-                        await stopsStore.loadStops(userLocation: location)
+                        await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: true)
                     }
                 }
             }

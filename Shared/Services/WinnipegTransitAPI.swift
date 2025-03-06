@@ -595,7 +595,7 @@ class TransitAPI {
                             let estimatedTime = arrival["estimated"] as? String
                             let scheduledTime = arrival["scheduled"] as? String
                             var finalArrivalText = ""
-                            var arrivalState = "Ok"
+                            var arrivalState = getOKStatusTextString()
                             var sortValue = 0
                             
                             if let estimatedTimeStr = estimatedTime,
@@ -677,7 +677,6 @@ class TransitAPI {
                                         sortValue = Int(timeDifference)
                                     }
                                     
-                                    // Standardize variant key
                                     if let firstPart = variantKey.split(separator: "-").first {
                                         variantKey = String(firstPart)
                                     }

@@ -3,6 +3,7 @@ import SwiftUI
 struct SavedStopsView: View {
     @StateObject private var savedStopsManager = SavedStopsManager.shared
     @State private var searchText = ""
+
     
     var filteredStops: [SavedStop] {
         guard !searchText.isEmpty else { return savedStopsManager.savedStops }
@@ -55,6 +56,8 @@ struct SavedStopsView: View {
                         }
                     }
                     .searchable(text: $searchText, prompt: "Search saved stops...")
+                    .disableAutocorrection(true)
+                    .autocapitalization(.none)
                     .refreshable {
                         savedStopsManager.loadSavedStops()
                     }

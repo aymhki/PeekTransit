@@ -3,7 +3,7 @@ import CoreLocation
 
 class StopsDataStore: ObservableObject {
     static let shared = StopsDataStore()
-    private static let searchDebounceTime: TimeInterval = 0.5
+    private static let searchDebounceTime: TimeInterval = 2.0
     private var searchTask: Task<Void, Never>?
 
     
@@ -19,7 +19,7 @@ class StopsDataStore: ObservableObject {
     
     private init() {}
     
-    func loadStops(userLocation: CLLocation) async {
+    func loadStops(userLocation: CLLocation, loadingFromWidgetSetup: Bool?) async {
         guard !isLoading else { return }
         
         await MainActor.run {
@@ -33,38 +33,73 @@ class StopsDataStore: ObservableObject {
             isProcessing = true
             let nearbyStops = try await TransitAPI.shared.getNearbyStops(userLocation: userLocation, forShort: getGlobalAPIForShortUsage())
             
-            for batch in stride(from: 0, to: nearbyStops.count, by: batchSize) {
-                let endIndex = min(batch + batchSize, nearbyStops.count)
-                let currentBatch = Array(nearbyStops[batch..<endIndex])
+            await MainActor.run {
+                self.stops = nearbyStops
                 
-                do {
-                    let enrichedBatch = try await TransitAPI.shared.getVariantsForStops(stops: currentBatch)
+                if let loadingFromWidgetSetup = loadingFromWidgetSetup, loadingFromWidgetSetup == false {
+                    self.isLoading = false
                     
-                    await MainActor.run {
-                        self.stops.append(contentsOf: enrichedBatch)
+                    if self.stops.isEmpty {
+                        self.error = TransitError.parseError("No stops could be loaded")
                     }
-                    
-                    // try await Task.sleep(nanoseconds: 100_000_000)
-                } catch {
-                    print("Error processing batch: \(error.localizedDescription)")
-                    continue
                 }
             }
             
-            await MainActor.run {
-                self.isLoading = false
-                if self.stops.isEmpty {
-                    self.error = TransitError.parseError("No stops could be loaded")
+            if let loadingFromWidgetSetup = loadingFromWidgetSetup, loadingFromWidgetSetup == true {
+                await enrichStops(nearbyStops)
+                
+                await MainActor.run {
+                    self.isLoading = false
+                    
+                    if self.stops.isEmpty {
+                        self.error = TransitError.parseError("No stops could be loaded")
+                    }
+                }
+            } else {
+                Task {
+                    await enrichStops(nearbyStops)
                 }
             }
+            
         } catch {
             await MainActor.run {
-                self.error = error
+                if self.stops.isEmpty {
+                    self.error = error
+                }
+                
                 self.isLoading = false
             }
         }
         
         isProcessing = false
+    }
+    
+    private func enrichStops(_ stops: [[String: Any]]) async {
+        var enrichedStops: [[String: Any]] = []
+        
+        for batch in stride(from: 0, to: stops.count, by: batchSize) {
+            let endIndex = min(batch + batchSize, stops.count)
+            let currentBatch = Array(stops[batch..<endIndex])
+            
+            do {
+                let enrichedBatch = try await TransitAPI.shared.getVariantsForStops(stops: currentBatch)
+                enrichedStops.append(contentsOf: enrichedBatch)
+                
+                await MainActor.run {
+                    for enrichedStop in enrichedBatch {
+                        if let number = enrichedStop["number"] as? Int,
+                           let index = self.stops.firstIndex(where: { ($0["number"] as? Int) == number }) {
+                            self.stops[index] = enrichedStop
+                        }
+                    }
+                }
+                
+                
+            } catch {
+                print("Error processing batch: \(error.localizedDescription)")
+                continue
+            }
+        }
     }
     
     func searchForStops(query: String, userLocation: CLLocation?) async {

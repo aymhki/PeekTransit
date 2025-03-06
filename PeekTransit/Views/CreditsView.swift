@@ -25,7 +25,7 @@ struct CreditsView: View {
 //                Spacer()
                 
                 VStack (spacing: 0) {
-                    Text("App idea and design inspired by:\n")
+                    Text("App design inspired by:\n")
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Text("Ryan Ramchandar")

@@ -17,7 +17,6 @@ struct ProviderLockscreen: IntentTimelineProvider {
         Task {
             let widgetId = configuration.widgetConfig?.identifier
             
-            // First return cached data with loading state
             if let widgetId = widgetId,
                let cachedData = WidgetHelper.getCachedEntry(forId: widgetId) {
                 completion(SimpleEntryLockscreen(
@@ -29,7 +28,6 @@ struct ProviderLockscreen: IntentTimelineProvider {
                 ))
             }
             
-            // Then fetch new data
             if let widgetId = widgetId,
                let widget = WidgetHelper.getWidgetFromDefaults(withId: widgetId) {
                 

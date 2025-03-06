@@ -10,6 +10,7 @@ struct ListView: View {
     @State private var searchText = ""
     @State private var showAlert = false
     @State private var savedStopsManager =  SavedStopsManager.shared
+    @State private var visibleRows = Set<Int>()
 
 
     var combinedStops: [[String: Any]] {
@@ -74,12 +75,13 @@ struct ListView: View {
                             let newLocation = locationManager.location
                             if let location = newLocation {
                                 Task {
-                                    await stopsStore.loadStops(userLocation: location)
+                                    await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                                 }
                             }
                         }
                         .buttonStyle(.bordered)
                     }
+                    .padding(.horizontal)
                 } else if combinedStops.isEmpty {
                     Text("No stops found nearby")
                         .foregroundColor(.secondary)
@@ -95,9 +97,21 @@ struct ListView: View {
                         
                         ForEach(filteredStops.indices, id: \.self) { index in
                             let stop = filteredStops[index]
-                            if let variants = stop["variants"] as? [[String: Any]] {
-                                StopRow(stop: stop, variants: variants, inSaved: false)
-                            }
+                            
+                            StopRow(
+                                stop: stop,
+                                variants: stop["variants"] as? [[String: Any]],
+                                inSaved: false,
+                                visibilityAction: { isVisible in
+                                    if isVisible {
+                                        visibleRows.insert(index)
+                                    } else {
+                                        visibleRows.remove(index)
+                                    }
+                                }
+                            )
+                            
+                            
                         }
                     }
                     .searchable(text: $searchText, prompt: "Search stops, routes...")
@@ -112,18 +126,19 @@ struct ListView: View {
                         let newLocation = locationManager.location
                         if let location = newLocation {
                             Task {
-                                await stopsStore.loadStops(userLocation: location)
+                                await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                             }
                         }
                         
                         searchText = ""
+                        MapSnapshotCache.shared.clearCache()
                     }
                 }
             }
             .navigationTitle("Nearby Stops")
-            .toolbar {
-                        
-                }
+            .onDisappear {
+                MapSnapshotCache.shared.cancelPendingRequests()
+            }
 
         }
         .onAppear {
@@ -133,7 +148,7 @@ struct ListView: View {
             if let location = newLocation,
                locationManager.shouldRefresh(for: location) {
                 Task {
-                    await stopsStore.loadStops(userLocation: location)
+                    await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                 }
             }
         }

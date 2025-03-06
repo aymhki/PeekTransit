@@ -59,7 +59,7 @@ struct ContentView: View {
                     ProgressView("Loading stop...")
                         .padding()
                 } else if let error = error {
-                    VStack(spacing: 16) {
+                    VStack(spacing: 30) {
                         Text("Error getting stop info")
                             .font(.headline)
                         Text(error.localizedDescription)

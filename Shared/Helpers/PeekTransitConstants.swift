@@ -162,7 +162,7 @@ public func getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: Widg
 }
 
 public func getStopsDistanceRadius() -> Double {
-    return 550
+    return 500
 }
 
 
@@ -414,23 +414,23 @@ public func getWidgetTextPlaceholder() -> String {
 
 
 public func getLateStatusTextString() -> String {
-    return "LATE"
+    return "Late"
 }
 
 public func getEarlyStatusTextString() -> String {
-    return "EARLY"
+    return "Early"
 }
 
 public func getCancelledStatusTextString() -> String {
-    return "CANCELLED"
+    return "Cancelled"
 }
 
 public func getOKStatusTextString() -> String {
-    return "OK"
+    return "Ok"
 }
 
 public func getDueStatusTextString() -> String {
-    return "DUE"
+    return "Due"
 }
 
 public enum DefaultTab: Int, CaseIterable, Identifiable {
