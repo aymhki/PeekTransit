@@ -767,3 +767,7 @@ public func getRefreshWidgetTimelineAfterHowManySeconds()->Int{
 public func getGlobalAPIForShortUsage() -> Bool {
     return true
 }
+
+public func getDistanceChangeAllowedBeforeRefreshingStops() -> CLLocationDistance {
+    return 100.00
+}
