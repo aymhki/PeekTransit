@@ -3,7 +3,7 @@ import CoreLocation
 
 class StopsDataStore: ObservableObject {
     static let shared = StopsDataStore()
-    private static let searchDebounceTime: TimeInterval = 2.0
+    private static let searchDebounceTime: TimeInterval = 1.0
     private var searchTask: Task<Void, Never>?
 
     

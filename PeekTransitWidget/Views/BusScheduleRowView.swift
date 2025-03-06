@@ -51,11 +51,16 @@ struct BusScheduleRow: View {
                         Text("\(components[2].prefix(1)).")
                             .widgetTheme(currentTheme, text: components[2], size: size)
                             .frame(alignment: .center)
+                            
                     } else {
                         Text(components[2])
                             .widgetTheme(currentTheme, text: components[2], size: size)
                             .frame(alignment: .center)
                     }
+                } else if (size == .accessoryRectangular) {
+                    Text(" ")
+                        .widgetTheme(currentTheme, text: components[2], size: size)
+                        .frame(alignment: .center)
                 }
                 
                 if (size != .systemSmall && size != .accessoryRectangular) {
@@ -68,7 +73,7 @@ struct BusScheduleRow: View {
                         .frame(alignment: .leading)
                 }
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .center)
             
         }
            

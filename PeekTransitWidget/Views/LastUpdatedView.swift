@@ -18,12 +18,14 @@ struct LastUpdatedView: View {
     var body: some View {
         
         if (size == "lockscreen" || size == "small") {
-            Text("Updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "O." : "")" )
+            Text("\(usingCached ? "" : " ")Updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "O." : "")" )
                 .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "O." : "")", size: widgetSizeFromString(size))
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.bottom, 2)
         } else {
             Text("Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "Old." : "")" )
                 .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "Old." : "")", size: widgetSizeFromString(size))
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.bottom, 8)
         }
     }
