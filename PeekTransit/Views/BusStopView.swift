@@ -1,7 +1,6 @@
 import SwiftUI
 import MapKit
 
-
 struct BusStopView: View {
     let stop: [String: Any]
     let isDeepLink: Bool
@@ -13,6 +12,7 @@ struct BusStopView: View {
     @State private var errorFetchingSchedule = false
     @State private var errorText = ""
     @State private var isLiveUpdatesEnabled: Bool = false
+    @State private var userPreferredLiveUpdates: Bool = true
     @State private var currentTheme: StopViewTheme = .default
     let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
     @EnvironmentObject private var themeManager: ThemeManager
@@ -26,7 +26,6 @@ struct BusStopView: View {
     private var isSaved: Bool {
         savedStopsManager.isStopSaved(stop)
     }
-
     
     private var liveUpdatesKey: String {
         "live_updates_\(stop["number"] as? Int ?? 0)"
@@ -37,17 +36,15 @@ struct BusStopView: View {
               let geographic = centre["geographic"] as? [String: Any],
               let lat = Double(geographic["latitude"] as? String ?? ""),
               let lon = Double(geographic["longitude"] as? String ?? "") else {
-                    return nil
-                }
+            return nil
+        }
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
     
     private func getLiveUpdatePreference() -> Bool {
-
         if UserDefaults.standard.object(forKey: liveUpdatesKey) != nil {
             return UserDefaults.standard.bool(forKey: liveUpdatesKey)
         }
-
         return true
     }
     
@@ -55,7 +52,7 @@ struct BusStopView: View {
         if isManual {
             isLoading = true
             isRefreshCooldown = true
-                        
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + cooldownDuration) {
                 isRefreshCooldown = false
             }
@@ -69,10 +66,16 @@ struct BusStopView: View {
             schedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
             errorFetchingSchedule = false
             errorText = ""
+            
+            // If we successfully fetch the schedule and user preferred live updates, re-enable them
+            if userPreferredLiveUpdates {
+                isLiveUpdatesEnabled = true
+            }
         } catch {
             print("Error loading schedules: \(error)")
             errorText = "Error loading schedules: \(error.localizedDescription)"
             errorFetchingSchedule = true
+            // Temporarily disable live updates but don't change user preference
             isLiveUpdatesEnabled = false
         }
     }
@@ -81,36 +84,36 @@ struct BusStopView: View {
         List {
             Section {
                 VStack(spacing: 30) {
-                    HStack (spacing: 30) {
-                        Text( (stop["name"] as? String ?? "Bus Stop"))
+                    HStack(spacing: 30) {
+                        Text((stop["name"] as? String ?? "Bus Stop"))
                             .font(.title3.bold())
-                            .fixedSize(horizontal: false, vertical: true) 
+                            .fixedSize(horizontal: false, vertical: true)
                             .lineLimit(nil)
                             .multilineTextAlignment(.leading)
-                            
                         
                         Spacer(minLength: 8)
                         
-                        
                         LiveIndicator(isAnimating: isLiveUpdatesEnabled)
                             .padding()
-                        
                     }
-                    
-                   
                     
                     Toggle("Live Updates", isOn: $isLiveUpdatesEnabled)
-                    .onChange(of: isLiveUpdatesEnabled) { newValue in
-                    UserDefaults.standard.set(newValue, forKey: liveUpdatesKey)
-                        if newValue {
-                            Task {
-                                await loadSchedules(isManual: false)
+                        .onChange(of: isLiveUpdatesEnabled) { newValue in
+                            // Only update UserDefaults if this is a user action (not error-related)
+                            if !errorFetchingSchedule {
+                                UserDefaults.standard.set(newValue, forKey: liveUpdatesKey)
+                                userPreferredLiveUpdates = newValue
+                            }
+                            
+                            if newValue {
+                                Task {
+                                    await loadSchedules(isManual: false)
+                                }
                             }
                         }
-                    }
                 }
             }
-
+            
             if let coordinate = coordinate {
                 Section {
                     RealMapPreview(
@@ -120,7 +123,6 @@ struct BusStopView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 200)
                     .listRowInsets(EdgeInsets())
-                    
                 }
             }
             
@@ -147,10 +149,7 @@ struct BusStopView: View {
                     .padding()
                     .padding([.vertical, .horizontal])
                     
-                    
-                    
-                    
-                } else if (schedules.isEmpty) {
+                } else if schedules.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "bus.fill")
                             .font(.system(size: 48))
@@ -167,39 +166,36 @@ struct BusStopView: View {
                         ForEach(schedules, id: \.self) { schedule in
                             let components = schedule.components(separatedBy: getScheduleStringSeparator())
                             
- 
                             if components.count > 1 {
-
                                 GeometryReader { geometry in
                                     let totalWidth = geometry.size.width
                                     let spacing: CGFloat = 0
-
+                                    
                                     let columnWidths = [
                                         totalWidth * 0.13,
                                         totalWidth * 0.42,
                                         components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.36 : totalWidth * 0.23,
                                         components[2].contains(getCancelledStatusTextString()) ? totalWidth * 0.0 : totalWidth * 0.25
                                     ]
-
+                                    
                                     HStack(spacing: spacing) {
                                         Text(components[0])
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[0], alignment: .leading)
-
-                                        Text( components[1])
+                                        
+                                        Text(components[1])
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[1], alignment: .leading)
-
-
-                                            Text(components[2])
-                                                .lineLimit(nil)
-                                                .fixedSize(horizontal: false, vertical: true)
-                                                .frame(width: columnWidths[2], alignment: .center)
-                                                .stopViewTheme(themeManager.currentTheme, text: components[2])
-
-                                        if (components.count > 3 && !components[2].contains(getCancelledStatusTextString())) {
+                                        
+                                        Text(components[2])
+                                            .lineLimit(nil)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                            .frame(width: columnWidths[2], alignment: .center)
+                                            .stopViewTheme(themeManager.currentTheme, text: components[2])
+                                        
+                                        if components.count > 3 && !components[2].contains(getCancelledStatusTextString()) {
                                             Text(components[3])
                                                 .lineLimit(nil)
                                                 .fixedSize(horizontal: false, vertical: true)
@@ -210,7 +206,6 @@ struct BusStopView: View {
                                     .padding(.horizontal, 1)
                                 }
                                 .frame(height: 50)
-
                             }
                         }
                         .padding(.all)
@@ -262,7 +257,9 @@ struct BusStopView: View {
             await loadSchedules(isManual: true)
         })
         .onAppear {
-            isLiveUpdatesEnabled = getLiveUpdatePreference()
+            // Initialize both the active state and user preference
+            userPreferredLiveUpdates = getLiveUpdatePreference()
+            isLiveUpdatesEnabled = userPreferredLiveUpdates
             isManualRefresh = true
             Task {
                 await loadSchedules(isManual: true)
@@ -283,5 +280,3 @@ struct BusStopView: View {
         }
     }
 }
-
-

@@ -61,6 +61,7 @@ class TransitAPI {
 
         
         isLoading = true
+        
         defer {
             isLoading = false
         }
@@ -101,16 +102,13 @@ class TransitAPI {
             throw TransitError.parseError("Invalid stops data format")
         }
         
-        // Process and extract distance values in a single pass
         var processedStops: [(stop: [String: Any], distance: Double)] = []
         
         for var stop in stops {
-            // Handle name replacement if needed
             if forShort, let name = stop["name"] as? String {
                 stop["name"] = name.replacingOccurrences(of: "@", with: " @ ")
             }
             
-            // Extract distance value
             var distanceValue: Double = Double.infinity
             if let distances = stop["distances"] as? [String: Any],
                let firstDistance = distances.first,
@@ -122,7 +120,6 @@ class TransitAPI {
             processedStops.append((stop: stop, distance: distanceValue))
         }
         
-        // Sort once based on pre-calculated distances
         let sortedStops = processedStops
             .sorted { $0.distance < $1.distance }
             .prefix(getMaxStopsAllowedToFetch())
@@ -386,7 +383,7 @@ class TransitAPI {
                             let estimatedTime = arrival["estimated"] as? String
                             let scheduledTime = arrival["scheduled"] as? String
                             var finalArrivalText = ""
-                            var arrivalState = "Ok"
+                            var arrivalState = getOKStatusTextString()
 
                             if let estimatedTimeStr = estimatedTime,
                                let scheduledTimeStr = scheduledTime {
@@ -492,7 +489,6 @@ class TransitAPI {
             let timeA = componentsA[3]
             let timeB = componentsB[3]
             
-            // Handle "Due" cases first
             if timeA == getDueStatusTextString() && timeB != getDueStatusTextString() {
                 return true
             }
@@ -503,7 +499,6 @@ class TransitAPI {
                 return true
             }
             
-            // Handle minute-based times
             let isMinutesA = timeA.hasSuffix("min.")
             let isMinutesB = timeB.hasSuffix("min.")
             
@@ -531,7 +526,6 @@ class TransitAPI {
             if isMinutesA { return true }
             if isMinutesB { return false }
             
-            // Handle clock times (HH:MM AM/PM)
             let timeComponentsA = timeA.components(separatedBy: " ")
             let timeComponentsB = timeB.components(separatedBy: " ")
             
@@ -546,34 +540,28 @@ class TransitAPI {
                 let isAMA = timeComponentsA[1] == "AM"
                 let isAMB = timeComponentsB[1] == "AM"
                 
-                // Get current hour in 24-hour format
                 let calendar = Calendar.current
                 let currentDate = Date()
                 let currentHour = calendar.component(.hour, from: currentDate)
                 
-                // Convert to 24-hour format
                 if !isAMA && hourA != 12 { hourA += 12 }
                 if isAMA && hourA == 12 { hourA = 0 }
                 if !isAMB && hourB != 12 { hourB += 12 }
                 if isAMB && hourB == 12 { hourB = 0 }
                 
-                // Calculate total minutes since midnight
                 var totalMinutesA = hourA * 60 + minuteA
                 var totalMinutesB = hourB * 60 + minuteB
                 
-                // If current time is PM and we see an AM time, it must be for tomorrow
+                
                 if currentHour >= 12 {
                     if isAMA {
-                        totalMinutesA += 24 * 60  // Add 24 hours worth of minutes
+                        totalMinutesA += 24 * 60
                     }
                     if isAMB {
                         totalMinutesB += 24 * 60
                     }
                 }
-                // If current time is AM and we see a PM time, it must be for today
-                else if currentHour < 12 {
-                    // No adjustment needed as PM times are already later in the day
-                }
+    
                 
                 return totalMinutesA < totalMinutesB
             }
@@ -700,7 +688,6 @@ class TransitAPI {
                                     
                                     let variantIdentifier = "\(variantKey)\(getScheduleStringSeparator())\(variantName)"
                                     
-                                    // Determine which time format to use
                                     if !variantMinutesAdded[variantIdentifier, default: false] && timeDifference < 15 {
                                         finalArrivalText = timeInMinutes
                                         variantMinutesAdded[variantIdentifier] = true
@@ -727,7 +714,6 @@ class TransitAPI {
         }
         
         let sortedEntries = tempScheduleEntries.sorted { entry1, entry2 in
-            // Handle "Due" entries first
             if entry1.time == getDueStatusTextString() {
                 return true
             }
