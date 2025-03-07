@@ -730,7 +730,7 @@ extension Bundle {
 
 public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
     switch size {
-        case .systemLarge: return 40
+        case .systemLarge: return 35
         case .systemMedium: return 35
         case .systemSmall: return 25
         case .accessoryRectangular: return 24
@@ -740,8 +740,8 @@ public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
 
 public func getRouteNameWidth(size: WidgetFamily) -> CGFloat {
     switch size {
-        case .systemLarge: return 100
-        case .systemMedium: return 100
+        case .systemLarge: return 130
+        case .systemMedium: return 130
         case .systemSmall: return 21
         case .accessoryRectangular: return 18
         default: return 70
@@ -770,4 +770,8 @@ public func getGlobalAPIForShortUsage() -> Bool {
 
 public func getDistanceChangeAllowedBeforeRefreshingStops() -> CLLocationDistance {
     return 100.00
+}
+
+public func getMinutesAllowedToKeepDueBusesInSchedule() -> Int {
+    return 1
 }

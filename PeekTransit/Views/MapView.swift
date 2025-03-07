@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 import WidgetKit
 
+
 struct MapView: View {
     @StateObject private var locationManager = LocationManager()
     @StateObject private var stopsStore = StopsDataStore.shared
@@ -9,6 +10,7 @@ struct MapView: View {
     @State private var selectedStop: [String: Any]?
     @State private var showLoadingIndicator = false
     @State private var centerMapOnUser = true
+    @State private var isManualRefresh = true
     
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
     
@@ -44,7 +46,7 @@ struct MapView: View {
                     }
                 }
                 
-                if stopsStore.isLoading && showLoadingIndicator {
+                if stopsStore.isLoading && isManualRefresh {
                     ProgressView()
                         .padding()
                         .background(Color(.systemBackground).opacity(1))
@@ -53,6 +55,7 @@ struct MapView: View {
                 
                 if let error = stopsStore.error {
                     ErrorViewForMapView(error: error) {
+                        isManualRefresh = true
                         showLoadingIndicator = true
                         refreshStops()
                     }
@@ -68,15 +71,20 @@ struct MapView: View {
             }
         }
         .onAppear {
+            isManualRefresh = true
             locationManager.requestLocation()
         }
         .onChange(of: locationManager.location) { newLocation in
             guard let location = newLocation else { return }
-            showLoadingIndicator = true
+        
+            
             if locationManager.shouldRefresh(for: location) {
+            
                 Task {
                     await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
-                    showLoadingIndicator = false
+                    if isManualRefresh {
+                        isManualRefresh = false
+                    }
                 }
             }
         }
@@ -89,28 +97,29 @@ struct MapView: View {
         }
         
         centerMapOnUser = true
-        showLoadingIndicator = true
+        isManualRefresh = true
+    
         
         if let location = locationManager.location,
            locationManager.shouldRefresh(for: location) {
             Task {
                 await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
-                showLoadingIndicator = false
+                isManualRefresh = false
             }
         } else {
-            showLoadingIndicator = false
+            isManualRefresh = false
         }
     }
     
     private func refreshStops() {
         guard let location = locationManager.location else { return }
+        
+        isManualRefresh = true
+        
         Task {
             await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
             showLoadingIndicator = false
+            isManualRefresh = false
         }
     }
 }
-
-
-
-

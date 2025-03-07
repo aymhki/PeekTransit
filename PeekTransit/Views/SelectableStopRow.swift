@@ -58,8 +58,9 @@ struct SelectableStopRow: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text(stop["name"] as? String ?? "Unknown Stop")
-                            .font(.headline)
-                            .lineLimit(3)
+                            .font(.subheadline)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
                         Spacer()
                         Text("#\(stop["number"] as? Int ?? 0)".replacingOccurrences(of: ",", with: ""))
                             .font(.subheadline)

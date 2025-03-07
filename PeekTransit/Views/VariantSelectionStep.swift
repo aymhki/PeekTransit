@@ -165,6 +165,7 @@ struct VariantSelectionStep: View {
                     }
                     .buttonStyle(.bordered)
                 }
+                .padding(.horizontal)
             } else {
                 ScrollView {
                     VStack(spacing: 20) {

@@ -307,7 +307,9 @@ class TransitAPI {
     func getStopSchedule(stopNumber: Int) async throws -> [String: Any] {
         let currentDate = Date()
         let calendar = Calendar.current
-        let currentComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: currentDate)
+        let startDate = calendar.date(byAdding: .minute, value: -5, to: currentDate)!
+        
+        let currentComponents = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: startDate)
 
         var periodAllowedForBusRoutes = currentComponents
         periodAllowedForBusRoutes.hour! += getTimePeriodAllowedForNextBusRoutes()
@@ -401,25 +403,22 @@ class TransitAPI {
                                 let currentDateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: currentDate)
                                 let currentTotalMinutes = (currentDateComponents.year! * 525600) + (currentDateComponents.month! * 43800) + (currentDateComponents.day! * 1440) + (currentDateComponents.hour! * 60) + currentDateComponents.minute!
                                 
-                                var timeDifference = estimatedTotalMinutes - currentTotalMinutes //estimatedTotalMinutes - currentTotalMinutes
-                                
-//                                if ( (estimatedTotalMinutes - currentTotalMinutes) < 0 ) {
-//                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
-//                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0 ) {
-//                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
-//                                }
-                                
-                                let delay = estimatedTotalMinutes - scheduledTotalMinutes
-                                
-//                                if ( (estimatedTotalMinutes - scheduledTotalMinutes) < 0 ) {
-//                                    delay = floor(Double(estimatedTotalMinutes - scheduledTotalMinutes))
-//                                } else if ( (estimatedTotalMinutes - scheduledTotalMinutes) > 0 ) {
-//                                    delay = ceil(Double(estimatedTotalMinutes - scheduledTotalMinutes))
-//                                }
-
-                                if timeDifference < -3 {
+                                guard let estimatedDate = dateFormatter.date(from: estimatedTimeStr),
+                                      let scheduledDate = dateFormatter.date(from: scheduledTimeStr) else {
                                     continue
                                 }
+                                
+                                let timeDifferenceSeconds = estimatedDate.timeIntervalSince(currentDate)
+                                let timeDifference = Int(ceil(timeDifferenceSeconds / 60))
+                                let delay = Int(ceil(estimatedDate.timeIntervalSince(scheduledDate) / 60))
+                                
+
+                                
+                                    if timeDifference < -getMinutesAllowedToKeepDueBusesInSchedule() {
+                                        continue
+                                        print(timeDifference)
+                                    }
+                                
                                 
                                 if cancelled == "true" {
                                     arrivalState = getCancelledStatusTextString()
@@ -427,7 +426,7 @@ class TransitAPI {
                                 } else {
                                     if (timeDifference < 0 && timeFormat != TimeFormat.clockTime) {
                                         finalArrivalText = "\(Int(-timeDifference)) min. ago"
-                                    } else if (timeDifference < 15 && timeFormat != TimeFormat.clockTime) {
+                                    } else if (timeDifference <= 15 && timeFormat != TimeFormat.clockTime) {
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else {
                                         var finalHour = Int(estimatedTimeParsedTime[0])!
@@ -448,17 +447,17 @@ class TransitAPI {
                                         }
                                     }
                                     
-                                    if (delay > 0 && timeDifference < 15 && timeFormat != TimeFormat.clockTime) {
+                                    if (delay > 0 && timeDifference <= 15 && timeFormat != TimeFormat.clockTime) {
                                         arrivalState = getLateStatusTextString()
                                         finalArrivalText = "\(Int(timeDifference)) min."
-                                    } else if delay < 0 && timeDifference < 15 {
+                                    } else if delay < 0 && timeDifference <= 15 {
                                         arrivalState = getEarlyStatusTextString()
                                         finalArrivalText = "\(Int(timeDifference)) min."
                                     } else {
                                         arrivalState = getOKStatusTextString()
                                     }
                                     
-                                    if (timeDifference == 0 || (timeDifference > 1 && timeDifference < -1)) {
+                                    if (timeDifference <= 0 && timeDifference >= -getMinutesAllowedToKeepDueBusesInSchedule()) {
                                         finalArrivalText = getDueStatusTextString()
                                     }
                                 }
@@ -625,18 +624,18 @@ class TransitAPI {
                                                         (currentDateComponents.day! * 1440) +
                                                         (currentDateComponents.hour! * 60) +
                                                         currentDateComponents.minute!
+                            
                                 
-                                let timeDifference = estimatedTotalMinutes - currentTotalMinutes
+                                guard let estimatedDate = dateFormatter.date(from: estimatedTimeStr),
+                                      let scheduledDate = dateFormatter.date(from: scheduledTimeStr) else {
+                                    continue
+                                }
                                 
-//                                if ((estimatedTotalMinutes - currentTotalMinutes) < 0) {
-//                                    timeDifference = floor(Double(estimatedTotalMinutes - currentTotalMinutes))
-//                                } else if ((estimatedTotalMinutes - currentTotalMinutes) > 0) {
-//                                    timeDifference = ceil(Double(estimatedTotalMinutes - currentTotalMinutes))
-//                                }
+                                let timeDifferenceSeconds = estimatedDate.timeIntervalSince(currentDate)
+                                let timeDifference = Int(ceil(timeDifferenceSeconds / 60))
+                                let delay = Int(round(estimatedDate.timeIntervalSince(scheduledDate) / 60))
                                 
-                                let delay = estimatedTotalMinutes - scheduledTotalMinutes
-                                
-                                if timeDifference < -3 {
+                                if timeDifference < -getMinutesAllowedToKeepDueBusesInSchedule() {
                                     continue
                                 }
                                 
@@ -658,19 +657,19 @@ class TransitAPI {
                                     
                                     timeIn12HourFormat = "\(finalHour):\(estimatedTimeParsedTime[1]) \(am ? "AM" : "PM")"
                                     
-                                    if timeDifference < 15 {
+                                    if timeDifference <= 15 {
                                         timeInMinutes = "\(Int(timeDifference)) min."
                                     }
                                     
-                                    if (delay > 0 && timeDifference < 15) {
+                                    if (delay > 0 && timeDifference <= 15) {
                                         arrivalState = getLateStatusTextString()
-                                    } else if delay < 0 && timeDifference < 15 {
+                                    } else if delay < 0 && timeDifference <= 15 {
                                         arrivalState = getEarlyStatusTextString()
                                     } else {
                                         arrivalState = getOKStatusTextString()
                                     }
                                     
-                                    if (timeDifference == 0 || (timeDifference > 1 && timeDifference < -1)) {
+                                    if (timeDifference < 0 && timeDifference >= -getMinutesAllowedToKeepDueBusesInSchedule()) {
                                         timeInMinutes = getDueStatusTextString()
                                         sortValue = -1
                                     } else {
@@ -687,7 +686,7 @@ class TransitAPI {
                                     
                                     let variantIdentifier = "\(variantKey)\(getScheduleStringSeparator())\(variantName)"
                                     
-                                    if !variantMinutesAdded[variantIdentifier, default: false] && timeDifference < 15 {
+                                    if !variantMinutesAdded[variantIdentifier, default: false] && timeDifference <= 15 {
                                         finalArrivalText = timeInMinutes
                                         variantMinutesAdded[variantIdentifier] = true
                                     } else {

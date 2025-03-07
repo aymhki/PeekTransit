@@ -2,7 +2,6 @@ import MapKit
 import Foundation
 import SwiftUI
 
-
 struct MapViewRepresentable: UIViewRepresentable {
     let stops: [[String: Any]]
     let userLocation: CLLocation?
@@ -56,6 +55,8 @@ struct MapViewRepresentable: UIViewRepresentable {
                 }
         )
         
+        var updatedStopNumbers = Set<Int>()
+        
         for stop in stops {
             guard let number = stop["number"] as? Int,
                   let centre = stop["centre"] as? [String: Any],
@@ -65,14 +66,17 @@ struct MapViewRepresentable: UIViewRepresentable {
                 continue
             }
             
+            updatedStopNumbers.insert(number)
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
             
             if let existingAnnotation = existingAnnotations[number] as? CustomStopAnnotation {
+                // Update existing annotation
                 existingAnnotation.coordinate = coordinate
                 existingAnnotation.title = stop["name"] as? String
                 existingAnnotation.subtitle = formatSubtitle(for: stop)
                 existingAnnotation.stopData = stop
             } else {
+                // Add new annotation
                 let annotation = CustomStopAnnotation(stopNumber: number, stopData: stop)
                 annotation.coordinate = coordinate
                 annotation.title = stop["name"] as? String
@@ -81,10 +85,14 @@ struct MapViewRepresentable: UIViewRepresentable {
             }
         }
         
-        let currentStopNumbers = Set(stops.compactMap { $0["number"] as? Int })
-        let annotationsToRemove = mapView.annotations.compactMap { $0 as? CustomStopAnnotation }
-            .filter { !currentStopNumbers.contains($0.stopNumber) }
-        mapView.removeAnnotations(annotationsToRemove)
+        if !stops.isEmpty {
+            let annotationsToRemove = mapView.annotations.compactMap { $0 as? CustomStopAnnotation }
+                .filter { !updatedStopNumbers.contains($0.stopNumber) }
+            
+            if !annotationsToRemove.isEmpty {
+                mapView.removeAnnotations(annotationsToRemove)
+            }
+        }
     }
     
     private func updateOverlay(on mapView: MKMapView) {
