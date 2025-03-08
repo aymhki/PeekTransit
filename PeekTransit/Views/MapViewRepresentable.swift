@@ -1,3 +1,4 @@
+
 import MapKit
 import Foundation
 import SwiftUI
@@ -7,11 +8,16 @@ struct MapViewRepresentable: UIViewRepresentable {
     let userLocation: CLLocation?
     let onAnnotationTapped: (MKAnnotation) -> Void
     @Binding var centerMapOnUser: Bool
+    let highlightedStopNumber: Int?
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+    
+    
     
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
+        context.coordinator.mapView = mapView
+        Coordinator.shared = context.coordinator
         mapView.showsUserLocation = true
         
         mapView.isZoomEnabled = true
@@ -39,6 +45,7 @@ struct MapViewRepresentable: UIViewRepresentable {
                 center: location.coordinate,
                 span: defaultSpan
             )
+            
             mapView.setRegion(region, animated: true)
             DispatchQueue.main.async {
                 centerMapOnUser = false
@@ -47,6 +54,8 @@ struct MapViewRepresentable: UIViewRepresentable {
     }
     
     private func updateAnnotations(on mapView: MKMapView) {
+        let group = DispatchGroup()
+        
         let existingAnnotations = Dictionary(
             uniqueKeysWithValues: mapView.annotations
                 .compactMap { annotation -> (Int, MKAnnotation)? in
@@ -56,6 +65,7 @@ struct MapViewRepresentable: UIViewRepresentable {
         )
         
         var updatedStopNumbers = Set<Int>()
+        var newAnnotations: [MKAnnotation] = []
         
         for stop in stops {
             guard let number = stop["number"] as? Int,
@@ -66,22 +76,31 @@ struct MapViewRepresentable: UIViewRepresentable {
                 continue
             }
             
+            group.enter()
+            
             updatedStopNumbers.insert(number)
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
             
             if let existingAnnotation = existingAnnotations[number] as? CustomStopAnnotation {
-                // Update existing annotation
                 existingAnnotation.coordinate = coordinate
                 existingAnnotation.title = stop["name"] as? String
                 existingAnnotation.subtitle = formatSubtitle(for: stop)
                 existingAnnotation.stopData = stop
+                group.leave()
             } else {
-                // Add new annotation
                 let annotation = CustomStopAnnotation(stopNumber: number, stopData: stop)
                 annotation.coordinate = coordinate
                 annotation.title = stop["name"] as? String
                 annotation.subtitle = formatSubtitle(for: stop)
                 mapView.addAnnotation(annotation)
+                newAnnotations.append(annotation)
+                group.leave()
+            }
+        }
+        
+        if !newAnnotations.isEmpty {
+            DispatchQueue.main.async {
+                mapView.addAnnotations(newAnnotations)
             }
         }
         
@@ -93,6 +112,8 @@ struct MapViewRepresentable: UIViewRepresentable {
                 mapView.removeAnnotations(annotationsToRemove)
             }
         }
+        
+        group.notify(queue: .main) {}
     }
     
     private func updateOverlay(on mapView: MKMapView) {
@@ -132,6 +153,8 @@ struct MapViewRepresentable: UIViewRepresentable {
     
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: MapViewRepresentable
+        static weak var shared: Coordinator?
+        weak var mapView: MKMapView?
         
         init(_ parent: MapViewRepresentable) {
             self.parent = parent
@@ -189,6 +212,7 @@ struct MapViewRepresentable: UIViewRepresentable {
             annotationView?.layer.shadowOpacity = 0.3
             annotationView?.layer.shadowRadius = 1
             annotationView?.displayPriority = .required
+        
             
             return annotationView
         }
@@ -211,3 +235,4 @@ struct MapViewRepresentable: UIViewRepresentable {
         }
     }
 }
+

@@ -736,10 +736,40 @@ class TransitAPI {
         
         return busScheduleList
     }
+    
+    
+    
+    func findTrip(from origin: CLLocation, to destination: CLLocation) async throws -> [TripPlan] {
+        guard let url = createURL(
+            path: "trip-planner.json",
+            parameters: [
+                "origin": "geo/\(origin.coordinate.latitude),\(origin.coordinate.longitude)",
+                "destination": "geo/\(destination.coordinate.latitude),\(destination.coordinate.longitude)"
+            ]
+        ) else {
+            throw TransitError.invalidURL
+        }
+        
+        let data = try await fetchData(from: url)
+        
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let plansArray = json["plans"] as? [[String: Any]] else {
+            throw TransitError.parseError("Invalid trip planner data format")
+        }
+        
+        var plans: [TripPlan] = []
+        
+        for planDict in plansArray {
+            do {
+                let plan = try TripPlan(from: planDict)
+                plans.append(plan)
+            } catch {
+                print("Error parsing plan: \(error)")
+            }
+        }
+        
+        return plans
+    }
+    
 }
-
-
-
-
-
 

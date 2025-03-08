@@ -10,6 +10,7 @@ class StopsDataStore: ObservableObject {
     @Published var stops: [[String: Any]] = []
     @Published var isLoading = false
     @Published var error: Error?
+    @Published var errorForGetStopFromTripPlan: Error?
     @Published var searchResults: [[String: Any]] = []
     @Published var isSearching = false
     @Published var searchError: Error?
@@ -173,6 +174,10 @@ class StopsDataStore: ObservableObject {
             throw TransitError.invalidURL
         }
         
+        await MainActor.run {
+            isLoading = true
+        }
+        
         let data = try await TransitAPI.shared.fetchData(from: url)
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let stop = json["stop"] as? [String: Any] else {
@@ -182,7 +187,15 @@ class StopsDataStore: ObservableObject {
         var enrichedStop = stop
         let variants = try await TransitAPI.shared.getOnlyVariantsForStop(stop: stop)
         enrichedStop["variants"] = variants
+        let finalStop = enrichedStop
         
-        return enrichedStop
+        await MainActor.run {
+            isLoading = false
+            stops.append(finalStop)
+            errorForGetStopFromTripPlan = nil
+            error = nil
+        }
+        
+        return finalStop
     }
 }

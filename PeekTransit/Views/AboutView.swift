@@ -32,6 +32,8 @@ struct AboutView: View {
                         .font(.title2.bold())
                     Text("by Ayman Hkias")
                         .foregroundColor(.secondary)
+                    Text("agamyahk@myumanitoba")
+                        .foregroundColor(.secondary)
                     Text("Version \(appVersion) (\(buildNumber))")
                         .foregroundColor(.secondary)
                 }
@@ -41,7 +43,7 @@ struct AboutView: View {
                         LinkItem(iconSystemName: "envelope.fill", text: "Email")
                     }
                     
-                    Link(destination: URL(string: "https://www.instagram.com/aymanhkias/")!) {
+                    Link(destination: URL(string: "https://www.instagram.com/aymanhki/")!) {
                         LinkItem(imageName: "InstagramIcon", text: "Instagram")
                     }
                     

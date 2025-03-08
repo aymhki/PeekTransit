@@ -775,3 +775,4 @@ public func getDistanceChangeAllowedBeforeRefreshingStops() -> CLLocationDistanc
 public func getMinutesAllowedToKeepDueBusesInSchedule() -> Int {
     return 1
 }
+
