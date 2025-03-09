@@ -7,10 +7,13 @@ import WidgetKit
 struct ListView: View {
     @StateObject private var locationManager = LocationManager()
     @StateObject private var stopsStore = StopsDataStore.shared
+    @StateObject private var networkMonitor = NetworkMonitor()
     @State private var searchText = ""
     @State private var showAlert = false
     @State private var savedStopsManager =  SavedStopsManager.shared
     @State private var visibleRows = Set<Int>()
+    @State private var isAppActive = true
+
 
 
     var combinedStops: [[String: Any]] {
@@ -59,10 +62,15 @@ struct ListView: View {
     var body: some View {
         NavigationView {
             Group {
+//                if !networkMonitor.isConnected && stopsStore.stops.isEmpty {
+//                    NetworkWaitingView() {
+//                        networkMonitor.stopMonitoring()
+//                        networkMonitor.startMonitoring()
+//                    }
+//                } else
+                
                 if stopsStore.isLoading {
                     ProgressView("Loading stops...")
-                        
-
                 } else if let error = stopsStore.error {
                     VStack {
                         Text("Error loading stops")
@@ -72,6 +80,7 @@ struct ListView: View {
                             .foregroundColor(.secondary)
                         
                         Button("Retry") {
+                            self.stopsStore.error = nil
                             let newLocation = locationManager.location
                             if let location = newLocation {
                                 Task {
@@ -138,13 +147,23 @@ struct ListView: View {
             .navigationTitle("Nearby Stops")
             .onDisappear {
                 MapSnapshotCache.shared.cancelPendingRequests()
+                networkMonitor.stopMonitoring()
             }
 
         }
         .onAppear {
+            networkMonitor.startMonitoring()
             locationManager.requestLocation()
         }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            isAppActive = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            isAppActive = true
+        }
         .onChange(of: locationManager.location) { newLocation in
+            guard isAppActive else { return }
+
             if let location = newLocation,
                locationManager.shouldRefresh(for: location) {
                 Task {

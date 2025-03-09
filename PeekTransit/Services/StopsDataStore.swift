@@ -4,8 +4,12 @@ import CoreLocation
 class StopsDataStore: ObservableObject {
     static let shared = StopsDataStore()
     private static let searchDebounceTime: TimeInterval = 1.0
+    private static let cacheDuration: TimeInterval = 180
     private var searchTask: Task<Void, Never>?
 
+    private var lastFetchTime: Date?
+    private var lastFetchLocation: CLLocation?
+    private var cachedStops: [[String: Any]] = []
     
     @Published var stops: [[String: Any]] = []
     @Published var isLoading = false
@@ -20,8 +24,35 @@ class StopsDataStore: ObservableObject {
     
     private init() {}
     
+    private func isCacheValid(for location: CLLocation) -> Bool {
+        guard let lastFetchTime = lastFetchTime,
+              let lastFetchLocation = lastFetchLocation else {
+            return false
+        }
+        
+        let timeValid = Date().timeIntervalSince(lastFetchTime) < Self.cacheDuration
+        let distanceValid = location.distance(from: lastFetchLocation) < 1
+        
+        return timeValid && distanceValid
+    }
+    
+    private func updateCache(location: CLLocation) {
+        self.lastFetchTime = Date()
+        self.lastFetchLocation = location
+        self.cachedStops = self.stops
+    }
+    
     func loadStops(userLocation: CLLocation, loadingFromWidgetSetup: Bool?) async {
         guard !isLoading else { return }
+        
+        if isCacheValid(for: userLocation) {
+            await MainActor.run {
+                self.stops = self.cachedStops
+                self.isLoading = false
+                self.error = nil
+            }
+            return
+        }
         
         await MainActor.run {
             self.searchResults = []
@@ -51,6 +82,7 @@ class StopsDataStore: ObservableObject {
                 
                 await MainActor.run {
                     self.isLoading = false
+                    self.updateCache(location: userLocation)
                     
                     if self.stops.isEmpty {
                         self.error = TransitError.parseError("No stops could be loaded")
@@ -59,6 +91,9 @@ class StopsDataStore: ObservableObject {
             } else {
                 Task {
                     await enrichStops(nearbyStops)
+                    await MainActor.run {
+                        self.updateCache(location: userLocation)
+                    }
                 }
             }
             

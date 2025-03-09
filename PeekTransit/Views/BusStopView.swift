@@ -5,7 +5,7 @@ struct BusStopView: View {
     let stop: [String: Any]
     let isDeepLink: Bool
     @StateObject private var savedStopsManager = SavedStopsManager.shared
-
+    @StateObject private var networkMonitor = NetworkMonitor()
     @State private var schedules: [String] = []
     @State private var isLoading = true
     @State private var isManualRefresh = false
@@ -17,6 +17,7 @@ struct BusStopView: View {
     let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
     @EnvironmentObject private var themeManager: ThemeManager
     @State private var isRefreshCooldown = false
+    @State private var isAppActive = true
     private let cooldownDuration: TimeInterval = 1.0
     
     private var isRefreshDisabled: Bool {
@@ -49,6 +50,9 @@ struct BusStopView: View {
     }
     
     private func loadSchedules(isManual: Bool) async {
+        
+        guard isAppActive && (isManual || networkMonitor.isConnected) else { return }
+
         if isManual {
             isLoading = true
             isRefreshCooldown = true
@@ -134,7 +138,7 @@ struct BusStopView: View {
                     .padding([.vertical, .horizontal])
                     .font(.caption)
                     
-                } else if errorFetchingSchedule {
+                } else if errorFetchingSchedule && isAppActive {
                     VStack(spacing: 16) {
                         Image(systemName: "bus.fill")
                             .font(.system(size: 48))
@@ -254,6 +258,7 @@ struct BusStopView: View {
             await loadSchedules(isManual: true)
         })
         .onAppear {
+            networkMonitor.startMonitoring()
             userPreferredLiveUpdates = getLiveUpdatePreference()
             isLiveUpdatesEnabled = userPreferredLiveUpdates
             isManualRefresh = true
@@ -266,8 +271,18 @@ struct BusStopView: View {
                 currentTheme = theme
             }
         }
+        .onDisappear {
+            networkMonitor.stopMonitoring()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            isAppActive = false
+            
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            isAppActive = true
+        }
         .onReceive(timer) { _ in
-            guard isLiveUpdatesEnabled else { return }
+            guard isAppActive && isLiveUpdatesEnabled && networkMonitor.isConnected else { return }
             isManualRefresh = false
             
             Task {

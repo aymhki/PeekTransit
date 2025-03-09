@@ -159,6 +159,7 @@ struct VariantSelectionStep: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     Button("Retry") {
+                        self.error = nil
                         Task {
                             await loadSchedules()
                         }
@@ -173,8 +174,6 @@ struct VariantSelectionStep: View {
                             .font(.title3)
                             .padding([.top, .horizontal])
                     
-                        
-                        
                         Button(action: {
                             withAnimation {
                                 noSelectedVariants.toggle()

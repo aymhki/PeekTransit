@@ -203,6 +203,7 @@
 				Models/TripPlan.swift,
 				Models/TripSegment.swift,
 				Services/LocalSearchCompleterDelegate.swift,
+				Services/NetworkMonitor.swift,
 				Services/StopsDataStore.swift,
 			);
 			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
@@ -215,6 +216,7 @@
 				Models/TripPlan.swift,
 				Models/TripSegment.swift,
 				Services/LocalSearchCompleterDelegate.swift,
+				Services/NetworkMonitor.swift,
 				Services/StopsDataStore.swift,
 			);
 			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
@@ -570,7 +572,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -609,7 +611,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -768,7 +770,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -807,7 +809,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -837,7 +839,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -865,7 +867,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

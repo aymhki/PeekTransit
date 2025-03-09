@@ -27,13 +27,11 @@ struct TripSegment {
         
         let dateFormatter = ISO8601DateFormatter()
         
-        // Initialize basic properties first
         self.type = type
         self.startTime = dateFormatter.date(from: startTimeStr) ?? Date()
         self.endTime = dateFormatter.date(from: endTimeStr) ?? Date()
         self.duration = totalDuration
         
-        // Handle route information
         if type == .ride, let routeDict = dict["route"] as? [String: Any] {
             self.routeKey = routeDict["key"] as? Int
             
@@ -62,67 +60,97 @@ struct TripSegment {
             self.variantName = nil
         }
         
-        // Handle fromStop
+
         let fromStopInfo: StopInfo?
         if let from = dict["from"] as? [String: Any] {
             if let stopDict = from["stop"] as? [String: Any] {
                 fromStopInfo = StopInfo(from: stopDict)
-            } else if from["origin"] as? [String: Any] != nil {
-                fromStopInfo = StopInfo(name: "Current Location")
+            } else if let origin = from["origin"] as? [String: Any] {
+                fromStopInfo =  Self.parseAddress(from: origin, type: "Current Location")
             } else {
-                fromStopInfo = TripSegment.getLastValidStopInfo(from: segmentsArray, currentIndex: currentSegmentIndex)
+                fromStopInfo = Self.lookupPreviousStop(in: segmentsArray, currentIndex: currentSegmentIndex)
             }
         } else {
-            fromStopInfo = TripSegment.getLastValidStopInfo(from: segmentsArray, currentIndex: currentSegmentIndex)
+            fromStopInfo = Self.lookupPreviousStop(in: segmentsArray, currentIndex: currentSegmentIndex)
         }
         
-        // Handle toStop
         let toStopInfo: StopInfo?
         if let to = dict["to"] as? [String: Any] {
             if let stopDict = to["stop"] as? [String: Any] {
                 toStopInfo = StopInfo(from: stopDict)
-            } else if to["destination"] as? [String: Any] != nil {
-                toStopInfo = StopInfo(name: "Destination")
+            } else if let destination = to["destination"] as? [String: Any] {
+                toStopInfo = Self.parseAddress(from: destination, type: "Destinaion")
             } else {
-                toStopInfo = TripSegment.getNextValidStopInfo(from: segmentsArray, currentIndex: currentSegmentIndex)
+                toStopInfo = Self.lookupNextStop(in: segmentsArray, currentIndex: currentSegmentIndex)
             }
         } else {
-            toStopInfo = TripSegment.getNextValidStopInfo(from: segmentsArray, currentIndex: currentSegmentIndex)
+            toStopInfo = Self.lookupNextStop(in: segmentsArray, currentIndex: currentSegmentIndex)
         }
         
         self.fromStop = fromStopInfo
         self.toStop = toStopInfo
     }
     
-    // Changed to static method
-    private static func getLastValidStopInfo(from segments: [[String: Any]], currentIndex: Int) -> StopInfo {
-        // Start from the current index and go backwards
-        for index in (0..<currentIndex).reversed() {
-            let segment = segments[index]
-            if let to = segment["to"] as? [String: Any],
-               let stopDict = to["stop"] as? [String: Any],
-               let stopInfo = StopInfo(from: stopDict),
-               stopInfo.key != -1,
-               stopInfo.location != nil {
-                return stopInfo
+    private static func parseAddress(from destination: [String: Any], type: String) -> StopInfo {
+            if let monument = destination["monument"] as? [String: Any],
+               let address = monument["address"] as? [String: Any],
+               let street = address["street"] as? [String: Any],
+               let streetName = street["name"] as? String,
+               let streetNumber = address["street-number"] as? Int {
+                return StopInfo(name: "\(streetNumber) \(streetName)")
             }
+            
+            if let address = destination["address"] as? [String: Any],
+               let street = address["street"] as? [String: Any],
+               let streetName = street["name"] as? String,
+               let streetNumber = address["street-number"] as? Int {
+                return StopInfo(name: "\(streetNumber) \(streetName)")
+            }
+        
+            if let address = destination["address"] as? [String: Any],
+               let addressSub = address["address"] as? [String: Any],
+               let street = addressSub["street"] as? [String: Any],
+               let streetName = street["name"] as? String,
+               let streetNumber = address["street-number"] as? Int {
+                return StopInfo(name: "\(streetNumber) \(streetName)")
+            }
+            
+            if let intersection = destination["intersection"] as? [String: Any],
+               let street = intersection["street"] as? [String: Any],
+                let streetName = street["name"] as? String {
+                return StopInfo(name: "\(streetName)")
+            }
+            
+            return StopInfo(name: type)
         }
-        return StopInfo(name: "Unknown Location")
-    }
+        
+        private static func lookupPreviousStop(in segments: [[String: Any]], currentIndex: Int) -> StopInfo? {
+            for index in (0..<currentIndex).reversed() {
+                let segment = segments[index]
+                if let to = segment["to"] as? [String: Any],
+                   let stopDict = to["stop"] as? [String: Any],
+                   let stopInfo = StopInfo(from: stopDict),
+                   stopInfo.key != -1,
+                   stopInfo.location != nil {
+                    return stopInfo
+                }
+            }
+            return StopInfo(name: "Location")
+        }
+        
+        private static func lookupNextStop(in segments: [[String: Any]], currentIndex: Int) -> StopInfo? {
+            for index in (currentIndex + 1)..<segments.count {
+                let segment = segments[index]
+                if let from = segment["from"] as? [String: Any],
+                   let stopDict = from["stop"] as? [String: Any],
+                   let stopInfo = StopInfo(from: stopDict),
+                   stopInfo.key != -1,
+                   stopInfo.location != nil {
+                    return stopInfo
+                }
+            }
+            return StopInfo(name: "Destination")
+        }
     
-    // Changed to static method
-    private static func getNextValidStopInfo(from segments: [[String: Any]], currentIndex: Int) -> StopInfo {
-        // Start from the current index and go forwards
-        for index in (currentIndex + 1)..<segments.count {
-            let segment = segments[index]
-            if let from = segment["from"] as? [String: Any],
-               let stopDict = from["stop"] as? [String: Any],
-               let stopInfo = StopInfo(from: stopDict),
-               stopInfo.key != -1,
-               stopInfo.location != nil {
-                return stopInfo
-            }
-        }
-        return StopInfo(name: "Unknown Location")
-    }
+    
 }

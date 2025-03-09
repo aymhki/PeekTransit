@@ -6,6 +6,7 @@ import WidgetKit
 struct MapView: View {
     @StateObject private var locationManager = LocationManager()
     @StateObject private var stopsStore = StopsDataStore.shared
+    @StateObject private var networkMonitor = NetworkMonitor()
     @State private var region = MKCoordinateRegion()
     @State private var selectedStop: [String: Any]?
     @State private var showLoadingIndicator = false
@@ -18,6 +19,8 @@ struct MapView: View {
     @State private var navigateToFocusedStop: Bool = false
     @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) var colorScheme
+    @State private var isAppActive = true
+
 
     
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
@@ -38,10 +41,20 @@ struct MapView: View {
                 )
                 .edgesIgnoringSafeArea(.top)
                 
+//                if !networkMonitor.isConnected && stopsStore.stops.isEmpty && !stopsStore.isLoading && stopsStore.error == nil && stopsStore.errorForGetStopFromTripPlan == nil {
+//                    NetworkWaitingView() {
+//                        networkMonitor.stopMonitoring()
+//                        networkMonitor.startMonitoring()
+//                    }
+//                        .padding()
+//                        .background(Color(.systemBackground).opacity(0.9))
+//                        .cornerRadius(10)
+//                }
+                
                 VStack {
                     Spacer()
                     HStack {
-                        if !isSearchingRoute && stopsStore.error == nil && !stopsStore.isLoading  {
+                        if !isSearchingRoute && stopsStore.error == nil && !stopsStore.isLoading && isAppActive  {
                             DestinationSearchButton(isSearching: $isSearchingRoute)
                                 .padding(.leading)
                         }
@@ -82,13 +95,16 @@ struct MapView: View {
                                 AddressSearchView(isSearching: $isSearchingRoute) { selectedRoute in
                                     handleSelectedRoute(selectedRoute)
                                 }
+                                .ignoresSafeArea(.keyboard)
                                 
-                                
+                                Spacer()
                             }
                             
                         }
+                        .ignoresSafeArea(.keyboard)
                         .transition(.move(edge: .bottom))
                         .zIndex(2)
+                        
                     }
                 }
                 
@@ -104,12 +120,14 @@ struct MapView: View {
                 
                 if let error = stopsStore.error {
                     ErrorViewForMapView(error: error) {
+                        self.stopsStore.error = nil
                         isManualRefresh = true
                         showLoadingIndicator = true
                         refreshStops()
                     }
                 } else if let error = stopsStore.errorForGetStopFromTripPlan {
                     ErrorViewForMapView(error: error) {
+                        self.stopsStore.errorForGetStopFromTripPlan = nil
                         isManualRefresh = true
                         showLoadingIndicator = true
                         stopsStore.isLoading = true
@@ -117,6 +135,7 @@ struct MapView: View {
                     }
                 }
             }
+            .ignoresSafeArea(.keyboard)
             .navigationDestination(isPresented: Binding(
                 get: { selectedStop != nil },
                 set: { if !$0 { selectedStop = nil } }
@@ -127,8 +146,19 @@ struct MapView: View {
             }
         }
         .onAppear {
+            networkMonitor.startMonitoring()
             isManualRefresh = true
             locationManager.requestLocation()
+        }
+        .onDisappear {
+            networkMonitor.stopMonitoring()
+        }
+        
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            isAppActive = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            isAppActive = true
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("FocusOnStop"))) { notification in
             withAnimation {
@@ -144,6 +174,7 @@ struct MapView: View {
 
         }
         .onChange(of: locationManager.location) { newLocation in
+            guard isAppActive else { return }
             guard let location = newLocation else { return }
         
             
@@ -181,6 +212,7 @@ struct MapView: View {
     }
     
     private func refreshStops() {
+        guard isAppActive else { return }
         guard let location = locationManager.location else { return }
         
         isManualRefresh = true

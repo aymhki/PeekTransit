@@ -192,6 +192,7 @@ struct StopSelectionStep: View {
                                                 .foregroundColor(.secondary)
 
                                             Button("Retry") {
+                                                self.stopsStore.error = nil
                                                 let newLocation = locationManager.location
                                                 if let location = newLocation {
                                                     Task {

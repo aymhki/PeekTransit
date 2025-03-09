@@ -68,6 +68,8 @@ struct ContentView: View {
                         
                         
                         Button("Retry") {
+                            self.error = nil
+                            
                             Task {
                                 if let stopNumber = deepLinkHandler.selectedStopNumber {
                                    

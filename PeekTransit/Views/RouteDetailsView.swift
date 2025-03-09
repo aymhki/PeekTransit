@@ -74,13 +74,22 @@ struct RouteDetailsView: View {
                                 
                                 
                                 VStack(alignment: .leading) {
-                                    let displayText = formatRouteDisplay(
-                                        number: segment.routeNumber,
-                                        name: segment.routeName
-                                    )
                                     
-                                    Text(displayText)
-                                        .fontWeight(.medium)
+                                    if (segment.variantKey == nil || segment.variantName == nil) {
+                                        
+                                        let displayText = formatRouteDisplay(
+                                            number: segment.routeNumber,
+                                            name: segment.routeName
+                                        )
+                                        
+                                        Text(displayText)
+                                            .fontWeight(.medium)
+                                    } else {
+                                        if let variantKey = segment.variantKey?.split(separator: "-")[0], let variantName = segment.variantName?.replacingOccurrences(of: variantKey, with: "") {
+                                            Text("\(variantKey) \(variantName)")
+                                                .fontWeight(.medium)
+                                        }
+                                    }
                                     
                                     if let fromStop = segment.fromStop {
                                         Text("Board at: \(fromStop.name)")

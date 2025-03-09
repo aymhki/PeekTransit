@@ -25,6 +25,8 @@ class TransitAPI {
     static let shared = TransitAPI()
     @Published private(set) var isLoading = false
     private let rateLimiter = RequestRateLimiter()
+    static let winnipegTimeZone = TimeZone(identifier: "America/Winnipeg")!
+
 
     
     init() {}
@@ -416,7 +418,6 @@ class TransitAPI {
                                 
                                     if timeDifference < -getMinutesAllowedToKeepDueBusesInSchedule() {
                                         continue
-                                        print(timeDifference)
                                     }
                                 
                                 
@@ -737,14 +738,14 @@ class TransitAPI {
         return busScheduleList
     }
     
-    
-    
-    func findTrip(from origin: CLLocation, to destination: CLLocation) async throws -> [TripPlan] {
+    func getLocationKey(latitude: Double, longitude: Double) async throws -> String? {
         guard let url = createURL(
-            path: "trip-planner.json",
+            path: "locations.json",
             parameters: [
-                "origin": "geo/\(origin.coordinate.latitude),\(origin.coordinate.longitude)",
-                "destination": "geo/\(destination.coordinate.latitude),\(destination.coordinate.longitude)"
+                "lat": String(latitude),
+                "lon": String(longitude),
+                "distance": "50",
+                "max-results": "1"
             ]
         ) else {
             throw TransitError.invalidURL
@@ -753,22 +754,181 @@ class TransitAPI {
         let data = try await fetchData(from: url)
         
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let plansArray = json["plans"] as? [[String: Any]] else {
-            throw TransitError.parseError("Invalid trip planner data format")
+              let locations = json["locations"] as? [[String: Any]],
+              let firstLocation = locations.first else {
+            return nil
         }
         
-        var plans: [TripPlan] = []
+        guard let locationType = firstLocation["type"] as? String else {
+            return nil
+        }
         
-        for planDict in plansArray {
-            do {
-                let plan = try TripPlan(from: planDict)
-                plans.append(plan)
-            } catch {
-                print("Error parsing plan: \(error)")
+        let key: String
+        if let stringKey = firstLocation["key"] as? String {
+            key = stringKey
+        } else if let intKey = firstLocation["key"] as? Int {
+            key = String(intKey)
+        } else {
+            return nil
+        }
+        
+        switch locationType {
+        case "intersection":
+            return "intersections/\(key)"
+        case "monument":
+            return "monuments/\(key)"
+        case "address":
+            return "addresses/\(key)"
+        default:
+            return nil
+        }
+    }
+    
+    
+    func findTrip(from origin: CLLocation, to destination: CLLocation) async throws -> [TripPlan] {
+        for transfers in 0...5 {
+            guard let url = createURL(
+                path: "trip-planner.json",
+                parameters: [
+                    "origin": "geo/\(origin.coordinate.latitude),\(origin.coordinate.longitude)",
+                    "destination": "geo/\(destination.coordinate.latitude),\(destination.coordinate.longitude)",
+                    "max-transfers": transfers
+                ]
+            ) else {
+                throw TransitError.invalidURL
+            }
+            
+            let data = try await fetchData(from: url)
+            
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let plansArray = json["plans"] as? [[String: Any]] else {
+                throw TransitError.parseError("Invalid trip planner data format")
+            }
+            
+            var plans: [TripPlan] = []
+            
+            for planDict in plansArray {
+                do {
+                    let plan = try TripPlan(from: planDict)
+                    plans.append(plan)
+                } catch {
+                    print("Error parsing plan: \(error)")
+                }
+            }
+            
+            if !plans.isEmpty {
+                return plans
+            }
+            
+            if transfers < 5 {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
             }
         }
         
-        return plans
+        return []
+    }
+    
+    
+    func getCurrentWinnipegDateTime() -> Date {
+        let utcCalendar = Calendar.current
+        var components = DateComponents()
+        components.timeZone = Self.winnipegTimeZone
+        
+        let now = Date()
+        let utcComponents = utcCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
+        
+        components.year = utcComponents.year
+        components.month = utcComponents.month
+        components.day = utcComponents.day
+        components.hour = utcComponents.hour
+        components.minute = utcComponents.minute
+        components.second = utcComponents.second
+        
+        return Calendar(identifier: .gregorian).date(from: components) ?? now
+    }
+    
+    func formatDateForAPI(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeZone = Self.winnipegTimeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+    
+    func formatTimeForAPI(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeZone = Self.winnipegTimeZone
+        formatter.dateFormat = "HH:mm:ss"
+        return formatter.string(from: date)
+    }
+    
+    func findTripWithLocationKey(
+        from currentLocationKey: String,
+        toLocationKey: String,
+        walkSpeed: Double = 5.0,
+        maxWalkTime: Int = 15,
+        minTransferWait: Int = 2,
+        maxTransferWait: Int = 15,
+        maxTransfers: Int = 3,
+        mode: String = "depart-after",
+        date: Date? = nil
+    ) async throws -> [TripPlan] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm:ss"
+        
+        // let currentDate = date ?? Date()
+        // let winnipegDate = date ?? getCurrentWinnipegDateTime()
+        
+        for transfers in 0...5 {
+            let parameters: [String: Any] = [
+                "origin": currentLocationKey,
+                "destination": toLocationKey,
+    //            "walk-speed": walkSpeed,
+    //            "max-walk-time": maxWalkTime,
+    //            "min-transfer-wait": minTransferWait,
+    //            "max-transfer-wait": maxTransferWait,
+                "max-transfers": transfers,
+    //            "mode": mode,
+    //            "date": dateFormatter.string(from: winnipegDate), //dateFormatter.string(from: currentDate),
+    //            "time": timeFormatter.string(from: winnipegDate) //timeFormatter.string(from: currentDate)
+            ]
+            
+            guard let url = createURL(
+                path: "trip-planner.json",
+                parameters: parameters
+            ) else {
+                throw TransitError.invalidURL
+            }
+            
+            let data = try await fetchData(from: url)
+            
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let plansArray = json["plans"] as? [[String: Any]] else {
+                throw TransitError.parseError("Invalid trip planner data format")
+            }
+            
+            var plans: [TripPlan] = []
+            
+            for planDict in plansArray {
+                do {
+                    let plan = try TripPlan(from: planDict)
+                    plans.append(plan)
+                } catch {
+                    print("Error parsing plan: \(error)")
+                }
+            }
+            
+            if !plans.isEmpty {
+                return plans
+            }
+            
+            if transfers < 5 {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+            }
+        }
+        
+        return []
     }
     
 }
