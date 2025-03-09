@@ -5,6 +5,8 @@ struct TripSegment {
     let type: SegmentType
     let startTime: Date
     let endTime: Date
+    let startTimeStr: String
+    let endTimeStr: String
     let duration: Int
     let routeKey: Int?
     let routeNumber: String?
@@ -25,11 +27,17 @@ struct TripSegment {
             throw TransitError.parseError("Invalid trip segment data")
         }
         
-        let dateFormatter = ISO8601DateFormatter()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+
         
         self.type = type
         self.startTime = dateFormatter.date(from: startTimeStr) ?? Date()
         self.endTime = dateFormatter.date(from: endTimeStr) ?? Date()
+        
+        self.startTimeStr = timeFormatter.string(from: self.startTime)
+        self.endTimeStr = timeFormatter.string(from: self.endTime)
+        
         self.duration = totalDuration
         
         if type == .ride, let routeDict = dict["route"] as? [String: Any] {
@@ -90,6 +98,12 @@ struct TripSegment {
         self.fromStop = fromStopInfo
         self.toStop = toStopInfo
     }
+    
+    private let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "hh:mm a"
+        return formatter
+    }()
     
     private static func parseAddress(from destination: [String: Any], type: String) -> StopInfo {
             if let monument = destination["monument"] as? [String: Any],

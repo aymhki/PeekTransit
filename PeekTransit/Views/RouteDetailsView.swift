@@ -37,6 +37,14 @@ struct RouteDetailsView: View {
                     Text("Total Trip: \(routePlan.duration) minutes")
                         .font(.subheadline)
                     
+                    Text("Start Time: \(routePlan.startTimeString)")
+                        .font(.subheadline)
+                    
+                    Text("End Time: \(routePlan.endTimeString)")
+                        .font(.subheadline)
+                    
+                    Spacer()
+                    
                     ForEach(routePlan.segments.indices, id: \.self) { index in
                         let segment = routePlan.segments[index]
                         
@@ -53,12 +61,12 @@ struct RouteDetailsView: View {
                                         .fontWeight(.medium)
                                     
                                     if let fromStop = segment.fromStop {
-                                        Text("From: \(fromStop.name)")
+                                        Text("From: \(fromStop.name) (\(segment.startTimeStr))")
                                             .font(.caption)
                                     }
                                     
                                     if let toStop = segment.toStop {
-                                        Text("To: \(toStop.name)")
+                                        Text("To: \(toStop.name) (\(segment.endTimeStr))")
                                             .font(.caption)
                                     }
                                 }
@@ -92,12 +100,12 @@ struct RouteDetailsView: View {
                                     }
                                     
                                     if let fromStop = segment.fromStop {
-                                        Text("Board at: \(fromStop.name)")
+                                        Text("Board at: \(fromStop.name) (\(segment.startTimeStr))")
                                             .font(.caption)
                                     }
                                     
                                     if let toStop = segment.toStop {
-                                        Text("Exit at: \(toStop.name)")
+                                        Text("Exit at: \(toStop.name) (\(segment.endTimeStr))")
                                             .font(.caption)
                                     }
                                     

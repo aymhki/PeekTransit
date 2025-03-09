@@ -776,3 +776,6 @@ public func getMinutesAllowedToKeepDueBusesInSchedule() -> Int {
     return 1
 }
 
+extension Notification.Name {
+    static let appUpdateAvailable = Notification.Name("appUpdateAvailable")
+}

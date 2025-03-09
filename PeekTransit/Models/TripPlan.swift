@@ -5,6 +5,8 @@ struct TripPlan {
     let planNumber: Int
     let startTime: Date
     let endTime: Date
+    let startTimeString: String
+    let endTimeString: String
     let duration: Int
     let walkingDuration: Int
     let waitingDuration: Int
@@ -24,7 +26,6 @@ struct TripPlan {
     }
     
     init(from planDict: [String: Any]) throws {
-        
         
         guard let planNumber = planDict["number"] as? Int,
               let times = planDict["times"] as? [String: Any],
@@ -48,9 +49,18 @@ struct TripPlan {
         
         
         
-        let dateFormatter = ISO8601DateFormatter()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+
+        
         self.startTime = dateFormatter.date(from: startTimeStr) ?? Date()
         self.endTime = dateFormatter.date(from: endTimeStr) ?? Date()
+
+        let startTimeFormatted = timeFormatter.string(from: self.startTime)
+        let endTimeFormatted = timeFormatter.string(from: self.endTime)
+        
+        self.startTimeString = startTimeFormatted
+        self.endTimeString = endTimeFormatted
         
         var parsedSegments: [TripSegment] = []
         var i = 0
@@ -72,7 +82,6 @@ struct TripPlan {
         let normalizedSegments = Double(segments.count) / 5.0
         let normalizedWalking = Double(walkingDuration) / 30
         let normalizedWaiting = Double(waitingDuration) / 20
-        
         var score = 0.0
         
         score += normalizedDuration * RouteWeights.durationWeight
@@ -91,6 +100,12 @@ struct TripPlan {
         
         return score
     }
+    
+    private let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "hh:mm a"
+        return formatter
+    }()
     
     static func getRecommendedRoute(from availableRoutes: [TripPlan]) -> TripPlan {
         guard !availableRoutes.isEmpty else {

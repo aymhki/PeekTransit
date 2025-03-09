@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var error: Error? = nil
     @AppStorage(settingsUserDefaultsKeys.defaultTab) private var defaultTab: Int = 0
+    @State private var showUpdateAlert = false
     
     var body: some View {
         TabView(selection: $selection) {
@@ -81,22 +82,15 @@ struct ContentView: View {
                         .buttonStyle(.bordered)
                     }
                     .padding()
-                    
-
                 }
             }
-            
-            
-        
         }
         .environmentObject(themeManager)
         .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
         .onChange(of: deepLinkHandler.selectedStopNumber) { stopNumber in
             guard let stopNumber = stopNumber else { return }
             Task {
-               
                 await loadStop(number: stopNumber)
-                
             }
         }
         .onAppear {
@@ -105,7 +99,33 @@ struct ContentView: View {
             }
             
             WidgetCenter.shared.reloadAllTimelines()
+            
+            NotificationCenter.default.addObserver(
+                forName: .appUpdateAvailable,
+                object: nil,
+                queue: .main
+            ) { _ in
+                showUpdateAlert = true
+            }
+            
+            Task {
+                await AppUpdateChecker().checkForUpdate()
+            }
         }
+        .alert("Update Available", isPresented: $showUpdateAlert) {
+            
+            Button("Update Now") {
+                if let appStoreURL = URL(string: "https://apps.apple.com/ca/app/peek-transit/id6741770809") {
+                    UIApplication.shared.open(appStoreURL)
+                }
+            }
+            
+            Button("Later", role: .cancel) {}
+            
+        } message: {
+            Text("A new version of the app is available. Would you like to update now?")
+        }
+    
     }
     
     private func loadStop(number: Int) async {

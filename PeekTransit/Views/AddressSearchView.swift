@@ -95,7 +95,7 @@ struct AddressSearchView: View {
                 .clipShape(getBottomRoundedShape())
             } else if !searchQuery.isEmpty {
                 ScrollView {
-                    if searchHandler.searchResults.isEmpty && !isLoading && !searchHandler.isSearching && searchQuery.count > 2 {
+                    if !isLoading && !searchHandler.isSearching && searchQuery.count > 2  && searchHandler.searchResults.isEmpty {
                         NoResultsViewForAddressSearch()
                             .padding()
                     } else {

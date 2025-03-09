@@ -18,13 +18,17 @@ struct StopInfo {
             return nil
         }
         
+        
+        
         self.key = key
-        self.name = name
+        
+        self.name = name.replacingOccurrences(of: "@", with: " @ ")
+        
         self.location = CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
     
     init( name: String) {
-        self.name = name
+        self.name = name.replacingOccurrences(of: "@", with: " @ ")
         self.key = -1
         self.location = nil
     }

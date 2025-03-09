@@ -792,7 +792,8 @@ class TransitAPI {
                 parameters: [
                     "origin": "geo/\(origin.coordinate.latitude),\(origin.coordinate.longitude)",
                     "destination": "geo/\(destination.coordinate.latitude),\(destination.coordinate.longitude)",
-                    "max-transfers": transfers
+                    "max-transfers": transfers,
+                    "usage": getGlobalAPIForShortUsage() ? "short" : "long"
                 ]
             ) else {
                 throw TransitError.invalidURL
@@ -891,7 +892,8 @@ class TransitAPI {
                 "max-transfers": transfers,
     //            "mode": mode,
     //            "date": dateFormatter.string(from: winnipegDate), //dateFormatter.string(from: currentDate),
-    //            "time": timeFormatter.string(from: winnipegDate) //timeFormatter.string(from: currentDate)
+    //            "time": timeFormatter.string(from: winnipegDate) //timeFormatter.string(from: currentDate),
+                "usage": getGlobalAPIForShortUsage() ? "short" : "long"
             ]
             
             guard let url = createURL(
