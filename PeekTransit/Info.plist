@@ -80,14 +80,5 @@
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Peek Transit needs access to your location to find nearby stops.</string>
     
-    <key>NSLocalNetworkUsageDescription</key>
-    <string>Network access is required to fetch transit information</string>
-    
-    <key>NSAppTransportSecurity</key>
-    <dict>
-        <key>NSAllowsArbitraryLoads</key>
-        <true/>
-    </dict>
-    
 </dict>
 </plist>
