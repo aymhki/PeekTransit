@@ -51,7 +51,7 @@ struct BusStopView: View {
     
     private func loadSchedules(isManual: Bool) async {
         
-        guard isAppActive && (isManual || networkMonitor.isConnected) else { return }
+        guard isAppActive else { return }
 
         if isManual {
             isLoading = true
@@ -282,7 +282,7 @@ struct BusStopView: View {
             isAppActive = true
         }
         .onReceive(timer) { _ in
-            guard isAppActive && isLiveUpdatesEnabled && networkMonitor.isConnected else { return }
+            guard isAppActive && isLiveUpdatesEnabled else { return }
             isManualRefresh = false
             
             Task {
