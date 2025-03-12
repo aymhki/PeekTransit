@@ -34,9 +34,8 @@ struct SavedStopsView: View {
             return false
         }
     }
-    
-    var body: some View {
-        NavigationView {
+
+    private var contentView: some View {
             Group {
                 if savedStopsManager.isLoading {
                     ProgressView("Loading saved stops...")
@@ -64,9 +63,23 @@ struct SavedStopsView: View {
                 }
             }
             .navigationTitle("Saved Stops")
-        }
-        .onAppear {
-            savedStopsManager.loadSavedStops()
+    }
+    
+    var body: some View {
+        if isLargeDevice() {
+            NavigationView {
+                contentView
+            }
+            .onAppear {
+                savedStopsManager.loadSavedStops()
+            }
+        } else {
+            NavigationStack {
+                contentView
+            }
+            .onAppear {
+                savedStopsManager.loadSavedStops()
+            }
         }
     }
 }

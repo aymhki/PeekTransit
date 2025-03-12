@@ -132,7 +132,7 @@ struct TripSegment {
             if let intersection = destination["intersection"] as? [String: Any],
                let street = intersection["street"] as? [String: Any],
                 let streetName = street["name"] as? String {
-                return StopInfo(name: "\(streetName)")
+                return StopInfo(name: "Closest intersection to destination at \(streetName)")
             }
             
             return StopInfo(name: type)

@@ -256,7 +256,7 @@ class TransitAPI {
                         guard let variantObject = variantObjects["variant"] as? [String: Any],
                         let variantKey = variantObject["key"] as? String 
                         else { return true }
-                        return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W")
+                        return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W" || variantKey.prefix(1) == "I")
                     }
                     
                     stop["variants"] = stopVariants
@@ -295,7 +295,7 @@ class TransitAPI {
                     guard let variantObject = variantObjects["variant"] as? [String: Any],
                     let variantKey = variantObject["key"] as? String
                     else { return true }
-                    return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W")
+                    return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W" || variantKey.prefix(1) == "I")
                 }
                 
                 return stopVariants
@@ -426,9 +426,9 @@ class TransitAPI {
                                     finalArrivalText = ""
                                 } else {
                                     if (timeDifference < 0 && timeFormat != TimeFormat.clockTime) {
-                                        finalArrivalText = "\(Int(-timeDifference)) min. ago"
-                                    } else if (timeDifference <= 15 && timeFormat != TimeFormat.clockTime) {
-                                        finalArrivalText = "\(Int(timeDifference)) min."
+                                        finalArrivalText = "\(Int(-timeDifference)) \(getMinutesPassedTextInArrivalTimes())"
+                                    } else if (timeDifference <= getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes() && timeFormat != TimeFormat.clockTime) {
+                                        finalArrivalText = "\(Int(timeDifference)) \(getMinutesRemainingTextInArrivalTimes())"
                                     } else {
                                         var finalHour = Int(estimatedTimeParsedTime[0])!
                                         let am = finalHour < 12
@@ -442,18 +442,18 @@ class TransitAPI {
                                         finalArrivalText = "\(finalHour):\(estimatedTimeParsedTime[1])"
 
                                         if am {
-                                            finalArrivalText += " AM"
+                                            finalArrivalText += " \(getGlobalAMText())"
                                         } else {
-                                            finalArrivalText += " PM"
+                                            finalArrivalText += " \(getGlobalPMText())"
                                         }
                                     }
                                     
-                                    if (delay > 0 && timeDifference <= 15 && timeFormat != TimeFormat.clockTime) {
+                                    if (delay > 0 && timeDifference <= getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes() && timeFormat != TimeFormat.clockTime) {
                                         arrivalState = getLateStatusTextString()
-                                        finalArrivalText = "\(Int(timeDifference)) min."
-                                    } else if delay < 0 && timeDifference <= 15 {
+                                        finalArrivalText = "\(Int(timeDifference)) \(getMinutesRemainingTextInArrivalTimes())"
+                                    } else if delay < 0 && timeDifference <= getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes() {
                                         arrivalState = getEarlyStatusTextString()
-                                        finalArrivalText = "\(Int(timeDifference)) min."
+                                        finalArrivalText = "\(Int(timeDifference)) \(getMinutesRemainingTextInArrivalTimes())"
                                     } else {
                                         arrivalState = getOKStatusTextString()
                                     }
@@ -499,8 +499,8 @@ class TransitAPI {
                 return true
             }
             
-            let isMinutesA = timeA.hasSuffix("min.")
-            let isMinutesB = timeB.hasSuffix("min.")
+            let isMinutesA = timeA.hasSuffix(getMinutesRemainingTextInArrivalTimes())
+            let isMinutesB = timeB.hasSuffix(getMinutesRemainingTextInArrivalTimes())
             
             if isMinutesA && isMinutesB {
                 let minutesA = Int(timeA.components(separatedBy: " ")[0]) ?? 0
@@ -537,8 +537,8 @@ class TransitAPI {
                 var hourB = Int(hourMinB[0]) ?? 0
                 let minuteA = Int(hourMinA[1]) ?? 0
                 let minuteB = Int(hourMinB[1]) ?? 0
-                let isAMA = timeComponentsA[1] == "AM"
-                let isAMB = timeComponentsB[1] == "AM"
+                let isAMA = timeComponentsA[1] == getGlobalAMText()
+                let isAMB = timeComponentsB[1] == getGlobalAMText()
                 
                 let calendar = Calendar.current
                 let currentDate = Date()
@@ -613,6 +613,7 @@ class TransitAPI {
                                                           (Int(estimatedTimeParsedDate[2])! * 1440) +
                                                           (Int(estimatedTimeParsedTime[0])! * 60) +
                                                           Int(estimatedTimeParsedTime[1])!
+                                
                                 let scheduledTotalMinutes = (Int(scheduledTimeParsedDate[0])! * 525600) +
                                                           (Int(scheduledTimeParsedDate[1])! * 43800) +
                                                           (Int(scheduledTimeParsedDate[2])! * 1440) +
@@ -656,15 +657,15 @@ class TransitAPI {
                                         finalHour -= 12
                                     }
                                     
-                                    timeIn12HourFormat = "\(finalHour):\(estimatedTimeParsedTime[1]) \(am ? "AM" : "PM")"
+                                    timeIn12HourFormat = "\(finalHour):\(estimatedTimeParsedTime[1]) \(am ? getGlobalAMText() : getGlobalPMText())"
                                     
-                                    if timeDifference <= 15 {
-                                        timeInMinutes = "\(Int(timeDifference)) min."
+                                    if timeDifference <= getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes() {
+                                        timeInMinutes = "\(Int(timeDifference)) \(getMinutesRemainingTextInArrivalTimes())"
                                     }
                                     
-                                    if (delay > 0 && timeDifference <= 15) {
+                                    if (delay > 0 && timeDifference <= getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes()) {
                                         arrivalState = getLateStatusTextString()
-                                    } else if delay < 0 && timeDifference <= 15 {
+                                    } else if delay < 0 && timeDifference <= getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes() {
                                         arrivalState = getEarlyStatusTextString()
                                     } else {
                                         arrivalState = getOKStatusTextString()
@@ -687,7 +688,7 @@ class TransitAPI {
                                     
                                     let variantIdentifier = "\(variantKey)\(getScheduleStringSeparator())\(variantName)"
                                     
-                                    if !variantMinutesAdded[variantIdentifier, default: false] && timeDifference <= 15 {
+                                    if !variantMinutesAdded[variantIdentifier, default: false] && timeDifference <= getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes() {
                                         finalArrivalText = timeInMinutes
                                         variantMinutesAdded[variantIdentifier] = true
                                     } else {

@@ -19,10 +19,10 @@ struct ThemeSelectionView: View {
                     .font(.title.bold())
                     .padding([.top, .bottom])
                 
-                Text("Note: This preview is only for color, font, and theme changes. The layout, size, and spacing between text elements will be different in the bus stop page and the widget elements")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal)
+//                Text("Note: This preview is only for color, font, and theme changes. The layout, size, and spacing between text elements will be different in the bus stop page and the widget elements")
+//                    .font(.subheadline)
+//                    .foregroundColor(.secondary)
+//                    .padding(.horizontal)
                 
                 ForEach(StopViewTheme.allCases, id: \.id) { theme in
                     ThemePreviewCard(

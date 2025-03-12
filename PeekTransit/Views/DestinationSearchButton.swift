@@ -14,7 +14,7 @@ struct DestinationSearchButton: View {
             }
         }) {
             HStack {
-                Image(systemName: "bus.fill")
+                Image(systemName: getGlobalBusIconSystemImageName())
                     .font(.caption)
                 Text("Don't know which bus to take?")
                     .font(.caption)

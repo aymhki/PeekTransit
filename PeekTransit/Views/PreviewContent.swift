@@ -19,7 +19,7 @@ struct PreviewContent: View {
                     .stopViewTheme(theme, text: getLateStatusTextString())
                 
                 
-                Text("1 min.")
+                Text("1 \(getMinutesRemainingTextInArrivalTimes())")
                     .stopViewTheme(theme, text: "")
                 
             }
@@ -39,7 +39,7 @@ struct PreviewContent: View {
                     .stopViewTheme(theme, text: getEarlyStatusTextString())
                 
                 
-                Text("11:15 AM")
+                Text("11:15 \(getGlobalAMText())")
                     .stopViewTheme(theme, text: "")
             }
             .padding(.horizontal, 16)

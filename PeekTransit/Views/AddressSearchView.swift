@@ -116,7 +116,7 @@ struct AddressSearchView: View {
             
             Spacer()
         }
-        .frame(maxWidth: isLargeDevice() ? UIScreen.main.bounds.width * 0.3 : UIScreen.main.bounds.width * 0.9, maxHeight: UIScreen.main.bounds.height * 0.7)
+        .frame(maxWidth: isLargeDevice() ? UIScreen.main.bounds.width * 0.5 : UIScreen.main.bounds.width * 0.9,  maxHeight: isLargeDevice() ? UIScreen.main.bounds.height * 0.5 : UIScreen.main.bounds.height * 0.7)
         .padding(.horizontal)
         .transition(.move(edge: .bottom).combined(with: .opacity))
         .onReceive(searchHandler.$searchResults) { results in

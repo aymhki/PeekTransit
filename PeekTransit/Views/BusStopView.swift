@@ -140,7 +140,7 @@ struct BusStopView: View {
                     
                 } else if errorFetchingSchedule && isAppActive {
                     VStack(spacing: 16) {
-                        Image(systemName: "bus.fill")
+                        Image(systemName: getGlobalBusIconSystemImageName())
                             .font(.system(size: 48))
                             .foregroundStyle(.secondary)
                         Text(errorText)
@@ -152,7 +152,7 @@ struct BusStopView: View {
                     
                 } else if schedules.isEmpty {
                     VStack(spacing: 16) {
-                        Image(systemName: "bus.fill")
+                        Image(systemName: getGlobalBusIconSystemImageName())
                             .font(.system(size: 48))
                             .foregroundStyle(.secondary)
                         Text("No service at this bus stop during this time.")
@@ -206,7 +206,7 @@ struct BusStopView: View {
                                     .padding(.vertical, 12)
                                     .padding(.horizontal, 1)
                                 }
-                                .frame(height: 50)
+                                .frame(height: isLargeDevice() ? 50 : 35)
                             }
                         }
                         .padding(.all)

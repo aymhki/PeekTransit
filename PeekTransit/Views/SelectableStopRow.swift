@@ -87,8 +87,8 @@ struct SelectableStopRow: View {
                         }
                     }
                     
-                    ScrollView {
-                        FlowLayout(spacing: 2) {
+                    VStack {
+                        FlowLayout(spacing: 12) {
                             ForEach(uniqueVariants.indices, id: \.self) { index in
                                 if let route = uniqueVariants[index]["route"] as? [String: Any],
                                    let variant = uniqueVariants[index]["variant"] as? [String: Any] {
@@ -98,6 +98,10 @@ struct SelectableStopRow: View {
                         }
                         .padding(.top)
                     }
+                    .frame(maxWidth: .infinity)
+                    .fixedSize(horizontal: false, vertical: true)
+                    
+                    Spacer()
                 }
             }
             .padding(.vertical, 8)

@@ -6,21 +6,30 @@ enum TimeFormat: String, CaseIterable {
         return .minutesRemaining
     }
     
+    var formattedValue: String {
+        switch self {
+        case .clockTime:
+            return "HH:MM \(getGlobalAMText())/\(getGlobalPMText())"
+        case .minutesRemaining:
+            return self.rawValue
+        }
+    }
+    
     var `description`: String {
         switch self {
         case .minutesRemaining:
             return "X(X) Minutes remaining when the bus is within 15 minutes with \(getLateStatusTextString()) (L.) and \(getEarlyStatusTextString()) (E.) prefix"
         case .clockTime:
-            return "Always clock Time (HH:MM AM/PM) without \(getLateStatusTextString()) (L.) and \(getEarlyStatusTextString()) (E.) prefix"
+            return "Always clock Time (HH:MM \(getGlobalAMText())/\(getGlobalPMText()) without \(getLateStatusTextString()) (L.) and \(getEarlyStatusTextString()) (E.) prefix"
         }
     }
     
     var `brief`: String {
         switch self {
         case .minutesRemaining:
-            return "X(X) min."
+            return "X(X) \(getMinutesRemainingTextInArrivalTimes())"
         case .clockTime:
-            return "HH:MM AM/PM"
+            return "HH:MM \(getGlobalAMText())/\(getGlobalPMText())"
         }
     }
 }

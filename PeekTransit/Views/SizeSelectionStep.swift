@@ -217,7 +217,7 @@ struct SizeSelectionStep: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
-//                    Text("Do you want your widget to show when it was last updated under the bus arrival times?\n\nExample: Last updated 12:34 PM\n\nNote that this text will always be in HH:MM AM/PM format")
+//                    Text("Do you want your widget to show when it was last updated under the bus arrival times?\n\nExample: Last updated 12:34 \(getGlobalPMText())\n\nNote that this text will always be in HH:MM \(getGlobalAMText())/\(getGlobalPMText()) format")
 //                        .font(.subheadline)
 //                        .foregroundColor(.secondary)
 //                        .padding(.horizontal)

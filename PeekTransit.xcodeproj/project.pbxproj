@@ -562,7 +562,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransit/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to show nearby transit stops and provide directions";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -601,7 +601,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransit/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to show nearby transit stops and provide directions";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

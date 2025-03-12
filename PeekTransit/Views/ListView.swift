@@ -13,9 +13,9 @@ struct ListView: View {
     @State private var savedStopsManager =  SavedStopsManager.shared
     @State private var visibleRows = Set<Int>()
     @State private var isAppActive = true
-
-
-
+    
+    
+    
     var combinedStops: [[String: Any]] {
         var combined = stopsStore.stops
         let existingStopNumbers = Set(combined.compactMap { $0["number"] as? Int })
@@ -31,10 +31,10 @@ struct ListView: View {
     }
     
     
-       var filteredStops: [[String: Any]] {
-           guard !searchText.isEmpty else { return combinedStops }
+    var filteredStops: [[String: Any]] {
+        guard !searchText.isEmpty else { return combinedStops }
         
-           return combinedStops.filter { stop in
+        return combinedStops.filter { stop in
             if let name = stop["name"] as? String,
                name.localizedCaseInsensitiveContains(searchText) {
                 return true
@@ -58,98 +58,95 @@ struct ListView: View {
             return false
         }
     }
-    
-    var body: some View {
-        NavigationView {
-            Group {
-//                if !networkMonitor.isConnected && stopsStore.stops.isEmpty {
-//                    NetworkWaitingView() {
-//                        networkMonitor.stopMonitoring()
-//                        networkMonitor.startMonitoring()
-//                    }
-//                } else
-                
-                if stopsStore.isLoading {
-                    ProgressView("Loading stops...")
-                } else if let error = stopsStore.error {
-                    VStack {
-                        Text("Error loading stops")
-                            .font(.headline)
-                        Text(error.localizedDescription)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        Button("Retry") {
-                            self.stopsStore.error = nil
-                            let newLocation = locationManager.location
-                            if let location = newLocation {
-                                Task {
-                                    await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    .padding(.horizontal)
-                } else if combinedStops.isEmpty {
-                    Text("No stops found nearby")
+
+    var contentView: some View {
+        Group {
+            //                if !networkMonitor.isConnected && stopsStore.stops.isEmpty {
+            //                    NetworkWaitingView() {
+            //                        networkMonitor.stopMonitoring()
+            //                        networkMonitor.startMonitoring()
+            //                    }
+            //                } else
+
+            if stopsStore.isLoading {
+                ProgressView("Loading stops...")
+            } else if let error = stopsStore.error {
+                VStack {
+                    Text("Error loading stops")
+                        .font(.headline)
+                    Text(error.localizedDescription)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
-                } else {
-                    List {
-                        if stopsStore.isSearching {
-                            HStack {
-                                Spacer()
-                                ProgressView("Searching...")
-                                Spacer()
-                            }
-                        }
-                        
-                        ForEach(filteredStops.indices, id: \.self) { index in
-                            let stop = filteredStops[index]
-                            
-                            StopRow(
-                                stop: stop,
-                                variants: stop["variants"] as? [[String: Any]],
-                                inSaved: false,
-                                visibilityAction: { isVisible in
-                                    if isVisible {
-                                        visibleRows.insert(index)
-                                    } else {
-                                        visibleRows.remove(index)
-                                    }
-                                }
-                            )
-                            
-                            
-                        }
-                    }
-                    .searchable(text: $searchText, prompt: "Search stops, routes...")
-                    .disableAutocorrection(true)
-                    .autocapitalization(.none)
-                    .onChange(of: searchText) { query in
-                        Task {
-                            await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
-                        }
-                    }
-                    .refreshable {
+
+                    Button("Retry") {
+                        self.stopsStore.error = nil
                         let newLocation = locationManager.location
                         if let location = newLocation {
                             Task {
                                 await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                             }
                         }
-                        
-                        searchText = ""
-                        MapSnapshotCache.shared.clearCache()
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.horizontal)
+            } else if combinedStops.isEmpty {
+                Text("No stops found nearby")
+                    .foregroundColor(.secondary)
+            } else {
+                List {
+                    if stopsStore.isSearching {
+                        HStack {
+                            Spacer()
+                            ProgressView("Searching...")
+                            Spacer()
+                        }
+                    }
+
+                    ForEach(filteredStops.indices, id: \.self) { index in
+                        let stop = filteredStops[index]
+
+                        StopRow(
+                            stop: stop,
+                            variants: stop["variants"] as? [[String: Any]],
+                            inSaved: false,
+                            visibilityAction: { isVisible in
+                                if isVisible {
+                                    visibleRows.insert(index)
+                                } else {
+                                    visibleRows.remove(index)
+                                }
+                            }
+                        )
+
+
                     }
                 }
-            }
-            .navigationTitle("Nearby Stops")
-            .onDisappear {
-                MapSnapshotCache.shared.cancelPendingRequests()
-                networkMonitor.stopMonitoring()
-            }
+                .searchable(text: $searchText, prompt: "Search stops, routes...")
+                .disableAutocorrection(true)
+                .autocapitalization(.none)
+                .onChange(of: searchText) { query in
+                    Task {
+                        await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
+                    }
+                }
+                .refreshable {
+                    let newLocation = locationManager.location
+                    if let location = newLocation {
+                        Task {
+                            await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
+                        }
+                    }
 
+                    searchText = ""
+                    MapSnapshotCache.shared.clearCache()
+                }
+            }
+        }
+        .navigationTitle("Nearby Stops")
+        .onDisappear {
+            MapSnapshotCache.shared.cancelPendingRequests()
+            networkMonitor.stopMonitoring()
         }
         .onAppear {
             networkMonitor.startMonitoring()
@@ -163,7 +160,7 @@ struct ListView: View {
         }
         .onChange(of: locationManager.location) { newLocation in
             guard isAppActive else { return }
-
+            
             if let location = newLocation,
                locationManager.shouldRefresh(for: location) {
                 Task {
@@ -172,6 +169,17 @@ struct ListView: View {
             }
         }
     }
-
+    
+    var body: some View {
+        if isLargeDevice() {
+            NavigationView {
+                contentView
+            }
+        } else {
+            NavigationStack {
+                contentView
+            }
+        }
+    }
 }
 

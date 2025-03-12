@@ -75,7 +75,7 @@ struct RouteDetailsView: View {
                         case .ride:
                             HStack(alignment: .top) {
                                 
-                                Image(systemName: "bus.fill")
+                                Image(systemName: getGlobalBusIconSystemImageName())
                                     .font(.system(size: 18))
                                     .frame(width: 24, height: 24)
                                     .foregroundColor(.blue)

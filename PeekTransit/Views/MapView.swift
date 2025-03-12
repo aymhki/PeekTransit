@@ -26,8 +26,11 @@ struct MapView: View {
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
     
     var body: some View {
+
         NavigationStack {
+            
             ZStack {
+                
                 MapViewRepresentable(
                     stops: stopsStore.stops,
                     userLocation: locationManager.location,
@@ -108,9 +111,6 @@ struct MapView: View {
                     }
                 }
                 
-                
-                
-                
                 if stopsStore.isLoading && isManualRefresh {
                     ProgressView()
                         .padding()
@@ -152,8 +152,7 @@ struct MapView: View {
         }
         .onDisappear {
             networkMonitor.stopMonitoring()
-        }
-        
+        }  
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
             isAppActive = false
         }
@@ -188,6 +187,7 @@ struct MapView: View {
                 }
             }
         }
+
     }
     
     private func centerOnUser() {

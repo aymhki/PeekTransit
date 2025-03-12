@@ -12,9 +12,7 @@ struct WidgetsView: View {
     @State private var widgetToDelete: WidgetModel? = nil
     @StateObject private var themeManager = ThemeManager.shared 
 
-    
-    var body: some View {
-        NavigationView {
+    private var contentView: some View {
             Group {
                 if savedWidgetsManager.isLoading {
                     ProgressView("Loading saved widgets...")
@@ -82,6 +80,10 @@ struct WidgetsView: View {
                     }
                 }
             }
+            .environmentObject(themeManager)
+            .refreshable {
+                savedWidgetsManager.loadSavedWidgets()
+            }
             .alert("Confirm Deletion", isPresented: $showingDeleteAlert) {
                 Button("No", role: .cancel) {
                     widgetToDelete = nil
@@ -109,32 +111,62 @@ struct WidgetsView: View {
                     Text("Are you sure you want to delete \(selectedWidgets.count) widget\(selectedWidgets.count == 1 ? "" : "s")?")
                 }
             }
-        }
-        .environmentObject(themeManager)
-        .overlay(alignment: .bottomTrailing) {
-            if !isEditing {
-                Button {
-                    selectedWidget = nil
-                    showingSetupView = true
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.white)
-                        .font(.title)
-                        .foregroundStyle(.white)
-                        .padding()
-                        .background(.blue)
-                        .clipShape(Circle())
-                        .shadow(radius: 4)
+    }
+    
+    var body: some View {
+
+        if isLargeDevice() {
+            NavigationView {
+                contentView
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !isEditing {
+                    Button {
+                        selectedWidget = nil
+                        showingSetupView = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.white)
+                            .font(.title)
+                            .foregroundStyle(.white)
+                            .padding()
+                            .background(.blue)
+                            .clipShape(Circle())
+                            .shadow(radius: 4)
+                    }
+                    .padding()
                 }
-                .padding()
+            }
+            .fullScreenCover(isPresented: $showingSetupView) {
+                WidgetSetupView(editingWidget: selectedWidget)
+            }
+        } else {
+            NavigationStack {
+                contentView
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if !isEditing {
+                    Button {
+                        selectedWidget = nil
+                        showingSetupView = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.white)
+                            .font(.title)
+                            .foregroundStyle(.white)
+                            .padding()
+                            .background(.blue)
+                            .clipShape(Circle())
+                            .shadow(radius: 4)
+                    }
+                    .padding()
+                }
+            }
+            .fullScreenCover(isPresented: $showingSetupView) {
+                WidgetSetupView(editingWidget: selectedWidget)
             }
         }
-        .fullScreenCover(isPresented: $showingSetupView) {
-            WidgetSetupView(editingWidget: selectedWidget)
-        }
-        .refreshable {
-            savedWidgetsManager.loadSavedWidgets()
-        }
+
     }
     
 }

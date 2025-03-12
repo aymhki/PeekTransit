@@ -34,7 +34,7 @@ struct WidgetSetupView: View {
         
         if let widget = editingWidget {
             _widgetSize = State(initialValue: widget.widgetData["size"] as? String ?? "medium")
-            _selectedTimeFormat = State(initialValue: TimeFormat(rawValue: widget.widgetData["timeFormat"] as? String ?? "") ?? .default)
+            //_selectedTimeFormat = State(initialValue: TimeFormat(rawValue: widget.widgetData["timeFormat"] as? String ?? "") ?? .default)
             _showLastUpdatedStatus = State(initialValue: widget.widgetData["showLastUpdatedStatus"] as? Bool ?? true)
             //_isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
             //_selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
@@ -60,7 +60,7 @@ struct WidgetSetupView: View {
         
         
         if isClosestStop {
-            return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.rawValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
+            return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         } else {
             let stopNumbers = selectedStops.compactMap { stop -> String? in
                 guard let number = stop["number"] as? Int else { return nil }
@@ -77,7 +77,7 @@ struct WidgetSetupView: View {
                 variantKeys = "Up Coming Buses"
             }
             
-             return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.rawValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
+             return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
             
             
         }
@@ -94,7 +94,7 @@ struct WidgetSetupView: View {
             "createdAt": ISO8601DateFormatter().string(from: Date()),
             "isClosestStop": isClosestStop,
             "name": widgetName.isEmpty ? generateDefaultWidgetName() : widgetName,
-            "timeFormat": selectedTimeFormat.rawValue,
+            "timeFormat": selectedTimeFormat.formattedValue,
             "showLastUpdatedStatus": showLastUpdatedStatus,
             "noSelectedVariants": noSelectedVariants,
             "multipleEntriesPerVariant": multipleEntriesPerVariant,

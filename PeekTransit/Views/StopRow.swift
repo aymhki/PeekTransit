@@ -6,11 +6,13 @@ struct StopRow: View {
     let variants: [[String: Any]]?
     let inSaved: Bool
     let visibilityAction: ((Bool) -> Void)?
+
     
     @ObservedObject private var savedStopsManager = SavedStopsManager.shared
     @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) var colorScheme
     @State private var forceUpdate = UUID()
+
     
     private var uniqueVariants: [[String: Any]]? {
         var seenKeys = Set<String>()
@@ -148,10 +150,10 @@ struct StopRow: View {
                     .foregroundColor(.secondary)
                 }
                 
-                ScrollView {
+                VStack {
                     if let variants = variants, let uniqueVariants = uniqueVariants {
                         
-                        FlowLayout(spacing: 8) {
+                        FlowLayout(spacing: 12) {
                             ForEach(uniqueVariants.indices, id: \.self) { index in
                                 if let route = uniqueVariants[index]["route"] as? [String: Any],
                                    let variant = uniqueVariants[index]["variant"] as? [String: Any] {
@@ -163,6 +165,9 @@ struct StopRow: View {
                         
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+                
             }
         }
         .padding(.vertical, 8)

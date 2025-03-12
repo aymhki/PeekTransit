@@ -512,10 +512,10 @@ public struct ThemeModifier: ViewModifier {
                 .foregroundStyle(foregroundColor(for: text))
         case .classic:
             content
-                .font(.custom("LCDDot", fixedSize: 13 * sizeFactor)).bold()
+                .font(.custom("LCDDot", fixedSize: 14 * sizeFactor)).bold()
                 .fontWeight(.black)
                 .background(.black)
-                .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))
+                .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
         }
     }
     
@@ -609,13 +609,13 @@ public struct WidgetThemeModifier: ViewModifier {
                 content
                     .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                     .fontWeight(.black)
-                    .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))
+                    .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
             } else {
                 content
                     .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                     .fontWeight(.black)
                     .background(.black)
-                    .foregroundStyle(Color(hex: "#EB8634", brightness: 1, saturation: 1))
+                    .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
             }
         }
     }
@@ -650,6 +650,7 @@ public struct WidgetThemeModifier: ViewModifier {
         } else if text.contains(getEarlyStatusTextString()) {
             return .blue
         }
+        
         return .primary
     }
 }
@@ -755,12 +756,12 @@ public func shouldShowShortRouteName(_ status: String) -> Bool {
 }
 
 public func getMaxPerferredstopsInClosestStops() -> Int {
-    return 3
+    return 5
 }
 
 
 public func getRefreshWidgetTimelineAfterHowManySeconds()->Int{
-    return 59
+    return 9
 }
 
 
@@ -778,4 +779,39 @@ public func getMinutesAllowedToKeepDueBusesInSchedule() -> Int {
 
 extension Notification.Name {
     static let appUpdateAvailable = Notification.Name("appUpdateAvailable")
+}
+
+public func calculateMinHeight(uniqueVariants: [[String: Any]]?) -> CGFloat {
+    guard let uniqueVariants = uniqueVariants else { return 30 }
+    
+    let variantCount = uniqueVariants.count
+    let rows = ceil(Double(variantCount) / 3.0)
+    let height = max(30, rows * 30)
+    
+    return height
+}
+
+
+public func getGlobalBusIconSystemImageName() -> String {
+    return "bus.fill"
+}
+
+public func getPeriodBeforeStartingToShowMinutesUntilNextBusInMinutes() -> Int {
+    return 15
+}
+
+public func getMinutesRemainingTextInArrivalTimes() -> String {
+    return "min."
+}
+
+public func getMinutesPassedTextInArrivalTimes() -> String {
+    return "min. ago"
+}
+
+public func getGlobalAMText() -> String {
+    return "AM"
+}
+
+public func getGlobalPMText() -> String {
+    return "PM"
 }

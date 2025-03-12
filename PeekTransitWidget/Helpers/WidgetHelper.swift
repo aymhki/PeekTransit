@@ -43,6 +43,20 @@ enum WidgetHelper {
             return (number, stop)
         })
         
+        var preferredVariants = Set<String>()
+        if let preferredStops = widgetData?["perferredStops"] as? [[String: Any]] {
+            for preferredStop in preferredStops {
+                if let selectedVariants = preferredStop["selectedVariants"] as? [[String: Any]] {
+                    for variant in selectedVariants {
+                        if let key = variant["key"] as? String, let name = variant["name"] as? String {
+                            let variantCombo = "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
+                            preferredVariants.insert(variantCombo)
+                        }
+                    }
+                }
+            }
+        }
+        
         if let preferredStops = widgetData?["perferredStops"] as? [[String: Any]] {
             for preferredStop in preferredStops {
                 if filteredStops.count >= maxStops {
@@ -55,13 +69,11 @@ enum WidgetHelper {
                 }
                 
                 do {
-                    
                     matchingNearbyStop = preferredStop
                     
                     let schedule = try await retryRequest {
                         try await TransitAPI.shared.getStopSchedule(stopNumber: preferredStopNumber)
                     }
-                    
                     
                     let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                         schedule: schedule,
@@ -84,6 +96,65 @@ enum WidgetHelper {
                     }
                 } catch {
                     print("Error fetching schedule for preferred stop \(preferredStopNumber): \(error)")
+                    continue
+                }
+            }
+        }
+        
+        if filteredStops.count < maxStops && !preferredVariants.isEmpty {
+            let processedStopNumbers = Set(filteredStops.compactMap { $0["number"] as? Int })
+            
+            for stop in stops {
+                guard let stopNumber = stop["number"] as? Int else { continue }
+                
+                if processedStopNumbers.contains(stopNumber) {
+                    continue
+                }
+                
+                do {
+                    let schedule = try await retryRequest {
+                        try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                    }
+                    
+                    let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
+                        schedule: schedule,
+                        timeFormat: .default
+                    )
+                    
+                    var stopVariants = Set<String>()
+                    for scheduleString in cleanedSchedule {
+                        let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
+                        if components.count >= 2 {
+                            let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
+                            stopVariants.insert(variantCombo)
+                        }
+                    }
+                    
+                    let matchingPreferredVariants = stopVariants.intersection(preferredVariants)
+                    if !matchingPreferredVariants.isEmpty {
+                        var updatedStop = stop
+                        var selectedVariants: [[String: Any]] = []
+                        
+                        for variantCombo in matchingPreferredVariants {
+                            let components = variantCombo.components(separatedBy: getCompositKeyLinkerForDictionaries())
+                            if components.count == 2 {
+                                selectedVariants.append([
+                                    "key": components[0],
+                                    "name": components[1]
+                                ])
+                            }
+                        }
+                        
+                        updatedStop["selectedVariants"] = selectedVariants
+                        filteredStops.append(updatedStop)
+                        seenVariants.formUnion(stopVariants)
+                        
+                        if filteredStops.count >= maxStops {
+                            break
+                        }
+                    }
+                } catch {
+                    print("Error fetching schedule for stop \(stopNumber): \(error)")
                     continue
                 }
             }
@@ -217,7 +288,7 @@ enum WidgetHelper {
                     } else {
                         cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                             schedule: schedule,
-                            timeFormat: widgetData["timeFormat"] as? String == TimeFormat.clockTime.rawValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
+                            timeFormat: widgetData["timeFormat"] as? String == TimeFormat.clockTime.formattedValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
                         )
                     }
                     
