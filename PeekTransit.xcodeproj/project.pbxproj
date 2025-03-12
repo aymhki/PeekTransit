@@ -66,32 +66,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2F2E798E2D5FC1E6005C12A0 /* Exceptions for "Shared" folder in "Peek Transit" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Assets/IPad App Preview Screens/IMG_0007.PNG",
-				"Assets/IPad App Preview Screens/IMG_0008.PNG",
-				"Assets/IPad App Preview Screens/IMG_0009.PNG",
-				"Assets/IPad App Preview Screens/IMG_0010.PNG",
-				"Assets/IPad App Preview Screens/IMG_0011.PNG",
-				"Assets/IPad App Preview Screens/IMG_0012.PNG",
-				"Assets/IPad App Preview Screens/IMG_0013.PNG",
-				"Assets/IPad App Preview Screens/IMG_0014.PNG",
-				"Assets/IPad App Preview Screens/IMG_0015.PNG",
-				"Assets/IPad App Preview Screens/IMG_0016.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0010.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0011.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0012.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0013.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0014.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0016.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0017.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0018.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0019.PNG",
-				"Assets/IPhone App Preview Screens/IMG_0020.PNG",
-			);
-			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
-		};
 		2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -268,7 +242,6 @@
 		2F200FCD2D4EBCEE009E18AE /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2F2E798E2D5FC1E6005C12A0 /* Exceptions for "Shared" folder in "Peek Transit" target */,
 				2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */,
 				2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
