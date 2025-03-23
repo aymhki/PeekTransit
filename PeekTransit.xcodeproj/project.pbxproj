@@ -34,13 +34,13 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		2F2010AC2D4EF93A009E18AE /* Embed ExtensionKit Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
 			dstSubfolderSpec = 16;
 			files = (
 			);
 			name = "Embed ExtensionKit Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 		2FB3B8D22D4DB2B1003BFF19 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -66,6 +66,71 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2F0B47ED2D8139A700F54AEA /* Exceptions for "Shared" folder in "Peek Transit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Assets/IPad Preview/IMG_0007.PNG",
+				"Assets/IPad Preview/IMG_0008.PNG",
+				"Assets/IPad Preview/IMG_0009.PNG",
+				"Assets/IPad Preview/IMG_0010.PNG",
+				"Assets/IPad Preview/IMG_0011.PNG",
+				"Assets/IPad Preview/IMG_0012.PNG",
+				"Assets/IPad Preview/IMG_0013.PNG",
+				"Assets/IPad Preview/IMG_0014.PNG",
+				"Assets/IPad Preview/IMG_0015.PNG",
+				"Assets/IPad Preview/IMG_0016.PNG",
+				"Assets/IPad Preview/IMG_0017.PNG",
+				"Assets/IPad Preview/IMG_0018.PNG",
+				"Assets/IPad Preview/IMG_0019.PNG",
+				"Assets/IPad Preview/IMG_0020.PNG",
+				"Assets/IPad Preview/IMG_0021.PNG",
+				"Assets/IPad Preview/IMG_0022.PNG",
+				"Assets/IPad Preview/IMG_0023.PNG",
+				"Assets/IPad Preview/IMG_0024.PNG",
+				"Assets/IPad Preview/IMG_0025.PNG",
+				"Assets/IPad Preview/IMG_0026.PNG",
+				"Assets/IPad Preview/IMG_0027.PNG",
+				"Assets/IPad Preview/IMG_0028.PNG",
+				"Assets/IPad Preview/IMG_0029.PNG",
+				"Assets/IPad Preview/IMG_0030.PNG",
+				"Assets/IPad Preview/IMG_0031.PNG",
+				"Assets/IPad Preview/IMG_0032.PNG",
+				"Assets/IPad Preview/IMG_0033.PNG",
+				"Assets/IPad Preview/IMG_0034.PNG",
+				"Assets/IPad Preview/IMG_0035.PNG",
+				"Assets/IPad Preview/IMG_0036.PNG",
+				"Assets/IPad Preview/IMG_0037.PNG",
+				"Assets/IPad Preview/IMG_0038.PNG",
+				"Assets/IPad Preview/IMG_0039.PNG",
+				"Assets/IPad Preview/IMG_0040.PNG",
+				"Assets/IPad Preview/IMG_0041.PNG",
+				"Assets/IPhone Preview/IMG_0007.PNG",
+				"Assets/IPhone Preview/IMG_0008.PNG",
+				"Assets/IPhone Preview/IMG_0009.PNG",
+				"Assets/IPhone Preview/IMG_0010.PNG",
+				"Assets/IPhone Preview/IMG_0011.PNG",
+				"Assets/IPhone Preview/IMG_0012.PNG",
+				"Assets/IPhone Preview/IMG_0013.PNG",
+				"Assets/IPhone Preview/IMG_0014.PNG",
+				"Assets/IPhone Preview/IMG_0015.PNG",
+				"Assets/IPhone Preview/IMG_0016.PNG",
+				"Assets/IPhone Preview/IMG_0017.PNG",
+				"Assets/IPhone Preview/IMG_0018.PNG",
+				"Assets/IPhone Preview/IMG_0019.PNG",
+				"Assets/IPhone Preview/IMG_0020.PNG",
+				"Assets/IPhone Preview/IMG_0021.PNG",
+				"Assets/IPhone Preview/IMG_0022.PNG",
+				"Assets/IPhone Preview/IMG_0023.PNG",
+				"Assets/IPhone Preview/IMG_0024.PNG",
+				"Assets/IPhone Preview/IMG_0025.PNG",
+				"Assets/IPhone Preview/IMG_0026.PNG",
+				"Assets/IPhone Preview/IMG_0027.PNG",
+				"Assets/IPhone Preview/IMG_0028.PNG",
+				"Assets/IPhone Preview/IMG_0029.PNG",
+				"Assets/IPhone Preview/IMG_0030.PNG",
+			);
+			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
+		};
 		2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -242,6 +307,7 @@
 		2F200FCD2D4EBCEE009E18AE /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				2F0B47ED2D8139A700F54AEA /* Exceptions for "Shared" folder in "Peek Transit" target */,
 				2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */,
 				2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
@@ -547,7 +613,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -586,7 +652,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -745,7 +811,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -784,7 +850,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -814,7 +880,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -842,7 +908,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

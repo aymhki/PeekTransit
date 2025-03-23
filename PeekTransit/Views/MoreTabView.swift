@@ -14,6 +14,7 @@ struct MoreTabView: View {
                     )
                 }
                 
+            
                 HStack {
                     SettingsRow(
                         icon: "apps.iphone",

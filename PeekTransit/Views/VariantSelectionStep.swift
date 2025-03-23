@@ -4,6 +4,7 @@ struct VariantSelectionStep: View {
     let selectedStops: [[String: Any]]
     @Binding var selectedVariants: [String: [[String: Any]]]
     let maxVariantsPerStop: Int
+    let settingNotification: Bool
     @Binding var stopsWithoutService: [Int]
     @Binding var showNoServiceAlert: Bool
     @Binding var noSelectedVariants: Bool
@@ -149,7 +150,7 @@ struct VariantSelectionStep: View {
     var body: some View {
         VStack {
             if isLoading {
-                ProgressView("Loading bus schedules...")
+                ProgressView("Loading bus stops schedules...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let error = error {
                 VStack(spacing: 8) {
@@ -170,39 +171,47 @@ struct VariantSelectionStep: View {
             } else {
                 ScrollView {
                     VStack(spacing: 20) {
-                        Text("Select the widget bus variants")
-                            .font(.title3)
-                            .padding([.top, .horizontal])
-                    
-                        Button(action: {
-                            withAnimation {
-                                noSelectedVariants.toggle()
-                                if noSelectedVariants {
-                                    selectedVariants = [:]
-                                }
-                            }
-                        }) {
-                            HStack(alignment: .center, spacing: 10) {
-                                Image(systemName: noSelectedVariants ? "checkmark.square.fill" : "square")
-                                    .foregroundColor(noSelectedVariants ? .blue : .secondary)
-                                    .font(.system(size: 28))
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Automatically show the upcoming buses everytime")
-                                        .font(.subheadline)
-                                        .foregroundColor(.primary)
-                                    Text("No need to select specific variant(s)")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        if settingNotification {
+                            Text("Select the notification bus variant")
+                                .font(.title3)
+                                .padding([.top, .horizontal])
+                        } else {
+                            Text("Select the widget bus variants")
+                                .font(.title3)
+                                .padding([.top, .horizontal])
                         }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding(.horizontal)
+                    
+                        if !settingNotification {
+                            Button(action: {
+                                withAnimation {
+                                    noSelectedVariants.toggle()
+                                    if noSelectedVariants {
+                                        selectedVariants = [:]
+                                    }
+                                }
+                            }) {
+                                HStack(alignment: .center, spacing: 10) {
+                                    Image(systemName: noSelectedVariants ? "checkmark.square.fill" : "square")
+                                        .foregroundColor(noSelectedVariants ? .blue : .secondary)
+                                        .font(.system(size: 28))
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Automatically show the upcoming buses everytime")
+                                            .font(.subheadline)
+                                            .foregroundColor(.primary)
+                                        Text("No need to select specific variant(s)")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal)
+                        }
                         
                         
-                        if !noSelectedVariants {
+                        if !noSelectedVariants || settingNotification {
                             
                             ForEach(selectedStops.indices, id: \.self) { index in
                                 let stop = selectedStops[index]

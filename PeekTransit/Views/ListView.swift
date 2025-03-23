@@ -162,7 +162,7 @@ struct ListView: View {
             guard isAppActive else { return }
             
             if let location = newLocation,
-               locationManager.shouldRefresh(for: location) {
+               locationManager.shouldRefresh(for: location), combinedStops.isEmpty, !stopsStore.isSearching, !stopsStore.isLoading {
                 Task {
                     await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                 }

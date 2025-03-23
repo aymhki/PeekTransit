@@ -6,6 +6,7 @@ struct StopSelectionStep: View {
     @Binding var isClosestStop: Bool
     @Binding var selectedPerferredStopsInClosestStops: Bool
     let maxStopsAllowed: Int
+    let settingNotification: Bool
     
     @StateObject private var locationManager = LocationManager()
     @StateObject private var stopsStore = StopsDataStore.shared
@@ -63,10 +64,14 @@ struct StopSelectionStep: View {
     }
     
     var getWhichMaxStopsToUse: Int {
-        if selectedPerferredStopsInClosestStops {
-            return maxPerferredstopsInClosestStops
+        if settingNotification {
+            return 1
         } else {
-            return maxStopsAllowed
+            if selectedPerferredStopsInClosestStops {
+                return maxPerferredstopsInClosestStops
+            } else {
+                return maxStopsAllowed
+            }
         }
     }
     
@@ -120,44 +125,30 @@ struct StopSelectionStep: View {
             ZStack {
                 ScrollView {
                     VStack(spacing: 16) {
-                        Text("Select the widget bus stops")
-                            .font(.title3)
-                            .padding([.top, .horizontal])
-
-                        Button(action: handleOptionToggle) {
-                            HStack(alignment: .center, spacing: 10) {
-                                Image(systemName: isClosestStop ? "checkmark.square.fill" : "square")
-                                    .foregroundColor(isClosestStop ? .blue : .secondary)
-                                    .font(.system(size: 28))
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Use closest stops based on location")
-                                        .font(.subheadline)
-                                        .foregroundColor(.primary)
-                                    Text("Updates automatically when viewing widget")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding(.horizontal)
-                        .disabled(viewState == .transitioning)
                         
-                        if isClosestStop {
-                            Button(action: handlePreferredToggle) {
+                        if settingNotification {
+                            Text("Select the notification bus stop")
+                                .font(.title3)
+                                .padding([.top, .horizontal])
+                        } else {
+                            Text("Select the widget bus stops")
+                                .font(.title3)
+                                .padding([.top, .horizontal])
+                        }
+                        
+                        if !settingNotification {
+                            
+                            Button(action: handleOptionToggle) {
                                 HStack(alignment: .center, spacing: 10) {
-                                    Image(systemName: selectedPerferredStopsInClosestStops ? "checkmark.square.fill" : "square")
-                                        .foregroundColor(selectedPerferredStopsInClosestStops ? .blue : .secondary)
+                                    Image(systemName: isClosestStop ? "checkmark.square.fill" : "square")
+                                        .foregroundColor(isClosestStop ? .blue : .secondary)
                                         .font(.system(size: 28))
                                     
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Select preferred stops")
+                                        Text("Use closest stops based on location")
                                             .font(.subheadline)
                                             .foregroundColor(.primary)
-                                        
-                                        Text("Allow selection to filter from closest stops")
+                                        Text("Updates automatically when viewing widget")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
@@ -166,11 +157,35 @@ struct StopSelectionStep: View {
                             }
                             .buttonStyle(PlainButtonStyle())
                             .padding(.horizontal)
-                            .transition(.opacity.combined(with: .move(edge: .leading)))
                             .disabled(viewState == .transitioning)
+                            
+                            if isClosestStop {
+                                Button(action: handlePreferredToggle) {
+                                    HStack(alignment: .center, spacing: 10) {
+                                        Image(systemName: selectedPerferredStopsInClosestStops ? "checkmark.square.fill" : "square")
+                                            .foregroundColor(selectedPerferredStopsInClosestStops ? .blue : .secondary)
+                                            .font(.system(size: 28))
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Select preferred stops")
+                                                .font(.subheadline)
+                                                .foregroundColor(.primary)
+                                            
+                                            Text("Allow selection to filter from closest stops")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .padding(.horizontal)
+                                .transition(.opacity.combined(with: .move(edge: .leading)))
+                                .disabled(viewState == .transitioning)
+                            }
                         }
 
-                        if (!isClosestStop || selectedPerferredStopsInClosestStops) {
+                        if (!isClosestStop || selectedPerferredStopsInClosestStops || settingNotification) {
                             VStack(spacing: 8) {
                                 HStack {
                                     Text("Selected stops: \(selectedStops.count)/\(getWhichMaxStopsToUse)")
@@ -223,13 +238,14 @@ struct StopSelectionStep: View {
                                 insertion: .opacity.combined(with: .move(edge: .trailing)).animation(.easeInOut(duration: 0.3).delay(0.05)),
                                 removal: .opacity.animation(.easeInOut(duration: 0.2))
                             ))
-                            .id("StopListContainer-\(isClosestStop)-\(selectedPerferredStopsInClosestStops)")
+                            .id("StopListContainer-\(isClosestStop)-\(selectedPerferredStopsInClosestStops)-\(settingNotification)")
                         }
                     }
                     .padding(.bottom, 20)
                 }
                 .animation(.easeInOut(duration: 0.3).delay(0.05), value: isClosestStop)
                 .animation(.easeInOut(duration: 0.3).delay(0.05), value: selectedPerferredStopsInClosestStops)
+                .animation(.easeInOut(duration: 0.3).delay(0.05), value: settingNotification)
                 .searchable(text: $searchText, prompt: "Search stops, routes...")
                 .disableAutocorrection(true)
                 .autocapitalization(.none)

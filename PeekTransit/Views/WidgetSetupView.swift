@@ -259,7 +259,8 @@ struct WidgetSetupView: View {
                                 selectedStops: $selectedStops,
                                 isClosestStop: $isClosestStop,
                                 selectedPerferredStopsInClosestStops: $selectedPerferredStopsInClosestStops,
-                                maxStopsAllowed: maxStopsAllowed
+                                maxStopsAllowed: maxStopsAllowed,
+                                settingNotification: false
                             )
                             
                             ContinueButton(
@@ -275,6 +276,7 @@ struct WidgetSetupView: View {
                                     selectedStops: selectedStops,
                                     selectedVariants: $selectedVariants,
                                     maxVariantsPerStop: maxVariantsPerStop,
+                                    settingNotification: false,
                                     stopsWithoutService: $stopsWithoutService,
                                     showNoServiceAlert: $showNoServiceAlert,
                                     noSelectedVariants: $noSelectedVariants
