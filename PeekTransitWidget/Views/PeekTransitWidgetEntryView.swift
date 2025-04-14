@@ -7,6 +7,8 @@ import Foundation
 struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     var entry: T
     @Environment(\.widgetFamily) var family
+    @Environment(\.widgetRenderingMode) var widgetRenderingMode
+
     
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -143,6 +145,8 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     forPreview: false,
                     isLoading: entry.isLoading
                 )
+                .accentedWidget()
+                .widgetAccentable()
                 
 
             } else {
@@ -155,11 +159,15 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     forPreview: false,
                     isLoading: entry.isLoading
                 )
+                .accentedWidget()
+                .widgetAccentable()
         
 
             }
         } else if let error = entry.errorMessage {
             WidgetErrorView(message: error)
+                .accentedWidget()
+                .widgetAccentable()
         }else {
             if (family != .accessoryRectangular) {
                 if(family != .systemSmall) {
@@ -180,6 +188,8 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                         
                         Spacer()
                     }
+                    .accentedWidget()
+                    .widgetAccentable()
                 } else {
                     VStack {
                         Spacer(minLength: 4)
@@ -201,12 +211,16 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                         
                         Spacer(minLength: 4)
                     }
+                    .accentedWidget()
+                    .widgetAccentable()
                 }
             } else {
                 Text("Peek Transit: Tap in edit to select a config and start")
                     .foregroundColor(.blue)
                     .padding(.horizontal)
                     .font(.system(size: 10, design: .monospaced ) )
+                    .accentedWidget()
+                    .widgetAccentable()
             }
         }
     }

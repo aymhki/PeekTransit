@@ -14,5 +14,6 @@ struct WidgetErrorView: View {
                 .padding(.horizontal)
         }
         .foregroundColor(.red)
+        
     }
 }

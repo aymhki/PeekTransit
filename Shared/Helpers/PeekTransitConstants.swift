@@ -601,9 +601,10 @@ public struct WidgetThemeModifier: ViewModifier {
         case .modern:
             content
                 .font(.system(size: getFontSize(), design: .monospaced).bold())
-                .background(Color(widgetSize == .accessoryRectangular ? .clear : .secondarySystemGroupedBackground))
+//                .background(Color(widgetSize == .accessoryRectangular ? .clear : .secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))
+            
         case .classic:
             if(widgetSize == .accessoryRectangular ) {
                 content
@@ -611,11 +612,15 @@ public struct WidgetThemeModifier: ViewModifier {
                     .fontWeight(.black)
                     .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
             } else {
+                
                 content
                     .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                     .fontWeight(.black)
-                    .background(.black)
+//                    .background(.black)
                     .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
+                
+
+                
             }
         }
     }
@@ -660,6 +665,25 @@ public extension View {
         modifier(WidgetThemeModifier(theme: theme, text: text, widgetSize: size))
     }
 }
+
+struct AccentedWidgetModifier: ViewModifier {
+    @Environment(\.widgetRenderingMode) var widgetRenderingMode
+    
+    func body(content: Content) -> some View {
+        if widgetRenderingMode == .accented {
+            content.luminanceToAlpha()
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    func accentedWidget() -> some View {
+        modifier(AccentedWidgetModifier())
+    }
+}
+
 
 
 public extension View {
@@ -715,7 +739,6 @@ extension CLLocationCoordinate2D: Identifiable {
         "\(latitude)\(getCompositKeyLinkerForDictionaries())\(longitude)"
     }
 }
-
 
 extension Bundle {
     var iconFileName: String? {

@@ -15,6 +15,7 @@ struct BusScheduleRow: View {
         return .default
     }
     
+    
     var body: some View {
         let components = schedule.components(separatedBy: getScheduleStringSeparator())
         if components.count >= 4 {

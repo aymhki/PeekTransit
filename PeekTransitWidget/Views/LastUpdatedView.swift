@@ -14,7 +14,7 @@ struct LastUpdatedView: View {
         }
         return .default
     }
-    
+        
     var body: some View {
         
         if (size == "lockscreen" || size == "small") {
