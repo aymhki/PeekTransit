@@ -761,7 +761,7 @@ public func getMaxPerferredstopsInClosestStops() -> Int {
 
 
 public func getRefreshWidgetTimelineAfterHowManySeconds()->Int{
-    return 9
+    return 1
 }
 
 

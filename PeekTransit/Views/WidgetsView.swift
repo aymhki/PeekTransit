@@ -32,8 +32,8 @@ struct WidgetsView: View {
                                             selectedWidgets.insert(savedWidget.id)
                                         }
                                     } else {
-                                        selectedWidget = savedWidget
-                                        showingSetupView = true
+//                                        selectedWidget = savedWidget
+//                                        showingSetupView = true
                                     }
                                 },
                                 isEditing: isEditing,
