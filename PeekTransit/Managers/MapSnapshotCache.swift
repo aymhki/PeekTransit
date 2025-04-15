@@ -95,8 +95,16 @@ class MapSnapshotCache {
         completion: @escaping (UIImage?) -> Void
     ) {
         let options = MKMapSnapshotter.Options()
+        
+        let offsetRatio = 0.0000064
+        let offsetLatitude = options.region.span.latitudeDelta * offsetRatio
+        let offsetCoordinate = CLLocationCoordinate2D(
+            latitude: coordinate.latitude + offsetLatitude,
+            longitude: coordinate.longitude
+        )
+        
         options.region = MKCoordinateRegion(
-            center: coordinate,
+            center: offsetCoordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
         )
         options.size = size
@@ -127,7 +135,7 @@ class MapSnapshotCache {
                 let markerPoint = snapshot.point(for: coordinate)
                 let markerRect = CGRect(
                     x: markerPoint.x - markerSize.width/2,
-                    y: markerPoint.y - markerSize.height/2,
+                    y: markerPoint.y - markerSize.height,
                     width: markerSize.width,
                     height: markerSize.height
                 )
@@ -141,6 +149,7 @@ class MapSnapshotCache {
                     width: markerRect.width * 0.1,
                     height: markerRect.height * 0.1
                 )
+                
                 let brightSpotPath = UIBezierPath(ovalIn: brightSpotRect)
                 UIColor.white.withAlphaComponent(0.9).setFill()
                 brightSpotPath.fill()

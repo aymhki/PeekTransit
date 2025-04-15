@@ -67,8 +67,10 @@ struct RealMapPreview: UIViewRepresentable {
             }
 
             if let image = markerImage {
+                let size = CGSize(width: 32, height: 32)
                 annotationView?.image = image
-                annotationView?.frame.size = CGSize(width: 32, height: 32)
+                annotationView?.frame.size = size
+                annotationView?.centerOffset = CGPoint(x: 0, y: -size.height / 2)
             }
 
             return annotationView

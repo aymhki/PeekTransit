@@ -205,6 +205,8 @@ struct MapViewRepresentable: UIViewRepresentable {
                 annotationView?.image = UIGraphicsGetImageFromCurrentImageContext()
                 UIGraphicsEndImageContext()
                 annotationView?.frame.size = size
+                
+                annotationView?.centerOffset = CGPoint(x: 0, y: -size.height / 2)
             }
             
             annotationView?.layer.shadowColor = UIColor.black.cgColor
