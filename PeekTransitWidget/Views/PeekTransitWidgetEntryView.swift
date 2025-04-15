@@ -130,99 +130,161 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     }
     
     var body: some View {
-
-        if let widgetData = entry.widgetData {
-           let filledScheduleData = getFilledScheduleData(widgetData: widgetData, scheduleData: entry.scheduleData)
-                
-            
-            if (isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData))  {
-                DynamicWidgetView(
-                    widgetData: widgetData,
-                    scheduleData: filledScheduleData,
-                    size: family,
-                    updatedAt: entry.date,
-                    fullyLoaded: true,
-                    forPreview: false,
-                    isLoading: entry.isLoading
-                )
-                .accentedWidget()
-                .widgetAccentable()
-                
-
-            } else {
-                DynamicWidgetView(
-                    widgetData: widgetData,
-                    scheduleData: filledScheduleData,
-                    size: family,
-                    updatedAt: entry.date,
-                    fullyLoaded: false,
-                    forPreview: false,
-                    isLoading: entry.isLoading
-                )
-                .accentedWidget()
-                .widgetAccentable()
         
-
-            }
-        } else if let error = entry.errorMessage {
-            WidgetErrorView(message: error)
-                .accentedWidget()
-                .widgetAccentable()
-        }else {
-            if (family != .accessoryRectangular) {
-                if(family != .systemSmall) {
-                    VStack (alignment: .center) {
-                        Spacer()
-                        
-                        Text("Peek Transit")
-                            .padding(.horizontal)
-                            .bold()
-                        
-                        Spacer()
-                        
-                        Text("Hold to edit and tap to select a widget configuration to start")
-                            .foregroundColor(.blue)
-                            .padding(.horizontal)
-                            .font(.subheadline )
-                            .bold()
-                        
-                        Spacer()
-                    }
+        if let widgetData = entry.widgetData {
+            
+            
+            if ( (widgetData["size"] as? String == "medium" && family == .systemMedium) || (widgetData["size"] as? String == "large" && family == .systemLarge) || (widgetData["size"] as? String == "small" && family == .systemSmall) || (widgetData["size"] as? String == "lockscreen" && family == .accessoryRectangular) ) {
+                
+                let filledScheduleData = getFilledScheduleData(widgetData: widgetData, scheduleData: entry.scheduleData)
+                
+                
+                if (isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData))  {
+                    DynamicWidgetView(
+                        widgetData: widgetData,
+                        scheduleData: filledScheduleData,
+                        size: family,
+                        updatedAt: entry.date,
+                        fullyLoaded: true,
+                        forPreview: false,
+                        isLoading: entry.isLoading
+                    )
                     .accentedWidget()
                     .widgetAccentable()
+                    
+                    
                 } else {
-                    VStack {
-                        Spacer(minLength: 4)
-                        
-                        Text("Peek Transit")
-                            .padding(.horizontal)
-                            .font(.system(size: 12 ) )
-                            .bold()
-                        
-                        
-                        Spacer(minLength: 4)
-                        
-                        
-                        Text("Hold to edit and tap to select a widget configuration to start")
-                            .foregroundColor(.blue)
-                            .padding(.horizontal)
-                            .font(.system(size: 12 ) )
-                            .bold()
-                        
-                        Spacer(minLength: 4)
-                    }
+                    DynamicWidgetView(
+                        widgetData: widgetData,
+                        scheduleData: filledScheduleData,
+                        size: family,
+                        updatedAt: entry.date,
+                        fullyLoaded: false,
+                        forPreview: false,
+                        isLoading: entry.isLoading
+                    )
                     .accentedWidget()
                     .widgetAccentable()
+                    
+                    
                 }
+                
             } else {
-                Text("Peek Transit: Hold to Customize your lockscreen then tap twice to select a config")
-                    .foregroundColor(.blue)
-                    .padding(.horizontal)
-                    .font(.system(size: 10, design: .monospaced ) )
+                if (family != .accessoryRectangular) {
+                    if(family != .systemSmall) {
+                        defaultNoConfigSelectedView
+                    } else {
+                        smallNoConfigSelectedView
+                    }
+                } else {
+                    lockscreenNoConfigSelectedView
+                }
+            }
+            
+            
+            } else if let error = entry.errorMessage {
+                WidgetErrorView(message: error)
                     .accentedWidget()
                     .widgetAccentable()
-            }
+            } else {
+                if (family != .accessoryRectangular) {
+                    if(family != .systemSmall) {
+                        defaultNoConfigSelectedView
+                    } else {
+                        smallNoConfigSelectedView
+                    }
+                } else {
+                    lockscreenNoConfigSelectedView
+                }
+            
         }
+    }
+    
+    
+
+    var lockscreenNoConfigSelectedView: some View {
+        HStack {
+            
+            
+        Image(systemName: getGlobalBusIconSystemImageName())
+            .foregroundColor(.blue)
+            .font(.system(size: 10))
+        
+    
+    
+        Text("P. T.: Hold on the wallpaper to customize your lockscreen then tap here twice to edit")
+            .foregroundColor(.blue)
+            .font(.system(size: 10) )
+        
+            
+            
+        }
+        .padding(.horizontal, 1)
+        .accentedWidget()
+        .widgetAccentable()
+    }
+    
+    
+    var smallNoConfigSelectedView: some View {
+        VStack {
+            Spacer(minLength: 4)
+            
+            HStack {
+                
+                Image(systemName: getGlobalBusIconSystemImageName())
+                    .font(.system(size: 12 ) )
+                    .bold()
+                
+                Text("Peek Transit")
+                    .font(.system(size: 12 ) )
+                    .bold()
+                
+            }
+            .padding(.horizontal)
+            
+            
+            Spacer(minLength: 4)
+            
+            
+            Text("Hold to edit and tap to select a widget configuration to start")
+                .foregroundColor(.blue)
+                .padding(.horizontal)
+                .font(.system(size: 12 ) )
+                .bold()
+            
+            Spacer(minLength: 4)
+        }
+        .accentedWidget()
+        .widgetAccentable()
+    }
+    
+    
+    var defaultNoConfigSelectedView: some View {
+        VStack (alignment: .center) {
+            Spacer()
+            
+            HStack {
+                Image(systemName: getGlobalBusIconSystemImageName())
+                    .bold()
+                
+                
+                Text("Peek Transit")
+                    .bold()
+            }
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            Text("Hold to edit and tap to select a widget configuration to start")
+                .foregroundColor(.blue)
+                .padding(.horizontal)
+                .font(.subheadline )
+                .bold()
+            
+            Spacer()
+        }
+        .accentedWidget()
+        .widgetAccentable()
     }
     
 }

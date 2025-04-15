@@ -14,5 +14,6 @@ struct PeekTransitLargeWidget: Widget {
         .description("Shows transit schedules in large size")
         .supportedFamilies([.systemLarge])
         .disableContentMarginsIfNeeded()
+        
     }
 }

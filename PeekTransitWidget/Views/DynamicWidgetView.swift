@@ -71,70 +71,177 @@ struct DynamicWidgetView: View {
     }
     
     var body: some View {
-        Group {
-            GeometryReader { geometry in
-                ZStack {
-                    if (size != .accessoryRectangular) {
-                        switch currentTheme {
-                        case .classic:
-                            Color.black
-                                .edgesIgnoringSafeArea(.all)
-                        case .modern:
-                            Color(.secondarySystemGroupedBackground)
-                                .edgesIgnoringSafeArea(.all)
-                        }
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                       
-                        content
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            
-                                
-                        if ((!fullyLoaded || scheduleDataToUse == nil || widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
-                            Text("Open app")
-                                .foregroundColor(.red)
-                                .font(.caption)
-                                .padding(.horizontal)
-                                .padding(.vertical)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .font(.caption)
+        if ( (widgetData["size"] as? String == "medium" && size == .systemMedium) || (widgetData["size"] as? String == "large" && size == .systemLarge) || (widgetData["size"] as? String == "small" && size == .systemSmall) || (widgetData["size"] as? String == "lockscreen" && size == .accessoryRectangular) ) {
+            
+            Group {
+                
+                
+                GeometryReader { geometry in
+                    ZStack {
+                        if (size != .accessoryRectangular) {
+                            switch currentTheme {
+                            case .classic:
+                                Color.black
+                                    .edgesIgnoringSafeArea(.all)
+                            case .modern:
+                                Color(.secondarySystemGroupedBackground)
+                                    .edgesIgnoringSafeArea(.all)
+                            }
                         }
                         
-                        if (widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true) {
-                            if (size != .accessoryRectangular) {
-                                if (size != .systemMedium || scheduleDataToUse.count <= 3) {
-                                    Spacer(minLength: 2)
-                                }
+                        
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            
+                            content
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            
+                            
+                            if ((!fullyLoaded || scheduleDataToUse == nil || widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
+                                Text("Open app")
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                    .padding(.horizontal)
+                                    .padding(.vertical)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .font(.caption)
                             }
                             
-                            if (size != .accessoryRectangular) {
-                                LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading,  usingCached: mightUseCacheData)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                            } else {
-                                LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading, usingCached: mightUseCacheData)
-                                    .frame(maxWidth: .infinity, alignment: .center)
+                            if (widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true) {
+                                if (size != .accessoryRectangular) {
+                                    if (size != .systemMedium || scheduleDataToUse.count <= 3) {
+                                        Spacer(minLength: 2)
+                                    }
+                                }
+                                
+                                if (size != .accessoryRectangular) {
+                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading,  usingCached: mightUseCacheData)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                } else {
+                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading, usingCached: mightUseCacheData)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                }
                             }
                         }
+                        .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .ignoresSafeArea(.all)
+                        
                     }
-                    .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
                 }
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .ignoresSafeArea(.all)
+                
+                
             }
-        }
-        .widgetBackground(backgroundView: Group {
+            .widgetBackground(backgroundView: Group {
+                if (size != .accessoryRectangular) {
+                    switch currentTheme {
+                    case .classic:
+                        Color.black
+                    case .modern:
+                        Color(.secondarySystemGroupedBackground)
+                    }
+                }
+            })
+        } else {
+            
             if (size != .accessoryRectangular) {
-                switch currentTheme {
-                case .classic:
-                    Color.black
-                case .modern:
-                    Color(.secondarySystemGroupedBackground)
+                if(size != .systemSmall) {
+                    defaultNoConfigSelectedView
+                } else {
+                    smallNoConfigSelectedView
                 }
+            } else {
+                lockscreenNoConfigSelectedView
             }
-        })
+            
+        }
     }
     
+    var lockscreenNoConfigSelectedView: some View {
+        HStack {
+            
+            
+   
+                
+            Image(systemName: getGlobalBusIconSystemImageName())
+                .foregroundColor(.blue)
+                .font(.system(size: 10))
+            
+        
+        
+            Text("P. T.: Hold on the wallpaper to customize your lockscreen then tap here twice to edit")
+                .foregroundColor(.blue)
+                .font(.system(size: 10) )
+            
+            
+        }
+        .padding(.horizontal, 1)
+        .accentedWidget()
+        .widgetAccentable()
+    }
+    
+    
+    var smallNoConfigSelectedView: some View {
+        VStack {
+            Spacer(minLength: 4)
+            
+            HStack {
+                
+                Image(systemName: getGlobalBusIconSystemImageName())
+                    .font(.system(size: 12 ) )
+                    .bold()
+                
+                Text("Peek Transit")
+                    .font(.system(size: 12 ) )
+                    .bold()
+                
+            }
+            .padding(.horizontal)
+            
+            
+            Spacer(minLength: 4)
+            
+            
+            Text("Hold to edit and tap to select a widget configuration to start")
+                .foregroundColor(.blue)
+                .padding(.horizontal)
+                .font(.system(size: 12 ) )
+                .bold()
+            
+            Spacer(minLength: 4)
+        }
+        .accentedWidget()
+        .widgetAccentable()
+    }
+    
+    
+    var defaultNoConfigSelectedView: some View {
+        VStack (alignment: .center) {
+            Spacer()
+            
+            HStack {
+                Image(systemName: getGlobalBusIconSystemImageName())
+                    .bold()
+                
+                
+                Text("Peek Transit")
+                    .bold()
+            }
+            .padding(.horizontal)
+            
+            Spacer()
+            
+            Text("Hold to edit and tap to select a widget configuration to start")
+                .foregroundColor(.blue)
+                .padding(.horizontal)
+                .font(.subheadline )
+                .bold()
+            
+            Spacer()
+        }
+        .accentedWidget()
+        .widgetAccentable()
+    }
 
     
     @ViewBuilder
