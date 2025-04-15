@@ -60,7 +60,7 @@ struct WidgetsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if !savedWidgetsManager.savedWidgets.isEmpty {
-                        Button(isEditing ? "Done" : "Edit") {
+                        Button(isEditing ? "Done" : "Select") {
                             withAnimation {
                                 isEditing.toggle()
                                 if !isEditing {

@@ -215,7 +215,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                     .widgetAccentable()
                 }
             } else {
-                Text("Peek Transit: Tap in edit to select a config and start")
+                Text("Peek Transit: Hold to Customize your lockscreen then tap twice to select a config")
                     .foregroundColor(.blue)
                     .padding(.horizontal)
                     .font(.system(size: 10, design: .monospaced ) )
