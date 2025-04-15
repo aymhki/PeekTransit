@@ -166,12 +166,13 @@ struct DynamicWidgetView: View {
             Image(systemName: getGlobalBusIconSystemImageName())
                 .foregroundColor(.blue)
                 .font(.system(size: 10))
-            
+                .bold()
         
         
             Text("P. T.: Hold on the wallpaper to customize your lockscreen then tap here twice to edit")
                 .foregroundColor(.blue)
-                .font(.system(size: 10) )
+                .font(.system(size: 10))
+                .bold()
             
             
         }
