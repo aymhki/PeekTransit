@@ -115,10 +115,10 @@ struct DynamicWidgetView: View {
                                 }
                                 
                                 if (size != .accessoryRectangular) {
-                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading,  usingCached: mightUseCacheData)
+                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading,  usingCached: mightUseCacheData, forPreview: forPreview)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 } else {
-                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading, usingCached: mightUseCacheData)
+                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading, usingCached: mightUseCacheData, forPreview: forPreview)
                                         .frame(maxWidth: .infinity, alignment: .center)
                                 }
                             }

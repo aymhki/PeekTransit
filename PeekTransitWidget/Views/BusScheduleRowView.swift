@@ -21,18 +21,18 @@ struct BusScheduleRow: View {
         if components.count >= 4 {
             HStack(spacing: 4) {
                 Text(components[0])
-                    .widgetTheme(currentTheme, text: components[0], size: size)
+                    .widgetTheme(currentTheme, text: components[0], size: size, inPreview: forPreview)
                     .frame(width: getRouteNumberWidth(size: size), alignment: .leading)
                 
                 if !components[1].isEmpty {
                     if (size != .systemSmall && size != .accessoryRectangular) {
                         let routeName = components[1]
                         Text(routeName)
-                        .widgetTheme(currentTheme, text: components[1], size: size)
+                        .widgetTheme(currentTheme, text: components[1], size: size, inPreview: forPreview)
                         .frame(width: getRouteNameWidth(size: size), alignment: .leading)
                     } else {
                         Text("\(components[1].prefix(1)).")
-                            .widgetTheme(currentTheme, text: components[1], size: size)
+                            .widgetTheme(currentTheme, text: components[1], size: size, inPreview: forPreview)
                             .frame(width: getRouteNameWidth(size: size), alignment: .leading)
                     }
                 }
@@ -50,17 +50,17 @@ struct BusScheduleRow: View {
                     
                     if ( (size == .systemSmall || size == .accessoryRectangular) && components[2] != getCancelledStatusTextString()) {
                         Text("\(components[2].prefix(1)).")
-                            .widgetTheme(currentTheme, text: components[2], size: size)
+                            .widgetTheme(currentTheme, text: components[2], size: size, inPreview: forPreview)
                             .frame(alignment: .center)
                             
                     } else {
                         Text(components[2])
-                            .widgetTheme(currentTheme, text: components[2], size: size)
+                            .widgetTheme(currentTheme, text: components[2], size: size, inPreview: forPreview)
                             .frame(alignment: .center)
                     }
                 } else if (size == .accessoryRectangular) {
                     Text(" ")
-                        .widgetTheme(currentTheme, text: components[2], size: size)
+                        .widgetTheme(currentTheme, text: components[2], size: size, inPreview: forPreview)
                         .frame(alignment: .center)
                 }
                 
@@ -70,7 +70,7 @@ struct BusScheduleRow: View {
                     
                 if (components[2] != getCancelledStatusTextString()) {
                     Text(components[3])
-                        .widgetTheme(currentTheme, text: components[3], size: size)
+                        .widgetTheme(currentTheme, text: components[3], size: size, inPreview: forPreview)
                         .frame(alignment: .leading)
                 }
             }

@@ -595,6 +595,7 @@ public struct WidgetThemeModifier: ViewModifier {
     let theme: StopViewTheme
     let text: String
     let widgetSize: WidgetFamily
+    let inPreview: Bool
     
     public func body(content: Content) -> some View {
         switch theme {
@@ -607,10 +608,18 @@ public struct WidgetThemeModifier: ViewModifier {
             
         case .classic:
             if(widgetSize == .accessoryRectangular ) {
-                content
-                    .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
-                    .fontWeight(.black)
-                    .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
+                if (inPreview) {
+                    content
+                        .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
+                        .fontWeight(.black)
+                        .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
+                } else {
+                    content
+                        .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
+                        .fontWeight(.black)
+                        //.foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
+                }
+
             } else {
                 
                 content
@@ -661,8 +670,8 @@ public struct WidgetThemeModifier: ViewModifier {
 }
 
 public extension View {
-    func widgetTheme(_ theme: StopViewTheme, text: String, size: WidgetFamily) -> some View {
-        modifier(WidgetThemeModifier(theme: theme, text: text, widgetSize: size))
+    func widgetTheme(_ theme: StopViewTheme, text: String, size: WidgetFamily, inPreview: Bool) -> some View {
+        modifier(WidgetThemeModifier(theme: theme, text: text, widgetSize: size, inPreview: inPreview))
     }
 }
 
