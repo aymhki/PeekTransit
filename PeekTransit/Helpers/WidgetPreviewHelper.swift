@@ -2,10 +2,12 @@ import SwiftUI
 import WidgetKit
 
 enum PreviewHelper {
-    static func generatePreviewSchedule(from widgetData: [String: Any], noConfig: Bool, timeFormat: TimeFormat, showLastUpdatedStatus: Bool, multipleEntriesPerVariant: Bool) -> ([String]?, [String: Any]?)? {
+    static func generatePreviewSchedule(from widgetData: [String: Any], noConfig: Bool, timeFormat: TimeFormat, showLastUpdatedStatus: Bool, multipleEntriesPerVariant: Bool, showLateTextStatus: Bool) -> ([String]?, [String: Any]?)? {
         var previewSchedules: [String] = []
         var updatedWidgetData: [String: Any] = widgetData
         let timeFormatTextToUse = timeFormat.brief
+        let useLateText = timeFormat == TimeFormat.minutesRemaining ? true : false
+        let stringToUseBasedOnTimeFormat = ( (useLateText || multipleEntriesPerVariant) && showLateTextStatus ) ? getLateStatusTextString() : getOKStatusTextString()
         
         if (!noConfig) {
             if (widgetData["isClosestStop"] as? Bool == false) {
@@ -19,10 +21,10 @@ enum PreviewHelper {
                                    let name = variant["name"] as? String {
                                     
                                     if (multipleEntriesPerVariant) {
-                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
                                         previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                                     } else {
-                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                                        previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                                     }
                                 }
                             }
@@ -46,10 +48,10 @@ enum PreviewHelper {
                             ]
                             selectedVariants.append(variant)
                             if (multipleEntriesPerVariant) {
-                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
                                 previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                             } else {
-                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                                previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                             }
                         }
                         
@@ -94,10 +96,10 @@ enum PreviewHelper {
                         ]
                         selectedVariants.append(variant)
                         if (multipleEntriesPerVariant) {
-                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
                             previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                         } else {
-                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                            previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                         }
                     }
                     
@@ -144,10 +146,10 @@ enum PreviewHelper {
                     ]
                     selectedVariants.append(variant)
                     if (multipleEntriesPerVariant) {
-                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
                         previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(TimeFormat.clockTime.brief)")
                     } else {
-                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(timeFormatTextToUse)")
+                        previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(timeFormatTextToUse)")
                     }
                 }
                 

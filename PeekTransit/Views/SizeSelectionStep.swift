@@ -23,7 +23,7 @@ struct SizeSelectionStep: View {
         return .default
     }
     
-    private let timeFormatExplainationText = "Due to the nature of iOS Widgets limitations, a live API widget can only be updated once every five minutes. For that reason, and until there is a fix around this issue it might not be very practical to display X(X) minutes remaining (when the bus is within 15 minutes of arrival time) if the widget updates after that amount of minutes has passed. Select from the options below which format you want the bus arrival times to be displayed in when glancing at your widget.\n\nNote that for both options you can select from the options below to see when the widget was last updated"
+    private let timeFormatExplainationText = "Due to the nature of iOS Widgets limitations, a live API widget can only be updated once every fiften minutes. For that reason, and until there is a fix around this issue it might not be very practical to display X(X) minutes remaining if the widget updates after that amount of minutes has passed. Select from the options below which format you want the bus arrival times to be displayed in when glancing at your widget.\n\nNote that for both oopt-in to see when the widget was last updated"
 
     
     var body: some View {
@@ -56,9 +56,10 @@ struct SizeSelectionStep: View {
                                     .stroke(Color.gray.opacity(0.5), lineWidth: 1)
                             )
                         
-                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize, "multipleEntriesPerVariant": multipleEntriesPerVariant], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant) ?? ([], [:])
+                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize, "multipleEntriesPerVariant": multipleEntriesPerVariant], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant,
+                         showLateTextStatus: selectedSize == "small" || selectedSize == "lockscreen") ?? ([], [:])
 
-                        
+                    
                         DynamicWidgetView(
                             widgetData: newWidgetData ?? [:],
                             scheduleData: newSchedule,
@@ -218,9 +219,14 @@ struct SizeSelectionStep: View {
                         .padding(.horizontal)
                     
 //                    Text("Do you want your widget to show when it was last updated under the bus arrival times?\n\nExample: Last updated 12:34 \(getGlobalPMText())\n\nNote that this text will always be in HH:MM \(getGlobalAMText())/\(getGlobalPMText()) format")
-//                        .font(.subheadline)
+//                        .font(.caption)
 //                        .foregroundColor(.secondary)
 //                        .padding(.horizontal)
+                    
+//                Text("Note: Technically, the widget is supposed to update everytime you look at it, but your phone won't always allow it. For example: Low Power/Battery Saving Mode, Weak Internet connection, etc... In these cases, it can take up to 15 minutes for the widget to update")
+//                    .font(.caption)
+//                    .foregroundColor(.secondary)
+//                    .padding(.horizontal)
                     
                     VStack(spacing: 12) {
                         Button(action: {

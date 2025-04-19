@@ -13,7 +13,7 @@ struct WidgetRowView: View {
         let timeFormatSelected = widgetData["timeFormat"] as? String ?? TimeFormat.default.formattedValue
         let timeFormatSelectedFinal = timeFormatSelected == TimeFormat.clockTime.formattedValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
         let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? true
-        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: widgetData, noConfig: false, timeFormat: timeFormatSelectedFinal, showLastUpdatedStatus:showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant ) ?? ([], [:])
+        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: widgetData, noConfig: false, timeFormat: timeFormatSelectedFinal, showLastUpdatedStatus:showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant, showLateTextStatus: false ) ?? ([], [:])
         
         HStack(spacing: 12) {
             

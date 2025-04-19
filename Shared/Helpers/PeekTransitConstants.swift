@@ -756,7 +756,7 @@ public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
     switch size {
         case .systemLarge: return 35
         case .systemMedium: return 35
-        case .systemSmall: return 25
+        case .systemSmall: return 27
         case .accessoryRectangular: return 24
         default: return 30
     }

@@ -136,6 +136,11 @@ struct StopSelectionStep: View {
                                 .padding([.top, .horizontal])
                         }
                         
+                        Text("Hint: Use the search bar to search for and select stops that are not near your location.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
+                        
                         if !settingNotification {
                             
                             Button(action: handleOptionToggle) {
@@ -145,10 +150,10 @@ struct StopSelectionStep: View {
                                         .font(.system(size: 28))
                                     
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Use closest stops based on location")
+                                        Text("Auto select closest stops everytime")
                                             .font(.subheadline)
                                             .foregroundColor(.primary)
-                                        Text("Updates automatically when viewing widget")
+                                        Text("Automatically use closest stops based on your location everytime you look at the widget")
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
@@ -171,7 +176,7 @@ struct StopSelectionStep: View {
                                                 .font(.subheadline)
                                                 .foregroundColor(.primary)
                                             
-                                            Text("Allow selection to filter from closest stops")
+                                            Text("Allow you to select which stop(s) to display on the widget regardless of distance from your location")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
