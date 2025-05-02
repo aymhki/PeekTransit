@@ -25,6 +25,7 @@ struct WidgetSetupView: View {
     @State private var noSelectedVariants: Bool = false
     @State private var multipleEntriesPerVariant: Bool = true
     @State private var selectedPerferredStopsInClosestStops = false
+    @State private var isTransitioning = false
     let editingWidget: WidgetModel?
 
     
@@ -34,25 +35,32 @@ struct WidgetSetupView: View {
         
         if let widget = editingWidget {
             _widgetSize = State(initialValue: widget.widgetData["size"] as? String ?? "medium")
-            //_selectedTimeFormat = State(initialValue: TimeFormat(rawValue: widget.widgetData["timeFormat"] as? String ?? "") ?? .default)
+            _selectedTimeFormat = State(initialValue: TimeFormat(rawValue: widget.widgetData["timeFormat"] as? String ?? "") ?? .default)
             _showLastUpdatedStatus = State(initialValue: widget.widgetData["showLastUpdatedStatus"] as? Bool ?? true)
-            //_isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
-            //_selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
-            _widgetName = State(initialValue: "")
-            //_noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
-            //_multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? true)
-            //_selectedPerferredStopsInClosestStops = State(initialValue: widget.widgetData["selectedPerferredStopsInClosestStops"] as? Bool ?? false)
+            _isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
+            _selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
+            _widgetName = State(initialValue:widget.widgetData["name"] as? String ?? "")
+            _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
+            _multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? true)
+            _selectedPerferredStopsInClosestStops = State(initialValue: widget.widgetData["selectedPerferredStopsInClosestStops"] as? Bool ?? false)
             
-            //if let stops = widget.widgetData["stops"] as? [[String: Any]] {
-             //   var variants: [String: [[String: Any]]] = [:]
-             //   for stop in stops {
-             //       if let number = stop["number"] as? Int,
-             //          let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
-             //           variants[String(number)] = selectedVariants
-             //       }
-             //   }
-             //   _selectedVariants = State(initialValue: variants)
-            //}
+            var counter = 0
+            
+            if let stops = widget.widgetData["stops"] as? [[String: Any]] {
+                var variants: [String: [[String: Any]]] = [:]
+                for stop in stops {
+                    if counter < getMaxStopsAllowedWith(widgetSizeGiven: widget.widgetData["size"] as? String ?? "medium") {
+                        if let number = stop["number"] as? Int,
+                           let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
+                            variants[String(number)] = selectedVariants
+                        }
+                    }
+                    
+                    counter += 1
+                }
+                
+                _selectedVariants = State(initialValue: variants)
+            }
         }
     }
 
@@ -85,6 +93,7 @@ struct WidgetSetupView: View {
         
     }
 
+    
 
     
     private func createWidgetData() -> [String: Any] {
@@ -152,53 +161,74 @@ struct WidgetSetupView: View {
         dismiss()
     }
     
-    private func nextStep() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            opacity = 0
-            slideOffset = -UIScreen.main.bounds.width
-        }
+    private func animateStepTransition(forward: Bool, completion: @escaping () -> Void) {
+        guard !isTransitioning else { return }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            if currentStep == 1 {
-                selectedVariants = [:]
-            }
-            
-            currentStep += 1
-            slideOffset = UIScreen.main.bounds.width
+        isTransitioning = true
+        let initialOffset = forward ? UIScreen.main.bounds.width : -UIScreen.main.bounds.width
+        let animationOffset = forward ? -UIScreen.main.bounds.width : UIScreen.main.bounds.width
+        
+        slideOffset = initialOffset
+        opacity = 0
+        
+        DispatchQueue.main.async {
+            completion()
             
             withAnimation(.easeInOut(duration: 0.3)) {
                 opacity = 1
                 slideOffset = 0
             }
+            
+            // Reset transitioning state after animation completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.isTransitioning = false
+            }
         }
     }
     
-    private func previousStep() {
-        withAnimation(.easeInOut(duration: 0.3)) {
-            opacity = 0
-            slideOffset = UIScreen.main.bounds.width
+    private func nextStep() {
+        animateStepTransition(forward: true) {
+            if currentStep == 1 {
+                if editingWidget != nil {
+                    selectedStops = Array(selectedStops[0..<min(selectedStops.count, maxStopsAllowed)])
+                } else {
+                    selectedVariants = [:]
+                }
+            }
+            
+            if currentStep == 2 {
+                if editingWidget != nil {
+                    var newSelectedVariants = [String: [[String: Any]]]()
+                    for (key, values) in selectedVariants {
+                        newSelectedVariants[key] = Array(values.prefix(maxVariantsPerStop))
+                    }
+                    selectedVariants = newSelectedVariants
+                }
+            }
+            
+            currentStep += 1
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+    }
+
+    private func previousStep() {
+        animateStepTransition(forward: false) {
             switch currentStep {
             case 3:
-                selectedVariants = [:]
+                if editingWidget == nil {
+                    selectedVariants = [:]
+                }
             case 2:
-                selectedStops = []
-                selectedVariants = [:]
-                isClosestStop = false
-                selectedPerferredStopsInClosestStops = false
+                if editingWidget == nil {
+                    selectedStops = []
+                    selectedVariants = [:]
+                    isClosestStop = false
+                    selectedPerferredStopsInClosestStops = false
+                }
             default:
                 break
             }
             
             currentStep -= 1
-            slideOffset = -UIScreen.main.bounds.width
-            
-            withAnimation(.easeInOut(duration: 0.3)) {
-                opacity = 1
-                slideOffset = 0
-            }
         }
     }
     
@@ -229,6 +259,14 @@ struct WidgetSetupView: View {
         }
     }
     
+    private func getMaxStopsAllowedWith(widgetSizeGiven: String) -> Int {
+        if (multipleEntriesPerVariant) {
+            return getMaxSopsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        } else {
+            return getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSizeGiven)
+        }
+    }
+    
     private var maxVariantsPerStop: Int {
         if (multipleEntriesPerVariant) {
             return getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
@@ -249,7 +287,7 @@ struct WidgetSetupView: View {
                             
                             ContinueButton(
                                 title: "Continue",
-                                isDisabled: widgetSize.isEmpty,
+                                isDisabled: widgetSize.isEmpty || isTransitioning,
                                 action: nextStep
                             )
                         }
@@ -265,7 +303,7 @@ struct WidgetSetupView: View {
                             
                             ContinueButton(
                                 title: "Continue",
-                                isDisabled: shouldDisableNextButton,
+                                isDisabled: shouldDisableNextButton || isTransitioning,
                                 action: nextStep
                             )
                         }
@@ -284,7 +322,7 @@ struct WidgetSetupView: View {
                                 
                                 ContinueButton(
                                     title: "Continue",
-                                    isDisabled: shouldDisableNextButton,
+                                    isDisabled: shouldDisableNextButton || isTransitioning,
                                     action: nextStep
                                 )
                             }
@@ -292,12 +330,13 @@ struct WidgetSetupView: View {
                             VStack {
                                 NameConfigurationStep(
                                     widgetName: $widgetName,
-                                    defaultName: generateDefaultWidgetName()
+                                    defaultName: generateDefaultWidgetName(),
+                                    editingWidget: editingWidget != nil
                                 )
                                 
                                 ContinueButton(
                                     title: "Save",
-                                    isDisabled: false,
+                                    isDisabled: false || isTransitioning,
                                     action: handleSave
                                 )
                             }
@@ -306,12 +345,13 @@ struct WidgetSetupView: View {
                         VStack {
                             NameConfigurationStep(
                                 widgetName: $widgetName,
-                                defaultName: generateDefaultWidgetName()
+                                defaultName: generateDefaultWidgetName(),
+                                editingWidget: editingWidget != nil
                             )
                             
                             ContinueButton(
                                 title: "Save",
-                                isDisabled: false,
+                                isDisabled: false  || isTransitioning,
                                 action: handleSave
                             )
                         }
@@ -330,10 +370,12 @@ struct WidgetSetupView: View {
                         Button("Cancel") {
                             dismiss()
                         }
+                        .disabled(isTransitioning)
                     } else {
                         Button("Back") {
                             previousStep()
                         }
+                        .disabled(isTransitioning)
                     }
                 }
             }

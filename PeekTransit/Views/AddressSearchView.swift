@@ -62,7 +62,8 @@ struct AddressSearchView: View {
                 }
             }
             .padding()
-            .background(Color(.systemBackground))
+            .background(Color(.secondarySystemGroupedBackground))
+            .foregroundStyle(.primary)
             .clipShape(getCustomRoundedShape(isAttached: showingResultsOrDetails))
             
             if !networkMonitor.isConnected {

@@ -1,10 +1,10 @@
 import SwiftUI
-
 struct WidgetRowView: View {
     let widgetData: [String: Any]
     let onTap: () -> Void
     let isEditing: Bool
     let isSelected: Bool
+    var onDelete: (() -> Void)?
     
     @EnvironmentObject private var themeManager: ThemeManager
     
@@ -16,15 +16,15 @@ struct WidgetRowView: View {
         let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: widgetData, noConfig: false, timeFormat: timeFormatSelectedFinal, showLastUpdatedStatus:showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant, showLateTextStatus: false ) ?? ([], [:])
         
         HStack(spacing: 12) {
-            
             if isEditing {
-                Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? .blue : .gray)
                     .font(.title2)
+                    .frame(width: 44) // Fixed width for consistent alignment
+                    .padding(.leading, 16)
             }
             
-            VStack(spacing: 8) {
+            VStack() {
                 let currentSize = widgetData["size"] as? String ?? "medium"
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
@@ -56,29 +56,76 @@ struct WidgetRowView: View {
                 .if(themeManager.currentTheme == .classic) { view in
                     view.background(.black)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                //.clipShape(RoundedRectangle(cornerRadius: 12))
                 .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: currentSize))
                 .frame(height: getPreviewHeight())
                 
                 Spacer()
-                
+            
                 Text(widgetData["name"] as? String ?? "Unnamed Widget")
                     .font(.subheadline)
                     .foregroundColor(.primary)
                     .padding()
+                    
+                if !isEditing {
+                    HStack(spacing: 20) {
+
+                        CircularIconButton(
+                            iconName: "trash",
+                            backgroundColor: .red,
+                            action: { if let onDelete = onDelete { onDelete() } }
+                        )
+                        .padding(.horizontal)
+  
+                        CircularIconButton(
+                            iconName: "square.and.pencil",
+                            backgroundColor: .blue,
+                            action: onTap
+                        )
+                        .padding(.horizontal)
                 
+                    }
+                    .padding(.bottom)
+                }
             }
             .padding()
+            
+            if isEditing {
+                Spacer()
+            }
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
         .onTapGesture {
-            onTap()
+            if isEditing {
+                onTap()
+            }
         }
     }
     
     private func getPreviewHeight() -> CGFloat {
         let size = widgetData["size"] as? String ?? "medium"
         return getWidgetPreviewRowHeightForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: size)
+    }
+}
+
+struct CircularIconButton: View {
+    let iconName: String
+    let backgroundColor: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(backgroundColor)
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: iconName)
+                    .font(.title3)
+                    .foregroundColor(.white)
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }

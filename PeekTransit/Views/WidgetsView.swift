@@ -10,7 +10,8 @@ struct WidgetsView: View {
     @State private var selectedWidgets: Set<String> = []
     @State private var showingDeleteAlert = false
     @State private var widgetToDelete: WidgetModel? = nil
-    @StateObject private var themeManager = ThemeManager.shared 
+    @StateObject private var themeManager = ThemeManager.shared
+
 
     private var contentView: some View {
             Group {
@@ -21,7 +22,11 @@ struct WidgetsView: View {
                         .foregroundColor(.secondary)
                 } else {
                     List {
-                        ForEach(savedWidgetsManager.savedWidgets) { savedWidget in
+
+
+                        ForEach(Array(savedWidgetsManager.savedWidgets.enumerated()), id: \.element.id) { index, savedWidget in
+
+                            
                             WidgetRowView(
                                 widgetData: savedWidget.widgetData,
                                 onTap: {
@@ -32,33 +37,49 @@ struct WidgetsView: View {
                                             selectedWidgets.insert(savedWidget.id)
                                         }
                                     } else {
-//                                        selectedWidget = savedWidget
-//                                        showingSetupView = true
+                                        withAnimation {
+                                            selectedWidget = savedWidget
+                                           // showingSetupView = true
+                                        }
                                     }
                                 },
                                 isEditing: isEditing,
-                                isSelected: selectedWidgets.contains(savedWidget.id)
+                                isSelected: selectedWidgets.contains(savedWidget.id),
+                                onDelete: {
+                                    widgetToDelete = savedWidget
+                                    showingDeleteAlert = true
+                                }
                             )
                             .listRowInsets(EdgeInsets())
                             .listRowBackground(Color.clear)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                if !isEditing {
-                                    Button(role: .destructive) {
-                                        widgetToDelete = savedWidget
-                                        showingDeleteAlert = true
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
+                            .listRowSeparator(.hidden)
+                            .listSectionSeparator(.hidden)
+//                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+//                                if !isEditing {
+//                                    Button(role: .destructive) {
+//                                        widgetToDelete = savedWidget
+//                                        showingDeleteAlert = true
+//                                    } label: {
+//                                        Label("Delete", systemImage: "trash")
+//                                    }
+//                                }
+//                            }
+                            
+                            if index < savedWidgetsManager.savedWidgets.count - 1 {
+                                Divider()
                             }
+                            
                         }
                     }
                     .listStyle(PlainListStyle())
+                    .safeAreaInset(edge: .bottom) {
+                        Color.clear.frame(height: UIDevice.current.userInterfaceIdiom == .pad ? 100 : 80)
+                    }
                 }
             }
             .navigationTitle("Widgets")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     if !savedWidgetsManager.savedWidgets.isEmpty {
                         Button(isEditing ? "Done" : "Select") {
                             withAnimation {
@@ -71,7 +92,7 @@ struct WidgetsView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     if isEditing && !selectedWidgets.isEmpty {
                         Button("Delete") {
                             showingDeleteAlert = true
@@ -163,10 +184,12 @@ struct WidgetsView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingSetupView) {
-                WidgetSetupView(editingWidget: selectedWidget)
+                WidgetSetupView(editingWidget: nil)
+            }
+            .fullScreenCover(item: $selectedWidget) { widget in
+                WidgetSetupView(editingWidget: widget)
             }
         }
-
     }
     
 }

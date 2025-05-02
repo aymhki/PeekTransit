@@ -3,7 +3,9 @@ import SwiftUI
 struct NameConfigurationStep: View {
     @Binding var widgetName: String
     let defaultName: String
+    let editingWidget: Bool
     @Environment(\.colorScheme) private var colorScheme
+    
     
     var body: some View {
         VStack(spacing: 24) {
@@ -25,6 +27,9 @@ struct NameConfigurationStep: View {
                     .padding(.horizontal)
                 
                 TextField("Widget Name", text: $widgetName)
+                    .disableAutocorrection(true)
+                    .autocorrectionDisabled(true)
+                    .autocapitalization(.none)
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 8)
@@ -38,13 +43,42 @@ struct NameConfigurationStep: View {
                             )
                     )
                     .onAppear() {
-                        widgetName = defaultName
+                        if (!editingWidget) {
+                            widgetName = defaultName
+                        }
                     }
                     .frame(maxWidth: 300)
+                
+
+                
+                if (editingWidget && widgetName != defaultName) {
+                    
+                    Button(action: {
+                        widgetName = defaultName
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill( (!editingWidget || widgetName == defaultName) ? Color.gray : Color.blue)
+                                .opacity((!editingWidget || widgetName == defaultName) ? 0.6 : 1)
+                            
+                            Text("Set the widget name to be the default name")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 8)
+                        }
+                    }
+                    .disabled((!editingWidget || widgetName == defaultName))
+                    .padding(.horizontal)
+                    .frame(height: UIDevice.current.userInterfaceIdiom == .pad ? 120 : 90)
+                    
+                }
                 
                 Text("Default name: \(defaultName)")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .padding(.horizontal)
+                
+                
             }
             .padding()
             .background(
