@@ -261,14 +261,17 @@ struct DynamicWidgetView: View {
                     let stopNumber = stop["number"] as? Int ?? 0
                     let multipleEntriesPerVariant = widgetDataToUse["multipleEntriesPerVariant"] as? Bool ?? true
                     let destinationUrl = createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!
-                    Link(destination: destinationUrl ) {
-                        if (size == .accessoryRectangular || size == .systemSmall) {
+                    
+                    if (size == .accessoryRectangular || size == .systemSmall) {
+                        WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
+                            .widgetURL(destinationUrl)
+                    } else {
+                        Link(destination: destinationUrl ) {
                             WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
-                                .widgetURL(destinationUrl)
-                        } else {
-                            WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
+                            
                         }
                     }
+                    
                     
                     
                     if ( stopIndex < stops.prefix(maxStops).count - 1 && size != .accessoryRectangular && size != .systemSmall && fullyLoaded )

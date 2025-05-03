@@ -506,7 +506,8 @@ public struct ThemeModifier: ViewModifier {
         switch theme {
         case .modern:
             content
-                .font(.system(size: 14 * sizeFactor, design: .monospaced).bold())
+                //.font(.system(size: 14 * sizeFactor, design: .monospaced).bold())
+                .font(.custom("Consolas-Bold", fixedSize: 14 * sizeFactor)).bold()
                 .background(Color(.secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))
@@ -601,7 +602,8 @@ public struct WidgetThemeModifier: ViewModifier {
         switch theme {
         case .modern:
             content
-                .font(.system(size: getFontSize(), design: .monospaced).bold())
+                //.font(.system(size: getFontSize(), design: .monospaced).bold())
+                .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
 //                .background(Color(widgetSize == .accessoryRectangular ? .clear : .secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))

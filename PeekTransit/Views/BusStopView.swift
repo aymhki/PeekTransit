@@ -216,6 +216,8 @@ struct BusStopView: View {
                     .stopViewTheme(themeManager.currentTheme, text: "")
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listSectionSeparator(.hidden)
                 }
             }
             .listRowInsets(EdgeInsets())

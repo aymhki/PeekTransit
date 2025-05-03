@@ -198,6 +198,10 @@
 		2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Assets/Fonts/Consolas-Bold.ttf",
+				Assets/Fonts/consolas.ttf,
+				"Assets/Fonts/courier-bold.ttf",
+				"Assets/Fonts/courier-normal.ttf",
 				"Assets/Fonts/Doto_Rounded-Black.ttf",
 				"Assets/Fonts/Doto_Rounded-Bold.ttf",
 				"Assets/Fonts/Doto_Rounded-ExtraBold.ttf",
@@ -264,6 +268,10 @@
 		2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Assets/Fonts/Consolas-Bold.ttf",
+				Assets/Fonts/consolas.ttf,
+				"Assets/Fonts/courier-bold.ttf",
+				"Assets/Fonts/courier-normal.ttf",
 				"Assets/Fonts/Doto_Rounded-Black.ttf",
 				"Assets/Fonts/Doto_Rounded-Bold.ttf",
 				"Assets/Fonts/Doto_Rounded-ExtraBold.ttf",

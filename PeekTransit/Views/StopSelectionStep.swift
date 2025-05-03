@@ -14,6 +14,8 @@ struct StopSelectionStep: View {
     @State private var maxPerferredstopsInClosestStops: Int = getMaxPerferredstopsInClosestStops()
     @State private var shouldShowContent = false
     @State private var viewState: ViewState = .loading
+    @StateObject private var savedStopsManager = SavedStopsManager.shared
+    @State private var selectedTab = 0
     
     private enum ViewState {
         case loading
@@ -36,9 +38,11 @@ struct StopSelectionStep: View {
     }
     
     var filteredStops: [[String: Any]] {
-        guard !searchText.isEmpty else { return combinedStops }
+        let stopsToFilter = selectedTab == 0 ? combinedStops : savedStopsManager.savedStops.map { $0.stopData }
         
-        return combinedStops.filter { stop in
+        guard !searchText.isEmpty else { return stopsToFilter }
+        
+        return stopsToFilter.filter { stop in
             if let name = stop["name"] as? String,
                name.localizedCaseInsensitiveContains(searchText) {
                 return true
@@ -125,6 +129,14 @@ struct StopSelectionStep: View {
             ZStack {
                 ScrollView {
                     VStack(spacing: 16) {
+
+                        
+                        Picker("Stops", selection: $selectedTab) {
+                            Text("All Stops").tag(0)
+                            Text("Bookmarked").tag(1)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
                         
                         if settingNotification {
                             Text("Select the notification bus stop")
@@ -136,47 +148,26 @@ struct StopSelectionStep: View {
                                 .padding([.top, .horizontal])
                         }
                         
-                        Text("Hint: Use the search bar to search for and select stops that are not near your location.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
-                        
-                        if !settingNotification {
+                        if (selectedTab == 0) {
+                            Text("Hint: Use the search bar to search for and select stops that are not near your location.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
                             
-                            Button(action: handleOptionToggle) {
-                                HStack(alignment: .center, spacing: 10) {
-                                    Image(systemName: isClosestStop ? "checkmark.square.fill" : "square")
-                                        .foregroundColor(isClosestStop ? .blue : .secondary)
-                                        .font(.system(size: 28))
-                                    
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("Auto select closest stops everytime")
-                                            .font(.subheadline)
-                                            .foregroundColor(.primary)
-                                        Text("Automatically use closest stops based on your location everytime you look at the widget")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                            .padding(.horizontal)
-                            .disabled(viewState == .transitioning)
                             
-                            if isClosestStop {
-                                Button(action: handlePreferredToggle) {
+                            if !settingNotification {
+                                
+                                Button(action: handleOptionToggle) {
                                     HStack(alignment: .center, spacing: 10) {
-                                        Image(systemName: selectedPerferredStopsInClosestStops ? "checkmark.square.fill" : "square")
-                                            .foregroundColor(selectedPerferredStopsInClosestStops ? .blue : .secondary)
+                                        Image(systemName: isClosestStop ? "checkmark.square.fill" : "square")
+                                            .foregroundColor(isClosestStop ? .blue : .secondary)
                                             .font(.system(size: 28))
                                         
                                         VStack(alignment: .leading, spacing: 4) {
-                                            Text("Select preferred stops")
+                                            Text("Auto select closest stops everytime")
                                                 .font(.subheadline)
                                                 .foregroundColor(.primary)
-                                            
-                                            Text("Allow you to select which stop(s) to display on the widget regardless of distance from your location")
+                                            Text("Automatically use closest stops based on your location everytime you look at the widget")
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
                                         }
@@ -185,9 +176,34 @@ struct StopSelectionStep: View {
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 .padding(.horizontal)
-                                .transition(.opacity.combined(with: .move(edge: .leading)))
                                 .disabled(viewState == .transitioning)
+                                
+                                if isClosestStop {
+                                    Button(action: handlePreferredToggle) {
+                                        HStack(alignment: .center, spacing: 10) {
+                                            Image(systemName: selectedPerferredStopsInClosestStops ? "checkmark.square.fill" : "square")
+                                                .foregroundColor(selectedPerferredStopsInClosestStops ? .blue : .secondary)
+                                                .font(.system(size: 28))
+                                            
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text("Select preferred stops")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.primary)
+                                                
+                                                Text("Allow you to select which stop(s) to display on the widget regardless of distance from your location")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                    .padding(.horizontal)
+                                    .transition(.opacity.combined(with: .move(edge: .leading)))
+                                    .disabled(viewState == .transitioning)
+                                }
                             }
+                        
                         }
 
                         if (!isClosestStop || selectedPerferredStopsInClosestStops || settingNotification) {
@@ -265,12 +281,22 @@ struct StopSelectionStep: View {
                     searchText = ""
                 }
                 .onChange(of: searchText) { query in
-                    Task {
-                        await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
+                    
+                    if (selectedTab == 0) {
+                        Task {
+                            await stopsStore.searchForStops(query: query, userLocation: locationManager.location)
+                        }
                     }
+                    
+                    
+                }
+                .onChange(of: selectedTab) { _ in
+                    searchText = ""
                 }
                 .onAppear {
                     locationManager.requestLocation()
+                    savedStopsManager.loadSavedStops()
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         viewState = .ready
                         shouldShowContent = true

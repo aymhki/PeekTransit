@@ -74,12 +74,11 @@ struct SelectableStopRow: View {
                         
                         if (savedStopsManager.isStopSaved(stop)) {
                             HStack {
-                                Text(String(format: "%.0f meters away", distanceInMeters))
+                                //Text(String(format: "%.0f meters away", distanceInMeters))
                                 Image(systemName: "bookmark.fill")
                             }
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-
                         } else {
                             Text(String(format: "%.0f meters away", distanceInMeters))
                                 .font(.subheadline)

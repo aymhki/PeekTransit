@@ -45,13 +45,21 @@ struct ContentView: View {
                 }
                 .tag(4)
         }
-        .sheet(isPresented: $deepLinkHandler.isShowingBusStop) {
+        .sheet(isPresented: $deepLinkHandler.isShowingBusStop, onDismiss: {
+            deepLinkHandler.isShowingBusStop = false
+            selectedStop = nil
+            error = nil
+            isLoading = false
+        }) {
             NavigationView {
                 if let stop = selectedStop {
                     BusStopView(stop: stop, isDeepLink: true)
                         .navigationBarItems(trailing:
                             Button(action: {
                                 deepLinkHandler.isShowingBusStop = false
+                                selectedStop = nil
+                                error = nil
+                                isLoading = false
                             }) {
                                 Text("Done")
                             }

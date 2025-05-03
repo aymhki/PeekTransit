@@ -53,12 +53,12 @@
     
 	<key>UIAppFonts</key>
 	<array>
-		<string>Doto-VariableFont_ROND,wght.ttf</string>
-		<string>Doto-Black.ttf</string>
-		<string>Doto-SemiBold.ttf</string>
-		<string>Doto-ExtraBold.ttf</string>
-		<string>Doto_Rounded-Black.ttf</string>
 		<string>LCDDot.ttf</string>
+        <string>SF-Pro-Text-Black.otf</string>
+        <string>courier-bold.ttf</string>
+        <string>courier-normal.ttf</string>
+        <string>consolas.ttf</string>
+        <string>Consolas-Bold.ttf</string>
 	</array>
     
 	<key>UIBackgroundModes</key>
