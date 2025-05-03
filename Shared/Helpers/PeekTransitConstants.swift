@@ -766,7 +766,7 @@ public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
         case .systemLarge: return 35
         case .systemMedium: return 35
         case .systemSmall: return 27
-        case .accessoryRectangular: return 24
+        case .accessoryRectangular: return 27
         default: return 30
     }
 }
@@ -776,7 +776,7 @@ public func getRouteNameWidth(size: WidgetFamily) -> CGFloat {
         case .systemLarge: return 130
         case .systemMedium: return 130
         case .systemSmall: return 21
-        case .accessoryRectangular: return 18
+        case .accessoryRectangular: return 17
         default: return 70
     }
 }
