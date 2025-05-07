@@ -45,12 +45,7 @@ struct ContentView: View {
                 }
                 .tag(4)
         }
-        .sheet(isPresented: $deepLinkHandler.isShowingBusStop, onDismiss: {
-            deepLinkHandler.isShowingBusStop = false
-            selectedStop = nil
-            error = nil
-            isLoading = false
-        }) {
+        .sheet(isPresented: $deepLinkHandler.isShowingBusStop, onDismiss: {closeDeepLinkHandlerSheet() }) {
             NavigationView {
                 if let stop = selectedStop {
                     BusStopView(stop: stop, isDeepLink: true)
@@ -59,14 +54,21 @@ struct ContentView: View {
                                 deepLinkHandler.isShowingBusStop = false
                                 selectedStop = nil
                                 error = nil
+                                
                                 isLoading = false
                             }) {
                                 Text("Done")
                             }
                         )
+                        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+                            closeDeepLinkHandlerSheet()
+                        }
                 } else if isLoading {
                     ProgressView("Loading stop...")
                         .padding()
+                        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+                            closeDeepLinkHandlerSheet()
+                        }
                 } else if let error = error {
                     VStack(spacing: 30) {
                         Text("Error getting stop info")
@@ -81,15 +83,16 @@ struct ContentView: View {
                             
                             Task {
                                 if let stopNumber = deepLinkHandler.selectedStopNumber {
-                                   
                                     await loadStop(number: stopNumber)
-                                    
                                 }
                             }
                         }
                         .buttonStyle(.bordered)
                     }
                     .padding()
+                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+                        closeDeepLinkHandlerSheet()
+                    }
                 }
             }
         }
@@ -154,5 +157,16 @@ struct ContentView: View {
             WidgetCenter.shared.reloadAllTimelines()
         }
     }
+    
+    private func closeDeepLinkHandlerSheet() {
+        
+        Task {
+            do {
+                deepLinkHandler.isShowingBusStop = false
+                selectedStop = nil
+                error = nil
+                isLoading = false
+            }
+        }
+    }
 }
-

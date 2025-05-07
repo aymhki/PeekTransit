@@ -59,7 +59,7 @@ class TransitAPI {
     }
     
     func fetchData(from url: URL) async throws -> Data {
-       // await rateLimiter.waitIfNeeded()
+       await rateLimiter.waitIfNeeded()
 
         
         isLoading = true
@@ -69,6 +69,7 @@ class TransitAPI {
         }
         
         
+        print("Sent: \(url)")
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
@@ -77,8 +78,12 @@ class TransitAPI {
         }
         
         guard httpResponse.statusCode == 200 else {
+            print(httpResponse)
             throw TransitError.networkError(NSError(domain: "", code: httpResponse.statusCode))
+            
         }
+        
+        print("Recieved: \(data)")
         
         return data
     }
