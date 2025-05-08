@@ -149,6 +149,8 @@ struct MapView: View {
         }
         .onAppear {
             networkMonitor.startMonitoring()
+            locationManager.initialize() // Initialize location manager
+            locationManager.startUpdatingLocation() // Start updating location
             isManualRefresh = true
             locationManager.requestLocation()
         }
