@@ -18,8 +18,11 @@ struct WidgetsView: View {
                 if savedWidgetsManager.isLoading {
                     ProgressView("Loading saved widgets...")
                 } else if savedWidgetsManager.savedWidgets.isEmpty {
+
                     Text("No saved Widgets")
                         .foregroundColor(.secondary)
+
+                    
                 } else {
                     List {
 
@@ -77,6 +80,7 @@ struct WidgetsView: View {
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("Widgets")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -160,6 +164,9 @@ struct WidgetsView: View {
             }
             .fullScreenCover(isPresented: $showingSetupView) {
                 WidgetSetupView(editingWidget: selectedWidget)
+            }
+            .fullScreenCover(item: $selectedWidget) { widget in
+                WidgetSetupView(editingWidget: widget)
             }
         } else {
             NavigationStack {

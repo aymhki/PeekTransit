@@ -59,7 +59,7 @@ class TransitAPI {
     }
     
     func fetchData(from url: URL) async throws -> Data {
-       await rateLimiter.waitIfNeeded()
+       // await rateLimiter.waitIfNeeded()
 
         
         isLoading = true

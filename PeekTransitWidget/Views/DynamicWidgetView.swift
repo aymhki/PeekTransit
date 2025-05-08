@@ -268,8 +268,9 @@ struct DynamicWidgetView: View {
                     } else {
                         Link(destination: destinationUrl ) {
                             WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
+                                
                             
-                        }
+                       }
                     }
                     
                     

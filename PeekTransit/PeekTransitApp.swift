@@ -8,10 +8,6 @@ struct PeekTransitApp: App {
     @StateObject private var deepLinkHandler = DeepLinkHandler.shared
     @StateObject private var themeManager = ThemeManager.shared
     
-    init() {
-        WidgetRefreshManager.shared.startPeriodicRefresh()
-    }
-    
     var body: some Scene {
         
         WindowGroup {
@@ -26,3 +22,6 @@ struct PeekTransitApp: App {
         
     }
 }
+
+
+

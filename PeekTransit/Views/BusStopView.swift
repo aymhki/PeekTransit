@@ -4,6 +4,8 @@ import MapKit
 struct BusStopView: View {
     let stop: [String: Any]
     let isDeepLink: Bool
+    let stopLoadError: Error?
+    
     @StateObject private var savedStopsManager = SavedStopsManager.shared
     @StateObject private var networkMonitor = NetworkMonitor()
     @State private var schedules: [String] = []
@@ -14,6 +16,8 @@ struct BusStopView: View {
     @State private var isLiveUpdatesEnabled: Bool = false
     @State private var userPreferredLiveUpdates: Bool = true
     @State private var currentTheme: StopViewTheme = .default
+    @State private var stopNumber: Int = 0
+    
     let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
     @EnvironmentObject private var themeManager: ThemeManager
     @State private var isRefreshCooldown = false
@@ -29,7 +33,7 @@ struct BusStopView: View {
     }
     
     private var liveUpdatesKey: String {
-        "live_updates_\(stop["number"] as? Int ?? 0)"
+        "live_updates_\(stopNumber)"
     }
     
     private var coordinate: CLLocationCoordinate2D? {
@@ -42,6 +46,13 @@ struct BusStopView: View {
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
     
+    init(stop: [String: Any], isDeepLink: Bool, stopLoadError: Error? = nil) {
+        self.stop = stop
+        self.isDeepLink = isDeepLink
+        self.stopLoadError = stopLoadError
+        self._stopNumber = State(initialValue: stop["number"] as? Int ?? 0)
+    }
+    
     private func getLiveUpdatePreference() -> Bool {
         if UserDefaults.standard.object(forKey: liveUpdatesKey) != nil {
             return UserDefaults.standard.bool(forKey: liveUpdatesKey)
@@ -50,9 +61,7 @@ struct BusStopView: View {
     }
     
     private func loadSchedules(isManual: Bool) async {
-        
         guard isAppActive else { return }
-
         if isManual {
             isLoading = true
             isRefreshCooldown = true
@@ -65,7 +74,6 @@ struct BusStopView: View {
         defer { isLoading = false }
         
         do {
-            guard let stopNumber = stop["number"] as? Int else { return }
             let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
             schedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
             errorFetchingSchedule = false
@@ -146,6 +154,24 @@ struct BusStopView: View {
                         Text(errorText)
                             .font(.title3)
                             .foregroundStyle(.secondary)
+                        
+                        Button(action: {
+                            isManualRefresh = true
+                            Task {
+                                await loadSchedules(isManual: true)
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Retry")
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                        }
+                        .padding(.top, 10)
                     }
                     .padding()
                     .padding([.vertical, .horizontal])
@@ -206,7 +232,7 @@ struct BusStopView: View {
                                     .padding(.vertical, 12)
                                     .padding(.horizontal, 1)
                                 }
-                                .frame(height: isLargeDevice() ? 50 : 35)
+                                .frame(height: isLargeDevice() ? 50 : 25)
                             }
                         }
                         .padding(.all)
@@ -223,7 +249,7 @@ struct BusStopView: View {
             .listRowInsets(EdgeInsets())
         }
         .listStyle(.plain)
-        .navigationTitle("#\(String(stop["number"] as? Int ?? 0))")
+        .navigationTitle("#\(String(stopNumber))")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: isDeepLink ? .navigationBarLeading : .navigationBarTrailing) {
@@ -260,6 +286,10 @@ struct BusStopView: View {
             await loadSchedules(isManual: true)
         })
         .onAppear {
+            if let number = stop["number"] as? Int {
+                stopNumber = number
+            }
+            
             networkMonitor.startMonitoring()
             userPreferredLiveUpdates = getLiveUpdatePreference()
             isLiveUpdatesEnabled = userPreferredLiveUpdates
@@ -291,5 +321,6 @@ struct BusStopView: View {
                 await loadSchedules(isManual: false)
             }
         }
+        .id(stopNumber)
     }
 }

@@ -13,7 +13,7 @@ struct ListView: View {
     @State private var savedStopsManager =  SavedStopsManager.shared
     @State private var visibleRows = Set<Int>()
     @State private var isAppActive = true
-    
+    @State private var hasPerformedInitialLoad = false
     
     
     var combinedStops: [[String: Any]] {
@@ -159,12 +159,27 @@ struct ListView: View {
             isAppActive = true
         }
         .onChange(of: locationManager.location) { newLocation in
+           // guard !hasPerformedInitialLoad else { return }
             guard isAppActive else { return }
             
             if let location = newLocation,
                locationManager.shouldRefresh(for: location), combinedStops.isEmpty, !stopsStore.isSearching, !stopsStore.isLoading {
+                hasPerformedInitialLoad = true
                 Task {
                     await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
+                }
+            }
+        }
+        .onChange(of: locationManager.authorizationStatus) { newStatus in
+            guard !hasPerformedInitialLoad else { return }
+            
+            if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
+                locationManager.requestLocation()
+                if let location = locationManager.location {
+                    hasPerformedInitialLoad = true
+                    Task {
+                        await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
+                    }
                 }
             }
         }

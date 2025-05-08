@@ -20,6 +20,8 @@ struct MapView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) var colorScheme
     @State private var isAppActive = true
+    @State private var hasPerformedInitialLoad = false
+
 
 
     
@@ -173,12 +175,12 @@ struct MapView: View {
 
         }
         .onChange(of: locationManager.location) { newLocation in
+           // guard !hasPerformedInitialLoad else { return }
             guard isAppActive else { return }
             guard let location = newLocation else { return }
-        
             
             if locationManager.shouldRefresh(for: location) {
-            
+                hasPerformedInitialLoad = true
                 Task {
                     await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                     if isManualRefresh {
@@ -187,6 +189,20 @@ struct MapView: View {
                 }
             }
         }
+        .onChange(of: locationManager.authorizationStatus) { newStatus in
+            guard !hasPerformedInitialLoad else { return }
+            
+            if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
+                locationManager.requestLocation()
+                if let location = locationManager.location {
+                    hasPerformedInitialLoad = true
+                    Task {
+                        await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
+                    }
+                }
+            }
+        }
+
 
     }
     

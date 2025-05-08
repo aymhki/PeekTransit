@@ -9,7 +9,7 @@ class MapSnapshotCache {
     private var cache = NSCache<NSString, UIImage>()
     private var pendingRequests = Set<String>()
     private var activeSnapshottings = 0
-    private let maxConcurrentSnapshottings = 3
+    private let maxConcurrentSnapshottings = 5
     private var queuedRequests = [(String, (UIImage?) -> Void)]()
     
     func clearCache() {

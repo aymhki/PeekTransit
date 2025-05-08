@@ -55,65 +55,60 @@ struct MapViewRepresentable: UIViewRepresentable {
     
     private func updateAnnotations(on mapView: MKMapView) {
         let group = DispatchGroup()
-        
+
         let existingAnnotations = Dictionary(
-            uniqueKeysWithValues: mapView.annotations
-                .compactMap { annotation -> (Int, MKAnnotation)? in
-                    guard let pointAnnotation = annotation as? CustomStopAnnotation else { return nil }
-                    return (pointAnnotation.stopNumber, annotation)
-                }
+            mapView.annotations.compactMap { annotation -> (Int, MKAnnotation)? in
+                guard let pointAnnotation = annotation as? CustomStopAnnotation else { return nil }
+                return (pointAnnotation.stopNumber, annotation)
+            },
+            uniquingKeysWith: { (first, _) in first }
         )
-        
+
         var updatedStopNumbers = Set<Int>()
-        var newAnnotations: [MKAnnotation] = []
-        
+        var newAnnotationsToAdd: [MKAnnotation] = []
+
         for stop in stops {
             guard let number = stop["number"] as? Int,
                   let centre = stop["centre"] as? [String: Any],
                   let geographic = centre["geographic"] as? [String: Any],
-                  let lat = Double(geographic["latitude"] as? String ?? ""),
-                  let lon = Double(geographic["longitude"] as? String ?? "") else {
+                  let latString = geographic["latitude"] as? String, let lat = Double(latString),
+                  let lonString = geographic["longitude"] as? String, let lon = Double(lonString) else {
                 continue
             }
-            
-            group.enter()
-            
+
+            // group.enter()
+
             updatedStopNumbers.insert(number)
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-            
+
             if let existingAnnotation = existingAnnotations[number] as? CustomStopAnnotation {
                 existingAnnotation.coordinate = coordinate
                 existingAnnotation.title = stop["name"] as? String
                 existingAnnotation.subtitle = formatSubtitle(for: stop)
                 existingAnnotation.stopData = stop
-                group.leave()
+                // group.leave()
             } else {
                 let annotation = CustomStopAnnotation(stopNumber: number, stopData: stop)
                 annotation.coordinate = coordinate
                 annotation.title = stop["name"] as? String
                 annotation.subtitle = formatSubtitle(for: stop)
-                mapView.addAnnotation(annotation)
-                newAnnotations.append(annotation)
-                group.leave()
+                newAnnotationsToAdd.append(annotation)
+                // group.leave()
             }
         }
-        
-        if !newAnnotations.isEmpty {
-            DispatchQueue.main.async {
-                mapView.addAnnotations(newAnnotations)
-            }
+
+        let annotationsToRemove = mapView.annotations.compactMap { $0 as? CustomStopAnnotation }
+            .filter { !updatedStopNumbers.contains($0.stopNumber) }
+
+        if !annotationsToRemove.isEmpty {
+            mapView.removeAnnotations(annotationsToRemove)
         }
-        
-        if !stops.isEmpty {
-            let annotationsToRemove = mapView.annotations.compactMap { $0 as? CustomStopAnnotation }
-                .filter { !updatedStopNumbers.contains($0.stopNumber) }
-            
-            if !annotationsToRemove.isEmpty {
-                mapView.removeAnnotations(annotationsToRemove)
-            }
+
+        if !newAnnotationsToAdd.isEmpty {
+            mapView.addAnnotations(newAnnotationsToAdd)
         }
-        
-        group.notify(queue: .main) {}
+
+        // group.notify(queue: .main) {} // Re-evaluate if DispatchGroup is needed
     }
     
     private func updateOverlay(on mapView: MKMapView) {

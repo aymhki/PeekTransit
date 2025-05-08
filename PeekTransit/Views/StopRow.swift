@@ -108,7 +108,7 @@ struct StopRow: View {
                     coordinate: coordinate,
                     direction: stop["direction"] as? String ?? "Unknown Direction"
                 )
-                .id(forceUpdate)
+                // .id(forceUpdate)
             }
             
             VStack(alignment: .leading, spacing: 8) {

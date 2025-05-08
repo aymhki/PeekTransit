@@ -4,169 +4,208 @@ import WidgetKit
 
 struct ContentView: View {
     @State private var selection: Int = 0
-    @StateObject private var deepLinkHandler = DeepLinkHandler.shared
-    @StateObject private var stopsStore = StopsDataStore.shared
     @StateObject private var themeManager = ThemeManager.shared
-    @State private var selectedStop: [String: Any]? = nil
-    @State private var isLoading = false
-    @State private var error: Error? = nil
+    @StateObject private var deepLinkHandler = DeepLinkHandler.shared
     @AppStorage(settingsUserDefaultsKeys.defaultTab) private var defaultTab: Int = 0
     @State private var showUpdateAlert = false
+    @State private var showStopView = false
+    @State private var selectedStop: [String: Any]? = nil
+    @State private var isLoadingStop = false
+    @State private var loadingError: Error? = nil
     
     var body: some View {
-        TabView(selection: $selection) {
-            MapView()
-                .tabItem {
-                    Label("Map", systemImage: "map.fill")
-                }
-                .tag(0)
-            
-            ListView()
-                .tabItem {
-                    Label("Stops", systemImage: "list.bullet")
-                }
-                .tag(1)
-            
-            SavedStopsView()
-                .tabItem {
-                    Label("Saved", systemImage: "bookmark.fill")
-                }
-                .tag(2)
-            
-            WidgetsView()
-                .tabItem {
-                    Label("Widgets", systemImage: "note.text")
-                }
-                .tag(3)
-            
-            MoreTabView()
-                .tabItem {
-                    Label("More", systemImage: "ellipsis.circle.fill")
-                }
-                .tag(4)
-        }
-        .sheet(isPresented: $deepLinkHandler.isShowingBusStop, onDismiss: {closeDeepLinkHandlerSheet() }) {
-            NavigationView {
-                if let stop = selectedStop {
-                    BusStopView(stop: stop, isDeepLink: true)
-                        .navigationBarItems(trailing:
-                            Button(action: {
-                                deepLinkHandler.isShowingBusStop = false
-                                selectedStop = nil
-                                error = nil
-                                
-                                isLoading = false
-                            }) {
-                                Text("Done")
-                            }
-                        )
-                        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-                            closeDeepLinkHandlerSheet()
-                        }
-                } else if isLoading {
-                    ProgressView("Loading stop...")
-                        .padding()
-                        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-                            closeDeepLinkHandlerSheet()
-                        }
-                } else if let error = error {
-                    VStack(spacing: 30) {
-                        Text("Error getting stop info")
-                            .font(.headline)
-                        Text(error.localizedDescription)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        
-                        Button("Retry") {
-                            self.error = nil
-                            
-                            Task {
-                                if let stopNumber = deepLinkHandler.selectedStopNumber {
-                                    await loadStop(number: stopNumber)
-                                }
-                            }
-                        }
-                        .buttonStyle(.bordered)
+        ZStack {
+            TabView(selection: $selection) {
+                MapView()
+                    .tabItem {
+                        Label("Map", systemImage: "map.fill")
                     }
-                    .padding()
-                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-                        closeDeepLinkHandlerSheet()
+                    .tag(0)
+                
+                ListView()
+                    .tabItem {
+                        Label("Stops", systemImage: "list.bullet")
+                    }
+                    .tag(1)
+                
+                SavedStopsView()
+                    .tabItem {
+                        Label("Saved", systemImage: "bookmark.fill")
+                    }
+                    .tag(2)
+                
+                WidgetsView()
+                    .tabItem {
+                        Label("Widgets", systemImage: "note.text")
+                    }
+                    .tag(3)
+                
+                MoreTabView()
+                    .tabItem {
+                        Label("More", systemImage: "ellipsis.circle.fill")
+                    }
+                    .tag(4)
+            }
+            .environmentObject(themeManager)
+            .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
+            .onAppear {
+                if selection == 0 {
+                    selection = defaultTab
+                }
+                
+                WidgetCenter.shared.reloadAllTimelines()
+                
+                NotificationCenter.default.addObserver(
+                    forName: .appUpdateAvailable,
+                    object: nil,
+                    queue: .main
+                ) { _ in
+                    showUpdateAlert = true
+                }
+                
+                Task {
+                    await AppUpdateChecker().checkForUpdate()
+                }
+            }
+            .alert("Update Available", isPresented: $showUpdateAlert) {
+                
+                Button("Update Now") {
+                    if let appStoreURL = URL(string: "https://apps.apple.com/ca/app/peek-transit/id6741770809") {
+                        UIApplication.shared.open(appStoreURL)
                     }
                 }
-            }
-        }
-        .environmentObject(themeManager)
-        .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
-        .onChange(of: deepLinkHandler.selectedStopNumber) { stopNumber in
-            guard let stopNumber = stopNumber else { return }
-            Task {
-                await loadStop(number: stopNumber)
-            }
-        }
-        .onAppear {
-            if selection == 0 {
-                selection = defaultTab
+                
+                Button("Later", role: .cancel) {}
+                
+            } message: {
+                Text("A new version of the app is available. Would you like to update now?")
             }
             
-            WidgetCenter.shared.reloadAllTimelines()
-            
-            NotificationCenter.default.addObserver(
-                forName: .appUpdateAvailable,
-                object: nil,
-                queue: .main
-            ) { _ in
-                showUpdateAlert = true
-            }
-            
-            Task {
-                await AppUpdateChecker().checkForUpdate()
-            }
-        }
-        .alert("Update Available", isPresented: $showUpdateAlert) {
-            
-            Button("Update Now") {
-                if let appStoreURL = URL(string: "https://apps.apple.com/ca/app/peek-transit/id6741770809") {
-                    UIApplication.shared.open(appStoreURL)
+            if isLoadingStop {
+                VStack {
+                    ProgressView("Loading Stop...")
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.4))
+                .zIndex(100)
             }
-            
-            Button("Later", role: .cancel) {}
-            
-        } message: {
-            Text("A new version of the app is available. Would you like to update now?")
         }
-    
+        .sheet(isPresented: $showStopView) {
+            if let stop = selectedStop {
+                NavigationView {
+                    BusStopView(stop: stop, isDeepLink: true, stopLoadError: loadingError)
+                        .navigationBarItems(trailing: Button("Close") {
+                            showStopView = false
+                            loadingError = nil
+                        })
+                }
+            } else if loadingError != nil {
+                StopLoadErrorView(error: loadingError, onRetry: {
+                    handleDeepLink()
+                }, onClose: {
+                    showStopView = false
+                    loadingError = nil
+                })
+            }
+        }
+        .onChange(of: deepLinkHandler.isShowingBusStop) { isShowing in
+            if isShowing {
+                handleDeepLink()
+            }
+        }
+        .onChange(of: deepLinkHandler.selectedStopNumber) { newStopNumber in
+            if showStopView && deepLinkHandler.isShowingBusStop {
+                handleDeepLink()
+            }
+        }
     }
     
-    private func loadStop(number: Int) async {
-        isLoading = true
-        error = nil
-        selectedStop = nil
+    private func handleDeepLink() {
+        guard let stopNumber = deepLinkHandler.selectedStopNumber else {
+            return
+        }
+        
+        loadingError = nil
+        
+        if let currentStop = selectedStop,
+           let currentStopNumber = currentStop["number"] as? Int,
+           currentStopNumber == stopNumber {
+            isLoadingStop = true
+        } else {
+            isLoadingStop = true
+            selectedStop = nil
+        }
         
         Task {
             do {
-                selectedStop = try await stopsStore.getStop(number: number)
-                if selectedStop == nil {
-                    throw TransitError.parseError("Stop not found")
+                if let stop = try await StopsDataStore.shared.getStop(number: stopNumber) {
+                    DispatchQueue.main.async {
+                        selectedStop = stop
+                        showStopView = true
+                        isLoadingStop = false
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        loadingError = TransitError.parseError("Stop not found")
+                        showStopView = true
+                        isLoadingStop = false
+                    }
                 }
             } catch {
-                self.error = error
+                print("Error loading stop: \(error)")
+                DispatchQueue.main.async {
+                    loadingError = error
+                    showStopView = true
+                    isLoadingStop = false
+                }
             }
-            isLoading = false
-            WidgetCenter.shared.reloadAllTimelines()
+            
+            DispatchQueue.main.async {
+                deepLinkHandler.isShowingBusStop = false
+            }
         }
     }
+}
+
+struct StopLoadErrorView: View {
+    let error: Error?
+    let onRetry: () -> Void
+    let onClose: () -> Void
     
-    private func closeDeepLinkHandlerSheet() {
-        
-        Task {
-            do {
-                deepLinkHandler.isShowingBusStop = false
-                selectedStop = nil
-                error = nil
-                isLoading = false
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.orange)
+                    .padding(.bottom, 10)
+                
+                Text("Error Loading Stop")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Text(error?.localizedDescription ?? "Could not load stop information")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                
+                Button(action: onRetry) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Retry")
+                    }
+                    .frame(minWidth: 120)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .padding(.top, 20)
             }
+            .padding()
+            .navigationBarItems(trailing: Button("Close") {
+                onClose()
+            })
         }
     }
 }
