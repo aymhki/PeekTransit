@@ -150,6 +150,8 @@ struct ListView: View {
         }
         .onAppear {
             networkMonitor.startMonitoring()
+            locationManager.initialize()
+            locationManager.startUpdatingLocation()
             locationManager.requestLocation()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in

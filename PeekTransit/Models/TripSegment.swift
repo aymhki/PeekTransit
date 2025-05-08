@@ -1,7 +1,7 @@
 import SwiftUI
 import MapKit
 
-struct TripSegment {
+struct TripSegment: Hashable {
     let type: SegmentType
     let startTime: Date
     let endTime: Date
@@ -166,5 +166,29 @@ struct TripSegment {
             return StopInfo(name: "Destination")
         }
     
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(type)
+        hasher.combine(startTime)
+        hasher.combine(endTime)
+        hasher.combine(duration)
+        hasher.combine(routeKey)
+        hasher.combine(routeNumber)
+        hasher.combine(variantKey)
+        hasher.combine(fromStop)
+        hasher.combine(toStop)
+    }
+    
+    public static func == (lhs: TripSegment, rhs: TripSegment) -> Bool {
+        return lhs.type == rhs.type &&
+               lhs.startTime == rhs.startTime &&
+               lhs.endTime == rhs.endTime &&
+               lhs.duration == rhs.duration &&
+               lhs.routeKey == rhs.routeKey &&
+               lhs.routeNumber == rhs.routeNumber &&
+               lhs.variantKey == rhs.variantKey &&
+               lhs.fromStop == rhs.fromStop &&
+               lhs.toStop == rhs.toStop
+    }
     
 }

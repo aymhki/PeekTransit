@@ -18,6 +18,7 @@ struct DestinationSearchButton: View {
                     .font(.caption)
                 Text("Don't know which bus to take?")
                     .font(.caption)
+                    // .fixedSize()
                     .multilineTextAlignment(.leading)
             }
             .foregroundStyle(.white)

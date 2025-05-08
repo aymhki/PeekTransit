@@ -83,7 +83,14 @@ class TransitAPI {
             
         }
         
-        print("Recieved: \(data)")
+        do {
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            print("Received: \(json)")
+        } catch {
+            print("Error occurred during JSON deserialization: \(error)")
+        }
+        
+        
         
         return data
     }
@@ -750,8 +757,8 @@ class TransitAPI {
             parameters: [
                 "lat": String(latitude),
                 "lon": String(longitude),
-                "distance": "50",
-                "max-results": "1"
+                // "distance": "30",
+                //"max-results": "3"
             ]
         ) else {
             throw TransitError.invalidURL
@@ -792,47 +799,78 @@ class TransitAPI {
     
     
     func findTrip(from origin: CLLocation, to destination: CLLocation) async throws -> [TripPlan] {
+        var allPlans: [TripPlan] = []
+        
+        var parameters: [String: Any] = [
+            "origin": "geo/\(origin.coordinate.latitude),\(origin.coordinate.longitude)",
+            "destination": "geo/\(destination.coordinate.latitude),\(destination.coordinate.longitude)",
+            "usage": getGlobalAPIForShortUsage() ? "short" : "long"
+        ]
+        
+        guard let url = createURL(path: "trip-planner.json", parameters: parameters) else {
+            throw TransitError.invalidURL
+        }
+        
+        var data = try await fetchData(from: url)
+        
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let plansArray = json["plans"] as? [[String: Any]] else {
+            throw TransitError.parseError("Invalid trip planner data format")
+        }
+        
+        for planDict in plansArray {
+            do {
+                let plan = try TripPlan(from: planDict)
+                allPlans.append(plan)
+            } catch {
+                print("Error parsing plan: \(error)")
+            }
+        }
+        
+        var foundAtTransfers: Int? = nil
+        
         for transfers in 0...5 {
-            guard let url = createURL(
-                path: "trip-planner.json",
-                parameters: [
-                    "origin": "geo/\(origin.coordinate.latitude),\(origin.coordinate.longitude)",
-                    "destination": "geo/\(destination.coordinate.latitude),\(destination.coordinate.longitude)",
-                    "max-transfers": transfers,
-                    "usage": getGlobalAPIForShortUsage() ? "short" : "long"
-                ]
-            ) else {
+            parameters["max-transfers"] = transfers
+            
+            guard let url = createURL(path: "trip-planner.json", parameters: parameters) else {
                 throw TransitError.invalidURL
             }
             
-            let data = try await fetchData(from: url)
+            data = try await fetchData(from: url)
             
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let plansArray = json["plans"] as? [[String: Any]] else {
                 throw TransitError.parseError("Invalid trip planner data format")
             }
             
-            var plans: [TripPlan] = []
-            
+            var plansForThisTransfer: [TripPlan] = []
             for planDict in plansArray {
                 do {
                     let plan = try TripPlan(from: planDict)
-                    plans.append(plan)
+                    plansForThisTransfer.append(plan)
                 } catch {
                     print("Error parsing plan: \(error)")
                 }
             }
             
-            if !plans.isEmpty {
-                return plans
+            if !plansForThisTransfer.isEmpty {
+                if foundAtTransfers == nil {
+                    foundAtTransfers = transfers
+                    allPlans.append(contentsOf: plansForThisTransfer)
+                } else {
+                    allPlans.append(contentsOf: plansForThisTransfer)
+                    break
+                }
+            } else if foundAtTransfers != nil {
+                continue
             }
             
             if transfers < 5 {
-                try await Task.sleep(nanoseconds: 1_000_000_000)
+                try await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second delay
             }
         }
         
-        return []
+        return Array(Set(allPlans))
     }
     
     
@@ -887,56 +925,86 @@ class TransitAPI {
         // let currentDate = date ?? Date()
         // let winnipegDate = date ?? getCurrentWinnipegDateTime()
         
+        var allPlans: [TripPlan] = []
+        
+        // First try with no max-transfers parameter (unlimited transfers)
+        var parameters: [String: Any] = [
+            "origin": currentLocationKey,
+            "destination": toLocationKey,
+            // "walk-speed": walkSpeed,
+            // "max-walk-time": maxWalkTime,
+            // "min-transfer-wait": minTransferWait,
+            // "max-transfer-wait": maxTransferWait,
+            // "mode": mode,
+            // "date": dateFormatter.string(from: winnipegDate),
+            // "time": timeFormatter.string(from: winnipegDate),
+            "usage": getGlobalAPIForShortUsage() ? "short" : "long"
+        ]
+        
+        guard let url = createURL(path: "trip-planner.json", parameters: parameters) else {
+            throw TransitError.invalidURL
+        }
+        
+        var data = try await fetchData(from: url)
+        
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let plansArray = json["plans"] as? [[String: Any]] else {
+            throw TransitError.parseError("Invalid trip planner data format")
+        }
+        
+        for planDict in plansArray {
+            do {
+                let plan = try TripPlan(from: planDict)
+                allPlans.append(plan)
+            } catch {
+                print("Error parsing plan: \(error)")
+            }
+        }
+        
+        var foundAtTransfers: Int? = nil
+        
         for transfers in 0...5 {
-            let parameters: [String: Any] = [
-                "origin": currentLocationKey,
-                "destination": toLocationKey,
-    //            "walk-speed": walkSpeed,
-    //            "max-walk-time": maxWalkTime,
-    //            "min-transfer-wait": minTransferWait,
-    //            "max-transfer-wait": maxTransferWait,
-                "max-transfers": transfers,
-    //            "mode": mode,
-    //            "date": dateFormatter.string(from: winnipegDate), //dateFormatter.string(from: currentDate),
-    //            "time": timeFormatter.string(from: winnipegDate) //timeFormatter.string(from: currentDate),
-                "usage": getGlobalAPIForShortUsage() ? "short" : "long"
-            ]
+            parameters["max-transfers"] = transfers
             
-            guard let url = createURL(
-                path: "trip-planner.json",
-                parameters: parameters
-            ) else {
+            guard let url = createURL(path: "trip-planner.json", parameters: parameters) else {
                 throw TransitError.invalidURL
             }
             
-            let data = try await fetchData(from: url)
+            data = try await fetchData(from: url)
             
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let plansArray = json["plans"] as? [[String: Any]] else {
                 throw TransitError.parseError("Invalid trip planner data format")
             }
             
-            var plans: [TripPlan] = []
-            
+            var plansForThisTransfer: [TripPlan] = []
             for planDict in plansArray {
                 do {
                     let plan = try TripPlan(from: planDict)
-                    plans.append(plan)
+                    plansForThisTransfer.append(plan)
                 } catch {
                     print("Error parsing plan: \(error)")
                 }
             }
             
-            if !plans.isEmpty {
-                return plans
+            if !plansForThisTransfer.isEmpty {
+                if foundAtTransfers == nil {
+                    foundAtTransfers = transfers
+                    allPlans.append(contentsOf: plansForThisTransfer)
+                } else {
+                    allPlans.append(contentsOf: plansForThisTransfer)
+                    break
+                }
+            } else if foundAtTransfers != nil {
+                continue
             }
             
             if transfers < 5 {
-                try await Task.sleep(nanoseconds: 1_000_000_000)
+                try await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second delay
             }
         }
         
-        return []
+        return Array(Set(allPlans))
     }
     
 }

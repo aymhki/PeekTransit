@@ -1,7 +1,7 @@
 import SwiftUI
 import CoreLocation
 
-struct StopInfo {
+struct StopInfo: Hashable {
     let key: Int
     let name: String
     let location: CLLocationCoordinate2D?
@@ -31,5 +31,21 @@ struct StopInfo {
         self.name = name.replacingOccurrences(of: "@", with: " @ ")
         self.key = -1
         self.location = nil
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(key)
+        hasher.combine(name)
+        if let location = location {
+            hasher.combine(location.latitude)
+            hasher.combine(location.longitude)
+        }
+    }
+    
+    public static func == (lhs: StopInfo, rhs: StopInfo) -> Bool {
+        return lhs.key == rhs.key &&
+               lhs.name == rhs.name &&
+               lhs.location?.latitude == rhs.location?.latitude &&
+               lhs.location?.longitude == rhs.location?.longitude
     }
 }

@@ -294,6 +294,8 @@ struct StopSelectionStep: View {
                     searchText = ""
                 }
                 .onAppear {
+                    locationManager.initialize()
+                    locationManager.startUpdatingLocation()
                     locationManager.requestLocation()
                     savedStopsManager.loadSavedStops()
 

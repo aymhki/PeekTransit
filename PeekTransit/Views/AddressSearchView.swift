@@ -5,11 +5,13 @@ import SwiftUI
 import MapKit
 import Combine
 
+// MARK: - Updated AddressSearchView
 struct AddressSearchView: View {
     @Binding var isSearching: Bool
     @State private var searchQuery = ""
     @State private var searchResults: [MKLocalSearchCompletion] = []
     @State private var routePlans: [TripPlan] = []
+    @State private var topRecommendedRoutes: [TripPlan] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showingRouteDetails = false
@@ -19,7 +21,7 @@ struct AddressSearchView: View {
     @FocusState private var isTextFieldFocused: Bool
     
     var onRouteSelected: (TripPlan) -> Void
-
+    
     init(isSearching: Binding<Bool>, onRouteSelected: @escaping (TripPlan) -> Void) {
         self._isSearching = isSearching
         self.onRouteSelected = onRouteSelected
@@ -42,6 +44,9 @@ struct AddressSearchView: View {
                     .onAppear {
                         isTextFieldFocused = true
                         networkMonitor.startMonitoring()
+                        locationManager.initialize()
+                        locationManager.startUpdatingLocation()
+                        locationManager.requestLocation()
                     }
                     .onDisappear {
                         networkMonitor.stopMonitoring()
@@ -79,18 +84,33 @@ struct AddressSearchView: View {
                     errorMessage = nil
                 }
                 .transition(.opacity)
-            } else if showingRouteDetails, !routePlans.isEmpty {
+            } else if showingRouteDetails, !topRecommendedRoutes.isEmpty {
                 ScrollView {
-                    RouteDetailsView(
-                        routePlan: getRoutWithShortestDuration(availableRoutes: routePlans),
-                        onDismiss: {
-                            withAnimation {
-                                showingRouteDetails = false
-                                searchQuery = ""
+                    VStack(spacing: 16) {
+                        ForEach(topRecommendedRoutes.indices, id: \.self) { index in
+                            RouteDetailsView(
+                                routePlan: topRecommendedRoutes[index],
+                                index: (index+1),
+                                numRoutes: topRecommendedRoutes.count,
+                                onDismiss: {
+                                    withAnimation {
+                                        showingRouteDetails = false
+                                        searchQuery = ""
+                                    }
+                                },
+                                onRouteSelected: onRouteSelected
+                            )
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(12)
+                            //.padding(.horizontal)
+                            
+                            if index < topRecommendedRoutes.count - 1 {
+                                Divider()
+                                    .padding(.horizontal)
                             }
-                        },
-                        onRouteSelected: onRouteSelected
-                    )
+                        }
+                    }
+                    .padding(.vertical)
                 }
                 .background(Color(.systemBackground))
                 .clipShape(getBottomRoundedShape())
@@ -137,7 +157,7 @@ struct AddressSearchView: View {
                searchHandler.isSearching ||
                 (searchHandler.searchResults.isEmpty && !isLoading && !searchHandler.isSearching && !searchQuery.isEmpty)) && errorMessage == nil
     }
-
+    
     private func getCustomRoundedShape(isAttached: Bool) -> some Shape {
         let cornerRadius: CGFloat = 12
         if isAttached {
@@ -146,15 +166,23 @@ struct AddressSearchView: View {
             return RoundedCornersForAddressSearch(radius: cornerRadius)
         }
     }
-
+    
     private func getBottomRoundedShape() -> some Shape {
         let cornerRadius: CGFloat = 12
         return RoundedCornersForAddressSearch(radius: cornerRadius, corners: [.bottomLeft, .bottomRight])
     }
-
-    private func getRoutWithShortestDuration(availableRoutes: [TripPlan]) -> TripPlan {
-        let reccomendedRoute = TripPlan.getRecommendedRoute(from: availableRoutes)
-        return reccomendedRoute // availableRoutes[0]
+    
+    private func getTopRecommendedRoutes(from availableRoutes: [TripPlan]) -> [TripPlan] {
+        if availableRoutes.count >= 5 {
+            // Return top 5 routes
+            return TripPlan.getTopRecommendedRoutes(from: availableRoutes, limit: 5)
+        } else if availableRoutes.count >= 3 {
+            // Return top 3 routes
+            return TripPlan.getTopRecommendedRoutes(from: availableRoutes, limit: 3)
+        } else {
+            // Return all available routes (could be just 1)
+            return TripPlan.getTopRecommendedRoutes(from: availableRoutes, limit: availableRoutes.count)
+        }
     }
     
     private func handleSelection(_ result: MKLocalSearchCompletion) {
@@ -204,6 +232,7 @@ struct AddressSearchView: View {
                             errorMessage = "No transit routes available to this destination right now"
                         } else {
                             routePlans = plans
+                            topRecommendedRoutes = getTopRecommendedRoutes(from: plans)
                             showingRouteDetails = true
                         }
                         isLoading = false
@@ -219,6 +248,7 @@ struct AddressSearchView: View {
                             errorMessage = "No transit routes available to this destination right now"
                         } else {
                             routePlans = plans
+                            topRecommendedRoutes = getTopRecommendedRoutes(from: plans)
                             showingRouteDetails = true
                         }
                         isLoading = false
@@ -232,17 +262,4 @@ struct AddressSearchView: View {
             }
         }
     }
-    
-    
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-struct TripPlan {
+struct TripPlan: Hashable {
     let planNumber: Int
     let startTime: Date
     let endTime: Date
@@ -15,13 +15,13 @@ struct TripPlan {
     let tripPlanDict: [String: Any]
     
     private struct RouteWeights {
-        static let durationWeight: Double = 0.4
-        static let segmentWeight: Double = 0.2
-        static let walkingWeight: Double = 0.25
-        static let waitingWeight: Double = 0.15
-        static let longWalkingPenalty: Double = 1.2
-        static let manyTransfersPenalty: Double = 1.3
-        static let longWalkingThreshold = 15
+        static let durationWeight: Double = 0.45
+        static let transfersWeight: Double = 0.25
+        static let walkingWeight: Double = 0.20
+        static let waitingWeight: Double = 0.10
+        static let longWalkingPenalty: Double = 1.5
+        static let manyTransfersPenalty: Double = 1.4
+        static let longWalkingThreshold = 12
         static let highTransferThreshold = 2
     }
     
@@ -77,25 +77,28 @@ struct TripPlan {
     }
     
     
-    func calculateRouteScore() -> Double {
-        let normalizedDuration = Double(duration) / 120
-        let normalizedSegments = Double(segments.count) / 5.0
-        let normalizedWalking = Double(walkingDuration) / 30
-        let normalizedWaiting = Double(waitingDuration) / 20
+    static func calculateRouteScore(route: TripPlan) -> Double {
+        let normalizedDuration = Double(route.duration) / 90.0        // Normalized to 90 min
+        let transferCount = route.segments.count - 1                  // Actual transfer count
+        let normalizedTransfers = Double(max(0, transferCount)) / 3.0 // Normalized to 3 transfers
+        let normalizedWalking = Double(route.walkingDuration) / 20.0  // Normalized to 20 min
+        let normalizedWaiting = Double(route.waitingDuration) / 15.0  // Normalized to 15 min
+        
         var score = 0.0
         
         score += normalizedDuration * RouteWeights.durationWeight
-        score += normalizedSegments * RouteWeights.segmentWeight
+        score += normalizedTransfers * RouteWeights.transfersWeight
         score += normalizedWalking * RouteWeights.walkingWeight
         score += normalizedWaiting * RouteWeights.waitingWeight
         
-        
-        if walkingDuration > RouteWeights.longWalkingThreshold {
-            score *= RouteWeights.longWalkingPenalty
+        if route.walkingDuration > RouteWeights.longWalkingThreshold {
+            let excessWalking = Double(route.walkingDuration - RouteWeights.longWalkingThreshold) / 10.0
+            score *= (1.0 + (excessWalking * (RouteWeights.longWalkingPenalty - 1.0)))
         }
         
-        if segments.count > RouteWeights.highTransferThreshold {
-            score *= RouteWeights.manyTransfersPenalty
+        if transferCount > RouteWeights.highTransferThreshold {
+            let excessTransfers = Double(transferCount - RouteWeights.highTransferThreshold)
+            score *= (1.0 + (excessTransfers * (RouteWeights.manyTransfersPenalty - 1.0) / 2.0))
         }
         
         return score
@@ -107,26 +110,123 @@ struct TripPlan {
         return formatter
     }()
     
-    static func getRecommendedRoute(from availableRoutes: [TripPlan]) -> TripPlan {
-        guard !availableRoutes.isEmpty else {
-            fatalError("No routes available")
+    static func getTopRecommendedRoutes(from availableRoutes: [TripPlan], limit: Int = 5) -> [TripPlan] {
+        guard !availableRoutes.isEmpty else { return [] }
+        
+        var walkingGroups: [Bool: [TripPlan]] = [true: [], false: []]
+        
+        for route in availableRoutes {
+            let isFirstSegmentWalking = route.segments.first?.type == .walk
+            if isFirstSegmentWalking {
+                walkingGroups[true]?.append(route)
+            } else {
+                walkingGroups[false]?.append(route)
+            }
         }
         
-
-        return availableRoutes.min { routeA, routeB in
-//            if routeA.segments.count != routeB.segments.count {
-//                return routeA.segments.count < routeB.segments.count
-//            }
+        walkingGroups[true]?.sort { route1, route2 in
+            guard let walkSegment1 = route1.segments.first, let walkSegment2 = route2.segments.first else {
+                return false
+            }
+            return walkSegment1.duration < walkSegment2.duration
+        }
+        
+        var finalSortedWalkingGroups: [Bool: [TripPlan]] = [true: [], false: []]
+        
+        for (isWalking, routes) in walkingGroups {
+            let segmentCountGroups = Dictionary(grouping: routes) { route in
+                return route.segments.count
+            }.sorted { $0.key < $1.key }
             
-            if routeA.duration != routeB.duration {
-                return routeA.duration < routeB.duration
+            var sortedBySegmentCount: [TripPlan] = []
+            
+            for (_, routesWithSameSegmentCount) in segmentCountGroups {
+                let sortedByStartTime = routesWithSameSegmentCount.sorted { $0.startTime < $1.startTime }
+                var startTimeGroups: [[TripPlan]] = []
+                var currentTimeGroup: [TripPlan] = []
+                var previousStartTime: Date?
+                let timeThreshold = 1 * 60
+                
+                for route in sortedByStartTime {
+                    if let prevTime = previousStartTime,
+                       abs(route.startTime.timeIntervalSince(prevTime)) <= Double(timeThreshold) {
+                        currentTimeGroup.append(route)
+                    } else {
+                        if !currentTimeGroup.isEmpty {
+                            startTimeGroups.append(currentTimeGroup)
+                        }
+                        currentTimeGroup = [route]
+                        previousStartTime = route.startTime
+                    }
+                }
+                
+                if !currentTimeGroup.isEmpty {
+                    startTimeGroups.append(currentTimeGroup)
+                }
+                
+                var segmentGroupRoutes: [TripPlan] = []
+                for group in startTimeGroups {
+                    let sortedByDuration = group.sorted { route1, route2 in
+                        if abs(route1.duration - route2.duration) <= 60 { // Within 1 minute threshold
+                            return calculateRouteScore(route: route1) < calculateRouteScore(route: route2)
+                        }
+                        return route1.duration < route2.duration
+                    }
+                    segmentGroupRoutes.append(contentsOf: sortedByDuration)
+                }
+                
+                sortedBySegmentCount.append(contentsOf: segmentGroupRoutes)
             }
             
-            return routeA.walkingDuration < routeB.walkingDuration
-        }!
+            finalSortedWalkingGroups[isWalking] = sortedBySegmentCount
+        }
+        
+        var finalRoutes: [TripPlan] = []
+        finalRoutes.append(contentsOf: finalSortedWalkingGroups[false] ?? [])
+        finalRoutes.append(contentsOf: finalSortedWalkingGroups[true] ?? [])
+        
+        let actualLimit = min(limit, finalRoutes.count)
+        return Array(finalRoutes.prefix(actualLimit))
     }
     
+    private static func sortWalkingSegment(routes: [TripPlan]) -> [TripPlan] {
+        return routes.sorted { (route1, route2) -> Bool in
+            let isFirstSegmentWalking1 = route1.segments.first?.type == .walk
+            let isFirstSegmentWalking2 = route2.segments.first?.type == .walk
+            
+            if isFirstSegmentWalking1 && isFirstSegmentWalking2 {
+                return route1.segments.first!.duration < route2.segments.first!.duration
+            } else if isFirstSegmentWalking1 && !isFirstSegmentWalking2 {
+                return false
+            } else if !isFirstSegmentWalking1 && isFirstSegmentWalking2 {
+                return true
+            } else {
+                return calculateRouteScore(route: route1) < calculateRouteScore(route: route2)
+            }
+        }
+    }
+    
+    public static func == (lhs: TripPlan, rhs: TripPlan) -> Bool {
+        guard lhs.startTime == rhs.startTime,
+              lhs.endTime == rhs.endTime,
+              lhs.duration == rhs.duration,
+              lhs.walkingDuration == rhs.walkingDuration,
+              lhs.waitingDuration == rhs.waitingDuration,
+              lhs.ridingDuration == rhs.ridingDuration,
+              lhs.segments.count == rhs.segments.count else {
+            return false
+        }
+        
+        return lhs.segments == rhs.segments
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(startTime)
+        hasher.combine(endTime)
+        hasher.combine(duration)
+        hasher.combine(walkingDuration)
+        hasher.combine(waitingDuration)
+        hasher.combine(ridingDuration)
+        hasher.combine(segments)
+    }
 }
-
-
-

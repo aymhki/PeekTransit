@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RouteDetailsView: View {
     let routePlan: TripPlan
+    let index: Int
+    let numRoutes: Int
     let onDismiss: () -> Void
     let onRouteSelected: (TripPlan) -> Void
     @State private var isLoading = false
@@ -11,7 +13,7 @@ struct RouteDetailsView: View {
         
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Recommended Route")
+                Text("Route \(index)/\(numRoutes)")
                     .font(.headline)
                 Spacer()
                 Button(action: onDismiss) {
