@@ -20,7 +20,7 @@ actor RequestRateLimiter {
 
 
 class TransitAPI {
-    private let apiKey = "uoYzaq2iEyZK1opS6zqo"
+    private let apiKey = Config.shared.transitAPIKey
     private let baseURL = "https://api.winnipegtransit.com/v3"
     static let shared = TransitAPI()
     @Published private(set) var isLoading = false
@@ -69,7 +69,7 @@ class TransitAPI {
         }
         
         
-        print("Sent: \(url)")
+        // print("Sent: \(url)")
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
@@ -78,17 +78,17 @@ class TransitAPI {
         }
         
         guard httpResponse.statusCode == 200 else {
-            print(httpResponse)
+            // print(httpResponse)
             throw TransitError.networkError(NSError(domain: "", code: httpResponse.statusCode))
             
         }
         
-        do {
-            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-            print("Received: \(json)")
-        } catch {
-            print("Error occurred during JSON deserialization: \(error)")
-        }
+//        do {
+//            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+//            print("Received: \(json)")
+//        } catch {
+//            print("Error occurred during JSON deserialization: \(error)")
+//        }
         
         
         

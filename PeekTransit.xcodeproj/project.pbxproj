@@ -235,6 +235,7 @@
 				Models/AnyCodable.swift,
 				Models/SharedDefaults.swift,
 				Models/WidgetModel.swift,
+				Services/Config.swift,
 				Services/WinnipegTransitAPI.swift,
 			);
 			target = 2FBB70982D500E0C008998C8 /* PeekTransitWidgetExtension */;
@@ -305,6 +306,7 @@
 				Models/AnyCodable.swift,
 				Models/SharedDefaults.swift,
 				Models/WidgetModel.swift,
+				Services/Config.swift,
 				Services/WinnipegTransitAPI.swift,
 			);
 			target = 2FBB71202D501CC0008998C8 /* PeekTransitWidgetIntentHelper */;
