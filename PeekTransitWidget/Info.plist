@@ -7,36 +7,26 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
-    
-    <key>NSExtensionAttributes</key>
-        <dict>
-            <key>IntentsSupported</key>
-            <array>
-                <string>ConfigurationLargeIntent</string>
-                <string>ConfigurationLockscreenIntent</string>
-                <string>ConfigurationMediumIntent</string>
-                <string>ConfigurationSmallIntent</string>
-            </array>
-        </dict>
-
-        <key>NSWidgetWantsLocation</key>
-            <true/>
-        <key>NSLocationUsageDescription</key>
-            <string>The widget needs your location to show nearby transit stops</string>
-        <key>NSLocationWhenInUseUsageDescription</key>
-            <string>The widget needs your location to show nearby transit stops</string>
-        
-        <key>CFBundleDisplayName</key>
-        <string>Peek Transit</string>
-        
-        <key>UIAppFonts</key>
-        <array>
-            <string>LCDDot.ttf</string>
-            <string>SF-Pro-Text-Black.otf</string>
-            <string>courier-bold.ttf</string>
-            <string>courier-normal.ttf</string>
-            <string>consolas.ttf</string>
-            <string>Consolas-Bold.ttf</string>
-        </array>
+	<key>NSExtensionAttributes</key>
+	<dict>
+		<key>IntentsSupported</key>
+		<array>
+			<string>ConfigurationLargeIntent</string>
+			<string>ConfigurationLockscreenIntent</string>
+			<string>ConfigurationMediumIntent</string>
+			<string>ConfigurationSmallIntent</string>
+		</array>
+	</dict>
+	<key>NSWidgetWantsLocation</key>
+	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>LCDDot.ttf</string>
+		<string>SF-Pro-Text-Black.otf</string>
+		<string>courier-bold.ttf</string>
+		<string>courier-normal.ttf</string>
+		<string>consolas.ttf</string>
+		<string>Consolas-Bold.ttf</string>
+	</array>
 </dict>
 </plist>

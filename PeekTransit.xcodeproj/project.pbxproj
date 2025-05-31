@@ -611,9 +611,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransit/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to show nearby transit stops and provide directions";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Peek Transit needs access your location to find nearby stops.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Peek Transit needs access to your location to find nearby stops.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -624,7 +627,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -650,9 +653,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransit/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to show nearby transit stops and provide directions";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Peek Transit needs access your location to find nearby stops.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Peek Transit needs access to your location to find nearby stops.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
@@ -663,7 +669,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -807,8 +813,10 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PeekTransitWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationUsageDescription = "The widget needs your location to show nearby transit stops";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "The widget needs your location to show nearby transit stops";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -822,7 +830,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
@@ -846,8 +854,10 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PeekTransitWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationUsageDescription = "The widget needs your location to show nearby transit stops";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "The widget needs your location to show nearby transit stops";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -861,7 +871,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
@@ -891,7 +901,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -919,7 +929,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
