@@ -47,7 +47,7 @@ struct AboutView: View {
                         LinkItem(imageName: "InstagramIcon", text: "Instagram")
                     }
                     
-                    Link(destination: URL(string: "https://github.com/Aymanhki")!) {
+                    Link(destination: URL(string: "https://github.com/aymhki")!) {
                         LinkItem(imageName: "GithubIconSVG", text: "GitHub")
                     }
                 }
