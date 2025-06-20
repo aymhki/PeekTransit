@@ -184,6 +184,9 @@ class StopsDataStore: ObservableObject {
             do {
                 let searchedStops = try await TransitAPI.shared.searchStops(query: query, forShort: getGlobalAPIForShortUsage())
                 
+                await MainActor.run {
+                    self.searchResults = searchedStops
+                }
                 
                 do {
                     let _ = try? await TransitAPI.shared.getVariantsForStops(stops: searchedStops) { [weak self] enrichedStop in
@@ -191,7 +194,7 @@ class StopsDataStore: ObservableObject {
                         
                         await MainActor.run {
                             if enrichedStop.number != -1,
-                               let index = self.stops.firstIndex(where: { ($0.number as? Int) == enrichedStop.number }) {
+                               let index = self.searchResults.firstIndex(where: { ($0.number as? Int) == enrichedStop.number }) {
                                 self.searchResults[index] = enrichedStop
                             }
                         }
