@@ -33,8 +33,8 @@ struct AnyCodable: Codable {
                 value = selectedVariants
             } else if let selectedStops = try? container.decode([Stop].self) {
                 value = selectedStops
-            } else if let perferredStps = try? container.decode([Stop].self) {
-                value = perferredStps
+            } else if let perferredStops = try? container.decode([Stop].self) {
+                value = perferredStops
             } else if let array = try? container.decode([AnyCodable].self) {
                 value = array.map { $0.value }
             } else if let dictionary = try? container.decode([String: AnyCodable].self) {
@@ -78,8 +78,8 @@ struct AnyCodable: Codable {
                 try container.encode(variant)
             } else if let selectedStops = value as? [Stop] {
                 try container.encode(selectedStops)
-            } else if let perferredStps = value as? [Stop] {
-                try container.encode(perferredStps)
+            } else if let perferredStops = value as? [Stop] {
+                try container.encode(perferredStops)
             } else if let selectedVariants = value as? [Variant] {
                 try container.encode(selectedVariants)
             } else if let  array = value as? [Any] {

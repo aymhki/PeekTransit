@@ -706,36 +706,6 @@
             endingLineNumber = "197"
             landmarkName = "searchForStops(query:userLocation:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "8CB74D9B-8176-47EB-88B1-37C1B2302295 - 7730807d8c5f62fa"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 @Swift.MainActor @Sendable () -&gt; () in closure #3 (Peek_Transit.Stop) async -&gt; () in closure #2 () async -&gt; () in Peek_Transit.StopsDataStore.searchForStops(query: Swift.String, userLocation: Swift.Optional&lt;__C.CLLocation&gt;) async -&gt; ()"
-                  moduleName = "Peek Transit.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/aymhki/IdeaProjects/PeekTransit/PeekTransit/Services/StopsDataStore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "197"
-                  endingLineNumber = "197">
-               </Location>
-               <Location
-                  uuid = "8CB74D9B-8176-47EB-88B1-37C1B2302295 - 9e405093bbc431c4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 (Peek_Transit.Stop) -&gt; Swift.Bool in closure #1 @Swift.MainActor @Sendable () -&gt; () in closure #3 (Peek_Transit.Stop) async -&gt; () in closure #2 () async -&gt; () in Peek_Transit.StopsDataStore.searchForStops(query: Swift.String, userLocation: Swift.Optional&lt;__C.CLLocation&gt;) async -&gt; ()"
-                  moduleName = "Peek Transit.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/aymhki/IdeaProjects/PeekTransit/PeekTransit/Services/StopsDataStore.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "197"
-                  endingLineNumber = "197">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
