@@ -2,13 +2,13 @@ import SwiftUI
 import WidgetKit
 
 struct StopSelectionStep: View {
-    @Binding var selectedStops: [[String: Any]]
+    @Binding var selectedStops: [Stop]
     @Binding var isClosestStop: Bool
     @Binding var selectedPerferredStopsInClosestStops: Bool
     let maxStopsAllowed: Int
     let settingNotification: Bool
     
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationManager = LocationManager.shared
     @StateObject private var stopsStore = StopsDataStore.shared
     @State private var searchText = ""
     @State private var maxPerferredstopsInClosestStops: Int = getMaxPerferredstopsInClosestStops()
@@ -23,12 +23,12 @@ struct StopSelectionStep: View {
         case transitioning
     }
     
-    var combinedStops: [[String: Any]] {
+    var combinedStops: [Stop] {
         var combined = stopsStore.stops
-        let existingStopNumbers = Set(combined.compactMap { $0["number"] as? Int })
+        let existingStopNumbers = Set(combined.compactMap { $0.number })
         
         for stop in stopsStore.searchResults {
-            if let number = stop["number"] as? Int,
+            if let number = stop.number as? Int,
                !existingStopNumbers.contains(number) {
                 combined.append(stop)
             }
@@ -37,29 +37,25 @@ struct StopSelectionStep: View {
         return combined
     }
     
-    var filteredStops: [[String: Any]] {
+    var filteredStops: [Stop] {
         let stopsToFilter = selectedTab == 0 ? combinedStops : savedStopsManager.savedStops.map { $0.stopData }
         
         guard !searchText.isEmpty else { return stopsToFilter }
         
         return stopsToFilter.filter { stop in
-            if let name = stop["name"] as? String,
+            if let name = stop.name as? String,
                name.localizedCaseInsensitiveContains(searchText) {
                 return true
             }
             
-            if let number = stop["number"] as? Int,
+            if let number = stop.number as? Int,
                String(number).contains(searchText) {
                 return true
             }
             
-            if let variants = stop["variants"] as? [[String: Any]] {
+            if let variants = stop.variants as? [Variant] {
                 return variants.contains { variant in
-                    if let variantDict = variant["variant"] as? [String: Any],
-                       let key = variantDict["key"] as? String {
-                        return key.localizedCaseInsensitiveContains(searchText)
-                    }
-                    return false
+                    return variant.key.localizedCaseInsensitiveContains(searchText)
                 }
             }
             
@@ -79,12 +75,12 @@ struct StopSelectionStep: View {
         }
     }
     
-    private func isStopSelected(_ stop: [String: Any]) -> Bool {
-        selectedStops.contains(where: { ($0["number"] as? Int) == (stop["number"] as? Int) })
+    private func isStopSelected(_ stop: Stop) -> Bool {
+        selectedStops.contains(where: { ($0.number) == (stop.number) })
     }
     
-    private func toggleStopSelection(_ stop: [String: Any]) {
-        if let index = selectedStops.firstIndex(where: { ($0["number"] as? Int) == (stop["number"] as? Int) }) {
+    private func toggleStopSelection(_ stop: Stop) {
+        if let index = selectedStops.firstIndex(where: { ($0.number) == (stop.number) }) {
             selectedStops.remove(at: index)
         } else if selectedStops.count < getWhichMaxStopsToUse {
             selectedStops.append(stop)
@@ -243,7 +239,6 @@ struct StopSelectionStep: View {
                                             .foregroundColor(.secondary)
                                             .frame(maxWidth: .infinity, minHeight: 100)
                                     } else {
-                                        // Only show content when ready
                                         Group {
                                             if viewState != .transitioning {
                                                 stopsListContent
@@ -335,7 +330,7 @@ struct StopSelectionStep: View {
 
             ForEach(filteredStops.indices, id: \.self) { index in
                 let stop = filteredStops[index]
-                if let variants = stop["variants"] as? [[String: Any]] {
+                if let variants = stop.variants as? [Variant] {
                     SelectableStopRow(
                         stop: stop,
                         variants: variants,

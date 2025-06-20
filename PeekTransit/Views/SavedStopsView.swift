@@ -11,23 +11,19 @@ struct SavedStopsView: View {
         return savedStopsManager.savedStops.filter { savedStop in
             let stop = savedStop.stopData
             
-            if let name = stop["name"] as? String,
+            if let name = stop.name as? String,
                name.localizedCaseInsensitiveContains(searchText) {
                 return true
             }
             
-            if let number = stop["number"] as? Int,
+            if let number = stop.number as? Int,
                String(number).contains(searchText) {
                 return true
             }
             
-            if let variants = stop["variants"] as? [[String: Any]] {
+            if let variants = stop.variants as? [Variant] {
                 return variants.contains { variant in
-                    if let variantDict = variant["variant"] as? [String: Any],
-                       let key = variantDict["key"] as? String {
-                        return key.localizedCaseInsensitiveContains(searchText)
-                    }
-                    return false
+                    return variant.key.localizedCaseInsensitiveContains(searchText)
                 }
             }
             

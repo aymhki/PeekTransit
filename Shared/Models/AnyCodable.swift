@@ -1,6 +1,5 @@
 import Foundation
 
-
 struct AnyCodable: Codable {
     let value: Any
     
@@ -21,12 +20,28 @@ struct AnyCodable: Codable {
             value = double
         } else if let string = try? container.decode(String.self) {
             value = string
-        } else if let array = try? container.decode([AnyCodable].self) {
-            value = array.map { $0.value }
-        } else if let dictionary = try? container.decode([String: AnyCodable].self) {
-            value = dictionary.mapValues { $0.value }
         } else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyCodable value cannot be decoded")
+            if let stops = try? container.decode([Stop].self) {
+                value = stops
+            } else if let stop = try? container.decode(Stop.self) {
+                value = stop
+            } else if let variants = try? container.decode([Variant].self) {
+                value = variants
+            } else if let variant = try? container.decode(Variant.self) {
+                value = variant
+            } else if let selectedVariants = try? container.decode([Variant].self) {
+                value = selectedVariants
+            } else if let selectedStops = try? container.decode([Stop].self) {
+                value = selectedStops
+            } else if let perferredStps = try? container.decode([Stop].self) {
+                value = perferredStps
+            } else if let array = try? container.decode([AnyCodable].self) {
+                value = array.map { $0.value }
+            } else if let dictionary = try? container.decode([String: AnyCodable].self) {
+                value = dictionary.mapValues { $0.value }
+            } else {
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyCodable value cannot be decoded")
+            }
         }
     }
     
@@ -44,13 +59,37 @@ struct AnyCodable: Codable {
             try container.encode(double)
         case let string as String:
             try container.encode(string)
-        case let array as [Any]:
-            try container.encode(array.map { AnyCodable($0) })
-        case let dict as [String: Any]:
-            try container.encode(dict.mapValues { AnyCodable($0) })
+        case let stops as [Stop]:
+            try container.encode(stops)
+        case let stop as Stop:
+            try container.encode(stop)
+        case let variants as [Variant]:
+            try container.encode(variants)
+        case let variant as Variant:
+            try container.encode(variant)
         default:
-            let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "AnyCodable value cannot be encoded")
-            throw EncodingError.invalidValue(value, context)
+            if let stops = value as? [Stop] {
+                try container.encode(stops)
+            } else if let stop = value as? Stop {
+                try container.encode(stop)
+            } else if let variants = value as? [Variant] {
+                try container.encode(variants)
+            } else if let variant = value as? Variant {
+                try container.encode(variant)
+            } else if let selectedStops = value as? [Stop] {
+                try container.encode(selectedStops)
+            } else if let perferredStps = value as? [Stop] {
+                try container.encode(perferredStps)
+            } else if let selectedVariants = value as? [Variant] {
+                try container.encode(selectedVariants)
+            } else if let  array = value as? [Any] {
+                try container.encode(array.map { AnyCodable($0) })
+            } else if let dict = value as? [String: Any] {
+                try container.encode(dict.mapValues { AnyCodable($0) })
+            } else {
+                let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "AnyCodable value cannot be encoded")
+                throw EncodingError.invalidValue(value, context)
+            }
         }
     }
 }

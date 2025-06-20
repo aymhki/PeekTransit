@@ -4,9 +4,9 @@ import SwiftUI
 
 class CustomStopAnnotation: MKPointAnnotation {
     let stopNumber: Int
-    var stopData: [String: Any]
+    var stopData: Stop
     
-    init(stopNumber: Int, stopData: [String: Any]) {
+    init(stopNumber: Int, stopData: Stop) {
         self.stopNumber = stopNumber
         self.stopData = stopData
         super.init()

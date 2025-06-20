@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreLocation
 import SwiftData
 import BackgroundTasks
 
@@ -38,9 +39,12 @@ struct PeekTransitApp: App {
                 }
             }
             .onAppear {
-                showSplashScreen = !hasSeenSplashScreen
+                let locationStatus = CLLocationManager.authorizationStatus()
+
+                showSplashScreen = !hasSeenSplashScreen && locationStatus == .notDetermined
+
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     isInitialized = true
                 }
             }

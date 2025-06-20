@@ -1,33 +1,68 @@
 import Foundation
+import SwiftUICore
 import CoreLocation
 import WidgetKit
 
 actor RequestRateLimiter {
     private var lastRequestTime: Date = Date()
-    private let minimumRequestInterval: TimeInterval = 1.0
+    private let minimumRequestInterval: TimeInterval = 0.1
+    
+    private var callCount: Int = 0
+    private var minuteStartTime: Date = Date()
+    private let maxCallsPerMinute: Int = 100
+    
     
     func waitIfNeeded() async {
         let currentTime = Date()
-        let timeSinceLastRequest = currentTime.timeIntervalSince(lastRequestTime)
         
-        if timeSinceLastRequest < minimumRequestInterval {
-            try? await Task.sleep(nanoseconds: UInt64((minimumRequestInterval - timeSinceLastRequest) * 1_000_000_000))
+        let timeElapsedSinceMinuteStart = currentTime.timeIntervalSince(minuteStartTime)
+        if timeElapsedSinceMinuteStart >= 60.0 {
+            callCount = 0
+            minuteStartTime = currentTime
         }
         
+        if callCount >= maxCallsPerMinute {
+            let timeToWaitForNewMinute = 60.0 - timeElapsedSinceMinuteStart + minimumRequestInterval
+            if timeToWaitForNewMinute > 0 {
+                print("\n***** Rate limit reached (\(maxCallsPerMinute) calls/minute). Waiting \(Int(timeToWaitForNewMinute)) seconds for next minute...")
+                try? await Task.sleep(nanoseconds: UInt64(timeToWaitForNewMinute * 1_000_000_000))
+                
+                callCount = 0
+                minuteStartTime = Date()
+            }
+        }
+        
+        let timeSinceLastRequest = currentTime.timeIntervalSince(lastRequestTime)
+        if timeSinceLastRequest < minimumRequestInterval {
+           try? await Task.sleep(nanoseconds: UInt64((minimumRequestInterval - timeSinceLastRequest) * 1_000_000_000))
+        }
+        
+        callCount += 1
         lastRequestTime = Date()
+        
+        print("\n***** API Call #\(callCount) in current minute")
+    }
+    
+    func getCallStats() -> (callCount: Int, timeRemaining: TimeInterval) {
+        let currentTime = Date()
+        let timeElapsed = currentTime.timeIntervalSince(minuteStartTime)
+        let timeRemaining = max(0, 60.0 - timeElapsed)
+        return (callCount: callCount, timeRemaining: timeRemaining)
+    }
+    
+    func resetCounter() {
+        callCount = 0
+        minuteStartTime = Date()
     }
 }
 
-
 class TransitAPI {
     private let apiKey = Config.shared.transitAPIKey
-    private let baseURL = "https://api.winnipegtransit.com/v3"
+    private let baseURL = "https://api.winnipegtransit.com/v4"
     static let shared = TransitAPI()
     @Published private(set) var isLoading = false
     private let rateLimiter = RequestRateLimiter()
     static let winnipegTimeZone = TimeZone(identifier: "America/Winnipeg")!
-
-
     
     init() {}
     
@@ -69,7 +104,7 @@ class TransitAPI {
         }
         
         
-        // print("Sent: \(url)")
+        print("\n***** Sent: \(url.absoluteString) at \(Date())")
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
@@ -95,7 +130,7 @@ class TransitAPI {
         return data
     }
     
-    func getNearbyStops(userLocation: CLLocation, forShort: Bool) async throws -> [[String: Any]] {
+    func getNearbyStops(userLocation: CLLocation, forShort: Bool) async throws -> [Stop] {
         guard let url = createURL(
             path: "stops.json",
             parameters: [
@@ -116,23 +151,25 @@ class TransitAPI {
             throw TransitError.parseError("Invalid stops data format")
         }
         
-        var processedStops: [(stop: [String: Any], distance: Double)] = []
+        var finalStopsToReturn: [Stop] = []
         
-        for var stop in stops {
-            if forShort, let name = stop["name"] as? String {
-                stop["name"] = name.replacingOccurrences(of: "@", with: " @ ")
-            }
-            
-            var distanceValue: Double = Double.infinity
-            if let distances = stop["distances"] as? [String: Any],
-               let firstDistance = distances.first,
-               let distanceString = firstDistance.value as? String,
-               let distance = Double(distanceString) {
-                distanceValue = distance
-            }
-            
-            processedStops.append((stop: stop, distance: distanceValue))
+        for stop in stops {
+            finalStopsToReturn.append(Stop(from: stop))
         }
+        
+        var processedStops: [(stop: Stop, distance: Double)] = []
+        
+        for var stop in finalStopsToReturn {
+            if forShort {
+                stop.name = stop.name.replacingOccurrences(of: "@", with: " @ ")
+            }
+            
+            processedStops.append((stop: stop, distance: stop.distance))
+        }
+        
+        let currentDate = Date()
+        
+        processedStops = processedStops.filter { currentDate >= $0.stop.effectiveFrom  && currentDate <= $0.stop.effectiveTo }
         
         let sortedStops = processedStops
             .sorted { $0.distance < $1.distance }
@@ -142,7 +179,7 @@ class TransitAPI {
         return sortedStops
     }
     
-    func searchStops(query: String, forShort: Bool) async throws -> [[String: Any]] {
+    func searchStops(query: String, forShort: Bool) async throws -> [Stop] {
         guard let url = createURL(
             path: "stops:\(query).json",
             parameters: [
@@ -159,52 +196,120 @@ class TransitAPI {
             throw TransitError.parseError("Invalid stops data format")
         }
         
-        var mutableStops = stops
+        var finalStopsToReturn: [Stop] = [];
+        
         if forShort {
-            for (index, var stop) in mutableStops.enumerated() {
-                if let name = stop["name"] as? String {
-                    stop["name"] = name.replacingOccurrences(of: "@", with: " @ ")
-                    mutableStops[index] = stop
-                }
+            for stopData in stops {
+                var toAdd: Stop = Stop(from: stopData)
+                toAdd.name = toAdd.name.replacingOccurrences(of: "@", with: " @ ")
+                finalStopsToReturn.append(toAdd)
+            }
+        } else {
+            for stopData in stops {
+                finalStopsToReturn.append(Stop(from: stopData))
             }
         }
         
-        return mutableStops.prefix(getMaxStopsAllowedToFetchForSearch()).map{$0}
+        return Array(finalStopsToReturn.prefix(getMaxStopsAllowedToFetchForSearch()))
     }
-    
-    
-    
-    private func createVariantsForStop(_ stopNumber: Int, currentDate: Date, endDate: Date, forShort: Bool) async throws -> [[String: Any]] {
-        let dateFormatter = ISO8601DateFormatter()
-        let startTime = dateFormatter.string(from: currentDate)
-        let endTime = dateFormatter.string(from: endDate)
+
+    private func createVariantsForStop(_ stopNumber: Int, currentDate: Date, endDate: Date, forShort: Bool) async -> [Variant] {
+
+        var variantToReturn: [Variant] = []
         
-        guard let url = createURL(path: "variants.json", parameters: [
-            "start": startTime,
-            "end": endTime,
-            "stop": stopNumber,
-            "usage": forShort ? "short" : "long"
-        ]) else {
-            throw TransitError.invalidURL
-        }
-        
-        let data = try await fetchData(from: url)
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let variantsArray = json["variants"] as? [[String: Any]] else {
-            throw TransitError.parseError("Invalid variants data format")
-        }
-        
-        return variantsArray.map { variant -> [String: Any] in
-            let route: [String: Any] = [
-                "key": stopNumber,
-                "number": stopNumber
+        guard let url = createURL(
+            path: "routes.json",
+            parameters: [
+                "stop": stopNumber,
+                "usage": forShort ? "short" : "long"
             ]
-            return ["route": route, "variant": variant]
+        ) else {
+            print("Warning: Invalid URL for stop \(stopNumber), returning original variant")
+            return variantToReturn
         }
+        
+        do {
+            let data = try await fetchData(from: url)
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                    let routeSchedules = json["routes"] as? [[String: Any]]
+            else {
+                print("Warning: Invalid stop schedule data format for stop \(stopNumber), returning original variant")
+                return variantToReturn
+            }
+            
+            for routeSchedule in routeSchedules {
+                guard let badgeStyle = routeSchedule["badge-style"] as? [String: Any],
+                      let backgroundColor = badgeStyle["background-color"] as? String,
+                      let borderColor = badgeStyle["border-color"] as? String,
+                      let textColor = badgeStyle["color"] as? String,
+                      let effectiveFrom = routeSchedule["effective-from"] as? String,
+                      let effectiveTo = routeSchedule["effective-to"] as? String,
+                      let variants = routeSchedule["variants"] as? [[String: Any]]
+                else {
+                    print("Warning: Invalid route schedule format, skipping this route")
+                    continue
+                }
+                
+                let name = routeSchedule["name"] as? String ?? "No Route Name"
+                let number = routeSchedule["number"] as? String ?? "No Route Number"
+                
+                var routeKeyToUse = ""
+                
+                if let routeKey = routeSchedule["key"] as? String {
+                    routeKeyToUse = routeKey
+                } else if let routeKey = routeSchedule["key"] as? Int {
+                    routeKeyToUse = String(routeKey)
+                } else {
+                    print("Warning: Invalid route key format or key not found, skipping this route")
+                    continue
+                }
+                
+                
+                for variantData in variants {
+                    do {
+                        var enrichedVariantData = variantData
+                        enrichedVariantData["background-color"] = backgroundColor
+                        enrichedVariantData["border-color"] = borderColor
+                        enrichedVariantData["text-color"] = textColor
+                        enrichedVariantData["name"] = name == "No Route Name" ? number == "No Route Number" ? "No Route Name or Number" : number : name
+                        enrichedVariantData["effective-from"] = effectiveFrom
+                        enrichedVariantData["effective-to"] = effectiveTo
+                        
+                        let vaenrichedVariantDatariant = Variant(from: enrichedVariantData)
+                        
+                        variantToReturn.append(vaenrichedVariantDatariant)
+                        
+                        
+                    } catch {
+                        print("Warning: Failed to process variant data: \(error), skipping this variant")
+                        continue
+                    }
+                    
+                }
+                
+                
+                do {
+                    
+                    var newRouteForThisKey = Route(key: routeKeyToUse, name: name, textColor: textColor, backgroundColor: backgroundColor, borderColor: borderColor, variants: variantToReturn)
+                    
+                    RouteCacheManager.shared.cacheRoute(newRouteForThisKey)
+                    
+                } catch {
+                    print("Warning: Failed to cache route \(routeKeyToUse): \(error), continuing with next route")
+                    continue
+                }
+            }
+            
+        } catch {
+            print("Warning: Failed to fetch data for stop \(stopNumber): \(error), returning original variant")
+        }
+        
+        return variantToReturn
     }
+
     
-    private func validateCaches(stops: [[String: Any]], enrichedStops: [[String: Any]], currentDate: Date, endDate: Date, forShort: Bool) async throws -> Bool {
-        let stopNumbers = stops.compactMap { $0["number"] as? Int }
+    private func validateCaches(stops: [Stop], enrichedStops: [Stop], currentDate: Date, endDate: Date, forShort: Bool) async throws -> Bool {
+        let stopNumbers = stops.compactMap { $0.number  }
         let stopsParam = stopNumbers.map(String.init).joined(separator: ",")
         
         guard let url = createURL(path: "variants.json", parameters: [
@@ -222,22 +327,27 @@ class TransitAPI {
             throw TransitError.parseError("Invalid bulk variants data format")
         }
         
-        let bulkVariantsSet = Set(allVariants.compactMap { variant -> String? in
-            guard let key = variant["key"] as? String,
-                  let name = variant["name"] as? String else { return nil }
-            return "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
+        var allVariantsToUse: [Variant] = []
+        
+        for variant in allVariants {
+            allVariantsToUse.append(Variant(from: variant));
+        }
+        
+        
+        let bulkVariantsSet = Set(allVariantsToUse.compactMap { variant -> String? in
+            return variant.key.split(separator: "-").first?.description
         })
         
         for enrichedStop in enrichedStops {
-            guard let variants = enrichedStop["variants"] as? [[String: Any]] else { continue }
+            let variants = enrichedStop.variants
             
             for variant in variants {
-                guard let variantData = variant["variant"] as? [String: Any],
-                      let key = variantData["key"] as? String,
-                      let name = variantData["name"] as? String else { continue }
                 
-                let variantIdentifier = "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
+                let variantIdentifier = variant.key.split(separator: "-").first?.description ?? ""
+                
                 if !bulkVariantsSet.contains(variantIdentifier) {
+                    
+                    print("\n**********\n \(variant.key) from stop \(enrichedStop.number) was not found in the bulk variants request \n**********\n")
                     return false
                 }
             }
@@ -246,71 +356,96 @@ class TransitAPI {
         return true
     }
     
-    func getVariantsForStops(stops: [[String: Any]]) async throws -> [[String: Any]] {
-        var enrichedStops: [[String: Any]] = []
+    
+    func getVariantsForStops(stops: [Stop], onStopEnriched: @escaping (Stop) async -> Void) async -> [Stop] {
+        var enrichedStops: [Stop] = []
         let currentDate = Date()
         let calendar = Calendar.current
         let endDate = calendar.date(byAdding: .hour, value: getTimePeriodAllowedForNextBusRoutes(), to: currentDate)!
         
         for var stop in stops {
-            if let stopNumber = stop["number"] as? Int {
-                var stopVariants: [[String: Any]]
+            if stop.number != -1 {
+                var stopVariants: [Variant]
                 
-                if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
+                if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stop.number) {
                     stopVariants = cachedVariants
                 } else {
-                    stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
-                    VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
+                    stopVariants = await createVariantsForStop(stop.number, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
+                    do {
+                        VariantsCacheManager.shared.cacheVariants(stopVariants, for: stop.number)
+                    } catch {
+                        print("Warning: Failed to cache variants for stop \(stop.number): \(error), continuing without caching")
+                    }
                 }
                 
                 if !stopVariants.isEmpty {
                     stopVariants = stopVariants.filter { variantObjects in
-                        guard let variantObject = variantObjects["variant"] as? [String: Any],
-                        let variantKey = variantObject["key"] as? String 
-                        else { return true }
-                        return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W" || variantKey.prefix(1) == "I")
+                        return !(variantObjects.key.prefix(1) == "S" || variantObjects.key.prefix(1) == "W" || variantObjects.key.prefix(1) == "I")
                     }
                     
-                    stop["variants"] = stopVariants
+                    stop.variants = stopVariants
                     enrichedStops.append(stop)
+                    
+                    await onStopEnriched(stop)
                 }
             }
         }
         
-        let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
-        
-        if !cachesValid {
-            VariantsCacheManager.shared.clearAllCaches()
-            return try await getVariantsForStops(stops: stops)
+        do {
+          let cachesValid = try await validateCaches(stops: stops, enrichedStops: enrichedStops, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
+            
+            if !cachesValid {
+                print("Warning: Caches invalid, clearing and retrying")
+                VariantsCacheManager.shared.clearAllCaches()
+                return await getVariantsForStops(stops: stops, onStopEnriched: onStopEnriched)
+            }
+        } catch {
+            print("Warning: Failed to validate caches: \(error), proceeding with current results")
         }
         
         return enrichedStops
     }
     
-    func getOnlyVariantsForStop(stop: [String: Any]) async throws -> [[String: Any]] {
+    func getOnlyVariantsForStop(stop: Stop) async throws -> [Variant] {
         let currentDate = Date()
         let calendar = Calendar.current
         let endDate = calendar.date(byAdding: .hour, value: getTimePeriodAllowedForNextBusRoutes(), to: currentDate)!
         
-        if let stopNumber = stop["number"] as? Int {
-            var stopVariants: [[String: Any]]
+        if stop.number != -1 {
+            var stopVariants: [Variant] = []
             
-            if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stopNumber) {
-                stopVariants = cachedVariants
-            } else {
-                stopVariants = try await createVariantsForStop(stopNumber, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
-                VariantsCacheManager.shared.cacheVariants(stopVariants, for: stopNumber)
+            guard let url = createURL(
+                path: "variants.json",
+                parameters: [
+                    "stop": stop.number
+                    
+                ]
+            ) else {
+                print("Warning: Invalid URL for stop \(stop.number), returning original variant")
+                return []
+            }
+            
+            let data = try await fetchData(from: url)
+            
+            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let allVariants = json["variants"] as? [[String: Any]] else {
+                throw TransitError.parseError("Invalid bulk variants data format")
+            }
+            
+            
+            
+            for currentVariant in allVariants {
+                var variantToAdd = Variant(from: currentVariant)
+                stopVariants.append(variantToAdd)
             }
             
             if !stopVariants.isEmpty {
+                
                 stopVariants = stopVariants.filter { variantObjects in
-                    guard let variantObject = variantObjects["variant"] as? [String: Any],
-                    let variantKey = variantObject["key"] as? String
-                    else { return true }
-                    return !(variantKey.prefix(1) == "S" || variantKey.prefix(1) == "W" || variantKey.prefix(1) == "I")
+                    return !(variantObjects.key.prefix(1) == "S" || variantObjects.key.prefix(1) == "W" || variantObjects.key.prefix(1) == "I") && (currentDate >= variantObjects.effectiveFrom  && currentDate <= variantObjects.effectiveTo)
                 }
                 
-                return stopVariants
+                return Array(Set<Variant>(stopVariants))
             }
         }
         
@@ -582,7 +717,6 @@ class TransitAPI {
         })
     }
     
-    
     func cleanScheduleMixedTimeFormat(schedule: [String: Any]) -> [String] {
         var busScheduleList: [String] = []
         let currentDate = Date()
@@ -797,7 +931,6 @@ class TransitAPI {
         }
     }
     
-    
     func findTrip(from origin: CLLocation, to destination: CLLocation) async throws -> [TripPlan] {
         var allPlans: [TripPlan] = []
         
@@ -866,13 +999,12 @@ class TransitAPI {
             }
             
             if transfers < 5 {
-                try await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second delay
+                try await Task.sleep(nanoseconds: 1_000_000_000)
             }
         }
         
         return Array(Set(allPlans))
     }
-    
     
     func getCurrentWinnipegDateTime() -> Date {
         let utcCalendar = Calendar.current
@@ -927,7 +1059,6 @@ class TransitAPI {
         
         var allPlans: [TripPlan] = []
         
-        // First try with no max-transfers parameter (unlimited transfers)
         var parameters: [String: Any] = [
             "origin": currentLocationKey,
             "destination": toLocationKey,
@@ -1006,6 +1137,5 @@ class TransitAPI {
         
         return Array(Set(allPlans))
     }
-    
 }
 

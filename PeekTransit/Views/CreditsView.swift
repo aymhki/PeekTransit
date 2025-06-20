@@ -4,25 +4,7 @@ struct CreditsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                
             
-//                VStack (spacing: 0) {
-//                    Text("Logo created by:\n")
-//                        .foregroundColor(.primary)
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                    Text("Omar Hkias")
-//                        .foregroundColor(.blue)
-//                        .underline()
-//                        .onTapGesture {
-//                            if let url = URL(string: "https://www.instagram.com/hkias/") {
-//                                UIApplication.shared.open(url)
-//                            }
-//                        }
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                    
-//                }
-//                
-//                Spacer()
                 
                 VStack (spacing: 0) {
                     Text("App design inspired by:\n")

@@ -7,10 +7,10 @@ import WidgetKit
 
 struct WidgetSetupView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationManager = LocationManager.shared
     @State private var currentStep = 1
-    @State private var selectedStops: [[String: Any]] = []
-    @State private var selectedVariants: [String: [[String: Any]]] = [:]
+    @State private var selectedStops: [Stop] = []
+    @State private var selectedVariants: [String: [Variant]] = [:]
     @State private var widgetSize = "medium"
     @State private var isClosestStop = false
     @State private var selectedTimeFormat: TimeFormat = .default
@@ -38,7 +38,7 @@ struct WidgetSetupView: View {
             _selectedTimeFormat = State(initialValue: TimeFormat(rawValue: widget.widgetData["timeFormat"] as? String ?? "") ?? .default)
             _showLastUpdatedStatus = State(initialValue: widget.widgetData["showLastUpdatedStatus"] as? Bool ?? true)
             _isClosestStop = State(initialValue: widget.widgetData["isClosestStop"] as? Bool ?? false)
-            _selectedStops = State(initialValue: widget.widgetData["stops"] as? [[String: Any]] ?? [])
+            _selectedStops = State(initialValue: widget.widgetData["stops"] as? [Stop] ?? [])
             _widgetName = State(initialValue:widget.widgetData["name"] as? String ?? "")
             _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
             _multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? true)
@@ -46,13 +46,12 @@ struct WidgetSetupView: View {
             
             var counter = 0
             
-            if let stops = widget.widgetData["stops"] as? [[String: Any]] {
-                var variants: [String: [[String: Any]]] = [:]
+            if let stops = widget.widgetData["stops"] as? [Stop] {
+                var variants: [String: [Variant]] = [:]
                 for stop in stops {
                     if counter < getMaxStopsAllowedWith(widgetSizeGiven: widget.widgetData["size"] as? String ?? "medium") {
-                        if let number = stop["number"] as? Int,
-                           let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
-                            variants[String(number)] = selectedVariants
+                        if stop.number != -1 {
+                            variants[String(stop.number)] = stop.selectedVariants
                         }
                     }
                     
@@ -71,15 +70,15 @@ struct WidgetSetupView: View {
             return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
         } else {
             let stopNumbers = selectedStops.compactMap { stop -> String? in
-                guard let number = stop["number"] as? Int else { return nil }
-                return "#\(number)"
+                guard  stop.number != -1 else { return nil }
+                return "#\(stop.number)"
             }.joined(separator: ", ")
             
             var variantKeys = ""
             
             if (!noSelectedVariants) {
                 variantKeys = selectedVariants.values.flatMap { variants in
-                    variants.compactMap { $0["key"] as? String }
+                    variants.compactMap { $0.key }
                 }.joined(separator: ", ")
             } else {
                 variantKeys = "Up Coming Buses"
@@ -117,14 +116,15 @@ struct WidgetSetupView: View {
             widgetData["type"] = "multi_stop"
         }
         
-        var stopsData: [[String: Any]] = []
+        var stopsData: [Stop] = []
         
         for stop in selectedStops {
             var stopData = stop
-            if let stopNumber = stop["number"] as? Int,
-               let variants = selectedVariants[String(stopNumber)] {
-                stopData["selectedVariants"] = variants
+            if stop.number != -1,
+               let variants = selectedVariants[String(stop.number)] {
+                stopData.selectedVariants = variants
             }
+            
             stopsData.append(stopData)
         }
         
@@ -179,7 +179,6 @@ struct WidgetSetupView: View {
                 slideOffset = 0
             }
             
-            // Reset transitioning state after animation completes
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 self.isTransitioning = false
             }
@@ -198,7 +197,7 @@ struct WidgetSetupView: View {
             
             if currentStep == 2 {
                 if editingWidget != nil {
-                    var newSelectedVariants = [String: [[String: Any]]]()
+                    var newSelectedVariants = [String: [Variant]]()
                     for (key, values) in selectedVariants {
                         newSelectedVariants[key] = Array(values.prefix(maxVariantsPerStop))
                     }
@@ -243,8 +242,8 @@ struct WidgetSetupView: View {
                 return false
             }
             return !selectedStops.allSatisfy { stop in
-                guard let stopNumber = stop["number"] as? Int else { return false }
-                return selectedVariants[String(stopNumber)]?.isEmpty == false
+                guard stop.number != -1 else { return false }
+                return selectedVariants[String(stop.number)]?.isEmpty == false
             } && !noSelectedVariants
         default:
             return false

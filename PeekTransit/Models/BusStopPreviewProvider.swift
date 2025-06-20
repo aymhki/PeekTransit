@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct BusStopPreviewProvider: UIViewControllerRepresentable {
-    let stop: [String: Any]
+    let stop: Stop
     
     func makeUIViewController(context: Context) -> UIViewController {
         let hostingController = UIHostingController(

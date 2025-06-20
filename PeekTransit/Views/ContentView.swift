@@ -9,7 +9,7 @@ struct ContentView: View {
     @AppStorage(settingsUserDefaultsKeys.defaultTab) private var defaultTab: Int = 0
     @State private var showUpdateAlert = false
     @State private var showStopView = false
-    @State private var selectedStop: [String: Any]? = nil
+    @State private var selectedStop: Stop? = nil
     @State private var isLoadingStop = false
     @State private var loadingError: Error? = nil
     
@@ -53,7 +53,7 @@ struct ContentView: View {
                     selection = defaultTab
                 }
                 
-                WidgetCenter.shared.reloadAllTimelines()
+                
                 
                 NotificationCenter.default.addObserver(
                     forName: .appUpdateAvailable,
@@ -98,6 +98,9 @@ struct ContentView: View {
                             showStopView = false
                             loadingError = nil
                         })
+                        .onAppear() {
+                            WidgetCenter.shared.reloadAllTimelines()
+                        }
                 }
             } else if loadingError != nil {
                 StopLoadErrorView(error: loadingError, onRetry: {
@@ -128,7 +131,7 @@ struct ContentView: View {
         loadingError = nil
         
         if let currentStop = selectedStop,
-           let currentStopNumber = currentStop["number"] as? Int,
+           let currentStopNumber = currentStop.number as? Int,
            currentStopNumber == stopNumber {
             isLoadingStop = true
         } else {

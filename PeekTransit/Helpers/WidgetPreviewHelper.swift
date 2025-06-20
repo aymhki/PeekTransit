@@ -11,14 +11,14 @@ enum PreviewHelper {
         
         if (!noConfig) {
             if (widgetData["isClosestStop"] as? Bool == false) {
-                guard let stops = widgetData["stops"] as? [[String: Any]] else { return nil }
+                guard let stops = widgetData["stops"] as? [Stop] else { return nil }
                 
                 for stop in stops {
                     if (widgetData["noSelectedVariants"] as? Bool == false) {
-                        if let variants = stop["selectedVariants"] as? [[String: Any]] {
+                        if let variants = stop.selectedVariants as? [Variant] {
                             for variant in variants {
-                                if let key = variant["key"] as? String,
-                                   let name = variant["name"] as? String {
+                                if let key = variant.key as? String,
+                                   let name = variant.name as? String {
                                     
                                     if (multipleEntriesPerVariant) {
                                         previewSchedules.append("\(key)\(getScheduleStringSeparator())\(name)\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
@@ -40,12 +40,12 @@ enum PreviewHelper {
                             maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
                         }
                         
-                        var selectedVariants: [[String: Any]] = []
+                        var selectedVariants: [Variant] = []
                         for _ in 0..<maxVariants {
-                            let variant: [String: Any] = [
+                            let variant: Variant = Variant(from:[
                                 "key": getWidgetTextPlaceholder(),
                                 "name": getWidgetTextPlaceholder()
-                            ]
+                            ])
                             selectedVariants.append(variant)
                             if (multipleEntriesPerVariant) {
                                 previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
@@ -56,10 +56,10 @@ enum PreviewHelper {
                         }
                         
                         var updatedStop = stop
-                        updatedStop["selectedVariants"] = selectedVariants
+                        updatedStop.selectedVariants = selectedVariants
                         
-                        if var updatedStops = updatedWidgetData["stops"] as? [[String: Any]],
-                           let stopIndex = updatedStops.firstIndex(where: { ($0["number"] as? Int) == (stop["number"] as? Int) }) {
+                        if var updatedStops = updatedWidgetData["stops"] as? [Stop],
+                           let stopIndex = updatedStops.firstIndex(where: { ($0.number) == (stop.number) }) {
                             updatedStops[stopIndex] = updatedStop
                             updatedWidgetData["stops"] = updatedStops
                         }
@@ -84,16 +84,16 @@ enum PreviewHelper {
                     maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
                 }
                 
-                var generatedStops: [[String: Any]] = []
+                var generatedStops: [Stop] = []
                 
                 for stopIndex in 0..<maxStops {
-                    var selectedVariants: [[String: Any]] = []
+                    var selectedVariants: [Variant] = []
                     
                     for _ in 0..<maxVariants {
-                        let variant: [String: Any] = [
+                        let variant: Variant = Variant(from: [
                             "key": getWidgetTextPlaceholder(),
                             "name": getWidgetTextPlaceholder()
-                        ]
+                        ])
                         selectedVariants.append(variant)
                         if (multipleEntriesPerVariant) {
                             previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
@@ -103,12 +103,12 @@ enum PreviewHelper {
                         }
                     }
                     
-                    let stop: [String: Any] = [
+                    let stop: Stop = Stop(from:[
                         "id": "preview_stop_\(stopIndex)",
                         "name": getWidgetTextPlaceholder(),
                         "number": getWidgetTextPlaceholder(),
                         "selectedVariants": selectedVariants
-                    ]
+                    ])
                     
                     generatedStops.append(stop)
                 }
@@ -134,16 +134,16 @@ enum PreviewHelper {
                 maxVariants = getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
             }
             
-            var generatedStops: [[String: Any]] = []
+            var generatedStops: [Stop] = []
             
             for stopIndex in 0..<maxStops {
-                var selectedVariants: [[String: Any]] = []
+                var selectedVariants: [Variant] = []
                 
                 for _ in 0..<maxVariants {
-                    let variant: [String: Any] = [
+                    let variant: Variant = Variant(from: [
                         "key": getWidgetTextPlaceholder(),
                         "name": getWidgetTextPlaceholder()
-                    ]
+                    ])
                     selectedVariants.append(variant)
                     if (multipleEntriesPerVariant) {
                         previewSchedules.append("\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(getWidgetTextPlaceholder())\(getScheduleStringSeparator())\(stringToUseBasedOnTimeFormat)\(getScheduleStringSeparator())\(TimeFormat.minutesRemaining.brief)")
@@ -153,12 +153,12 @@ enum PreviewHelper {
                     }
                 }
                 
-                let stop: [String: Any] = [
+                let stop: Stop = Stop(from: [
                     "id": "preview_stop_\(stopIndex)",
                     "name": getWidgetTextPlaceholder(),
                     "number": getWidgetTextPlaceholder(),
                     "selectedVariants": selectedVariants
-                ]
+                ])
                 
                 generatedStops.append(stop)
             }

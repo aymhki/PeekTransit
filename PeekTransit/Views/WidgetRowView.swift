@@ -20,7 +20,7 @@ struct WidgetRowView: View {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isSelected ? .blue : .gray)
                     .font(.title2)
-                    .frame(width: 44) // Fixed width for consistent alignment
+                    .frame(width: 44)
                     .padding(.leading, 16)
             }
             
@@ -56,7 +56,6 @@ struct WidgetRowView: View {
                 .if(themeManager.currentTheme == .classic) { view in
                     view.background(.black)
                 }
-                //.clipShape(RoundedRectangle(cornerRadius: 12))
                 .frame(maxWidth: getWidgetPreviewWidthForSize(widgetSizeSystemFormat: nil, widgetSizeStringFormat: currentSize))
                 .frame(height: getPreviewHeight())
                 

@@ -4,11 +4,11 @@ import WidgetKit
 
 
 struct MapView: View {
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationManager = LocationManager.shared
     @StateObject private var stopsStore = StopsDataStore.shared
     @StateObject private var networkMonitor = NetworkMonitor()
     @State private var region = MKCoordinateRegion()
-    @State private var selectedStop: [String: Any]?
+    @State private var selectedStop: Stop?
     @State private var showLoadingIndicator = false
     @State private var centerMapOnUser = true
     @State private var isManualRefresh = true
@@ -23,9 +23,20 @@ struct MapView: View {
     @State private var hasPerformedInitialLoad = false
 
 
+    var locationDenied: Bool {
+        locationManager.authorizationStatus == .denied ||
+        locationManager.authorizationStatus == .restricted
+    }
 
     
     private let defaultSpan = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+    
+    var currentlyAvailableStops: [Stop] {
+        let currentDate = Date()
+        return stopsStore.stops.filter { stop in
+            return currentDate >= stop.effectiveFrom && currentDate <= stop.effectiveTo
+        }
+    }
     
     var body: some View {
 
@@ -34,7 +45,7 @@ struct MapView: View {
             ZStack {
                 
                 MapViewRepresentable(
-                    stops: stopsStore.stops,
+                    stops: currentlyAvailableStops,
                     userLocation: locationManager.location,
                     onAnnotationTapped: { annotation in
                         if let customAnnotation = annotation as? CustomStopAnnotation {
@@ -46,7 +57,7 @@ struct MapView: View {
                 )
                 .edgesIgnoringSafeArea(.top)
                 
-//                if !networkMonitor.isConnected && stopsStore.stops.isEmpty && !stopsStore.isLoading && stopsStore.error == nil && stopsStore.errorForGetStopFromTripPlan == nil {
+//                if !networkMonitor.isConnected && currentlyAvailableStops.isEmpty && !stopsStore.isLoading && stopsStore.error == nil && stopsStore.errorForGetStopFromTripPlan == nil {
 //                    NetworkWaitingView() {
 //                        networkMonitor.stopMonitoring()
 //                        networkMonitor.startMonitoring()
@@ -55,6 +66,11 @@ struct MapView: View {
 //                        .background(Color(.systemBackground).opacity(0.9))
 //                        .cornerRadius(10)
 //                }
+                
+                if locationDenied {
+                    LocationPermissionDeniedView()
+                        .zIndex(1)
+                }
                 
                 VStack {
                     Spacer()
@@ -149,10 +165,21 @@ struct MapView: View {
         }
         .onAppear {
             networkMonitor.startMonitoring()
-            locationManager.initialize()
-            locationManager.startUpdatingLocation()
+            
+            if locationManager.authorizationStatus == nil {
+                locationManager.initialize()
+            }
+            
+            if locationManager.authorizationStatus == .authorizedWhenInUse ||
+               locationManager.authorizationStatus == .authorizedAlways {
+                locationManager.startUpdatingLocation()
+            }
+            
             isManualRefresh = true
-            locationManager.requestLocation()
+            
+            if locationManager.location == nil {
+                locationManager.requestLocation()
+            }
         }
         .onDisappear {
             networkMonitor.stopMonitoring()
@@ -162,6 +189,20 @@ struct MapView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             isAppActive = true
+            
+            if (stopsStore.stops.isEmpty && !stopsStore.isLoading) {
+                isManualRefresh = true
+                showLoadingIndicator = true
+                if let location = locationManager.location {
+                    Task {
+                        await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
+                        showLoadingIndicator = false
+                        isManualRefresh = false
+                    }
+                } else {
+                    locationManager.requestLocation()
+                }
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("FocusOnStop"))) { notification in
             withAnimation {
@@ -177,12 +218,17 @@ struct MapView: View {
 
         }
         .onChange(of: locationManager.location) { newLocation in
-           // guard !hasPerformedInitialLoad else { return }
-            guard isAppActive else { return }
-            guard let location = newLocation else { return }
             
-            if locationManager.shouldRefresh(for: location) {
-                hasPerformedInitialLoad = true
+            guard isAppActive else {
+                return
+            }
+            guard let location = newLocation else {
+                return
+            }
+            
+            let shouldRefresh = locationManager.shouldRefresh(for: location)
+            
+            if shouldRefresh {
                 Task {
                     await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                     if isManualRefresh {
@@ -192,16 +238,8 @@ struct MapView: View {
             }
         }
         .onChange(of: locationManager.authorizationStatus) { newStatus in
-            guard !hasPerformedInitialLoad else { return }
-            
             if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
                 locationManager.requestLocation()
-                if let location = locationManager.location {
-                    hasPerformedInitialLoad = true
-                    Task {
-                        await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
-                    }
-                }
             }
         }
 
@@ -285,7 +323,7 @@ struct MapView: View {
     }
     
     private func selectAndDisplayStop(withNumber stopNumber: Int, navigateToBusStopView: Bool) {
-        if let existingStop = stopsStore.stops.first(where: { ($0["number"] as? Int) == stopNumber }) {
+        if let existingStop = currentlyAvailableStops.first(where: { ($0.number) == stopNumber }) {
             if (navigateToBusStopView) {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.selectedStop = existingStop
@@ -321,15 +359,9 @@ struct MapView: View {
         }
     }
     
-    private func zoomToStop(_ stop: [String: Any]) {
-        guard let centre = stop["centre"] as? [String: Any],
-              let geographic = centre["geographic"] as? [String: Any],
-              let lat = Double(geographic["latitude"] as? String ?? ""),
-              let lon = Double(geographic["longitude"] as? String ?? "") else {
-            return
-        }
-        
-        let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    private func zoomToStop(_ stop: Stop) {
+
+        let coordinate = CLLocationCoordinate2D(latitude: stop.centre.geographic.latitude, longitude: stop.centre.geographic.longitude)
         let region = MKCoordinateRegion(
             center: coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001)
@@ -339,11 +371,62 @@ struct MapView: View {
             mapView.setRegion(region, animated: true)
             
             if let annotation = mapView.annotations.first(where: {
-                ($0 as? CustomStopAnnotation)?.stopNumber == (stop["number"] as? Int)
+                ($0 as? CustomStopAnnotation)?.stopNumber == (stop.number)
             }) {
                 mapView.selectAnnotation(annotation, animated: true)
             }
         }
     }
     
+}
+
+
+struct LocationPermissionDeniedView: View {
+    @State private var showSettingsAlert = false
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "location.slash.fill")
+                .font(.system(size: 50))
+                .foregroundColor(.red)
+            
+            Text("Location Access Required")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            Text("PeekTransit needs your location to show nearby transit stops")
+                .font(.body)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Button(action: {
+                showSettingsAlert = true
+            }) {
+                Text("Enable Location Access")
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.blue)
+                    .cornerRadius(25)
+            }
+        }
+        .padding(40)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.systemBackground))
+                .shadow(radius: 10)
+        )
+        .padding()
+        .alert("Open Settings?", isPresented: $showSettingsAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Open Settings") {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+        } message: {
+            Text("You'll need to enable location access in Settings to use PeekTransit.")
+        }
+    }
 }

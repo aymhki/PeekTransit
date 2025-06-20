@@ -5,7 +5,6 @@ import SwiftUI
 import MapKit
 import Combine
 
-// MARK: - Updated AddressSearchView
 struct AddressSearchView: View {
     @Binding var isSearching: Bool
     @State private var searchQuery = ""
@@ -17,7 +16,7 @@ struct AddressSearchView: View {
     @State private var showingRouteDetails = false
     @State private var networkMonitor = NetworkMonitor()
     @StateObject private var searchHandler = SearchHandler()
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationManager = LocationManager.shared
     @FocusState private var isTextFieldFocused: Bool
     
     var onRouteSelected: (TripPlan) -> Void
@@ -102,7 +101,6 @@ struct AddressSearchView: View {
                             )
                             .background(Color(.secondarySystemGroupedBackground))
                             .cornerRadius(12)
-                            //.padding(.horizontal)
                             
                             if index < topRecommendedRoutes.count - 1 {
                                 Divider()
@@ -174,13 +172,10 @@ struct AddressSearchView: View {
     
     private func getTopRecommendedRoutes(from availableRoutes: [TripPlan]) -> [TripPlan] {
         if availableRoutes.count >= 5 {
-            // Return top 5 routes
             return TripPlan.getTopRecommendedRoutes(from: availableRoutes, limit: 5)
         } else if availableRoutes.count >= 3 {
-            // Return top 3 routes
             return TripPlan.getTopRecommendedRoutes(from: availableRoutes, limit: 3)
         } else {
-            // Return all available routes (could be just 1)
             return TripPlan.getTopRecommendedRoutes(from: availableRoutes, limit: availableRoutes.count)
         }
     }

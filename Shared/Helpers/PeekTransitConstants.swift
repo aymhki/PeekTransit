@@ -506,7 +506,6 @@ public struct ThemeModifier: ViewModifier {
         switch theme {
         case .modern:
             content
-                //.font(.system(size: 14 * sizeFactor, design: .monospaced).bold())
                 .font(.custom("Consolas-Bold", fixedSize: 14 * sizeFactor)).bold()
                 .background(Color(.secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
@@ -553,6 +552,19 @@ extension Color {
         let adjustedColor = uiColor.adjustBrightness(brightness).adjustSaturation(saturation)
 
         self.init(uiColor: adjustedColor)
+    }
+    
+    func toHex() -> String {
+        let uiColor = UIColor(self)
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        
+        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        
+        let rgb = Int(red * 255) << 16 | Int(green * 255) << 8 | Int(blue * 255)
+        return String(format: "#%06x", rgb)
     }
 }
 
@@ -602,9 +614,7 @@ public struct WidgetThemeModifier: ViewModifier {
         switch theme {
         case .modern:
             content
-                //.font(.system(size: getFontSize(), design: .monospaced).bold())
                 .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
-//                .background(Color(widgetSize == .accessoryRectangular ? .clear : .secondarySystemGroupedBackground))
                 .foregroundStyle(.primary)
                 .foregroundStyle(foregroundColor(for: text))
             
@@ -619,7 +629,6 @@ public struct WidgetThemeModifier: ViewModifier {
                     content
                         .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                         .fontWeight(.black)
-                        //.foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
                 }
 
             } else {
@@ -627,7 +636,6 @@ public struct WidgetThemeModifier: ViewModifier {
                 content
                     .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                     .fontWeight(.black)
-//                    .background(.black)
                     .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
                 
 

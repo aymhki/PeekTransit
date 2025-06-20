@@ -34,21 +34,21 @@ enum WidgetHelper {
         return savedWidgets.first { $0.id == id }
     }
     
-    static func getFilteredStopsForWidget(_ stops: [[String: Any]], maxStops: Int, widgetData: [String: Any]?) async -> [[String: Any]] {
-        var filteredStops: [[String: Any]] = []
+    static func getFilteredStopsForWidget(_ stops: [Stop], maxStops: Int, widgetData: [String: Any]?) async -> [Stop] {
+        var filteredStops: [Stop] = []
         var seenVariants = Set<String>()
         
-        let nearbyStopsDict = Dictionary(uniqueKeysWithValues: stops.compactMap { stop -> (Int, [String: Any])? in
-            guard let number = stop["number"] as? Int else { return nil }
+        let nearbyStopsDict = Dictionary(uniqueKeysWithValues: stops.compactMap { stop -> (Int, Stop)? in
+            guard let number = stop.number as? Int else { return nil }
             return (number, stop)
         })
         
         var preferredVariants = Set<String>()
-        if let preferredStops = widgetData?["perferredStops"] as? [[String: Any]] {
+        if let preferredStops = widgetData?["perferredStops"] as? [Stop] {
             for preferredStop in preferredStops {
-                if let selectedVariants = preferredStop["selectedVariants"] as? [[String: Any]] {
+                if let selectedVariants = preferredStop.selectedVariants as? [Variant] {
                     for variant in selectedVariants {
-                        if let key = variant["key"] as? String, let name = variant["name"] as? String {
+                        if let key = variant.key as? String, let name = variant.name as? String {
                             let variantCombo = "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
                             preferredVariants.insert(variantCombo)
                         }
@@ -57,13 +57,13 @@ enum WidgetHelper {
             }
         }
         
-        if let preferredStops = widgetData?["perferredStops"] as? [[String: Any]] {
+        if let preferredStops = widgetData?["perferredStops"] as? [Stop] {
             for preferredStop in preferredStops {
                 if filteredStops.count >= maxStops {
                     break
                 }
                 
-                guard let preferredStopNumber = preferredStop["number"] as? Int,
+                guard let preferredStopNumber = preferredStop.number as? Int,
                       var matchingNearbyStop = nearbyStopsDict[preferredStopNumber] else {
                     continue
                 }
@@ -102,10 +102,10 @@ enum WidgetHelper {
         }
         
         if filteredStops.count < maxStops && !preferredVariants.isEmpty {
-            let processedStopNumbers = Set(filteredStops.compactMap { $0["number"] as? Int })
+            let processedStopNumbers = Set(filteredStops.compactMap { $0.number })
             
             for stop in stops {
-                guard let stopNumber = stop["number"] as? Int else { continue }
+                guard let stopNumber = stop.number as? Int else { continue }
                 
                 if processedStopNumbers.contains(stopNumber) {
                     continue
@@ -133,19 +133,19 @@ enum WidgetHelper {
                     let matchingPreferredVariants = stopVariants.intersection(preferredVariants)
                     if !matchingPreferredVariants.isEmpty {
                         var updatedStop = stop
-                        var selectedVariants: [[String: Any]] = []
+                        var selectedVariants: [Variant] = []
                         
                         for variantCombo in matchingPreferredVariants {
                             let components = variantCombo.components(separatedBy: getCompositKeyLinkerForDictionaries())
                             if components.count == 2 {
-                                selectedVariants.append([
+                                selectedVariants.append(Variant(from:[
                                     "key": components[0],
                                     "name": components[1]
-                                ])
+                                ]))
                             }
                         }
                         
-                        updatedStop["selectedVariants"] = selectedVariants
+                        updatedStop.selectedVariants = selectedVariants
                         filteredStops.append(updatedStop)
                         seenVariants.formUnion(stopVariants)
                         
@@ -161,10 +161,10 @@ enum WidgetHelper {
         }
         
         if filteredStops.count < maxStops {
-            let processedStopNumbers = Set(filteredStops.compactMap { $0["number"] as? Int })
+            let processedStopNumbers = Set(filteredStops.compactMap { $0.number })
             
             for stop in stops {
-                guard let stopNumber = stop["number"] as? Int else { continue }
+                guard let stopNumber = stop.number as? Int else { continue }
                 
                 if processedStopNumbers.contains(stopNumber) {
                     continue
@@ -209,9 +209,9 @@ enum WidgetHelper {
             var usedKeys = Set<String>()
             
             for stop in stops {
-                guard let direction = stop["direction"] as? String,
-                      let street = stop["street"] as? [String: Any],
-                      let streetName = street["name"] as? String else {
+                guard let direction = stop.direction as? String,
+                      let street = stop.street as? Street,
+                      let streetName = street.name as? String else {
                     continue
                 }
                 
@@ -236,14 +236,14 @@ enum WidgetHelper {
     }
     
     static func getScheduleForWidget(_ widgetData: [String: Any], isClosestStop: Bool? = false) async -> ([String]?, [String: Any]) {
-        guard let stops = widgetData["stops"] as? [[String: Any]] else {
+        guard let stops = widgetData["stops"] as? [Stop] else {
             return (nil, widgetData)
         }
         
         let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? true
         var schedulesArray: [String] = []
         var updatedWidgetData = widgetData
-        var updatedStops: [[String: Any]] = []
+        var updatedStops: [Stop] = []
         var cleanedSchedule: [String] = []
         var maxVariants = 0
         var maxStops = 0
@@ -276,7 +276,7 @@ enum WidgetHelper {
             if currentStop < maxStops {
                 
                 currentStop = currentStop + 1
-                guard let stopNumber = stop["number"] as? Int else { continue }
+                guard let stopNumber = stop.number as? Int else { continue }
                 
                 do {
                     let schedule = try await retryRequest {
@@ -292,9 +292,9 @@ enum WidgetHelper {
                         )
                     }
                     
-                    if ( ( isClosestStop ?? false && widgetData["selectedPerferredStopsInClosestStops"] as? Bool == false  ) || widgetData["noSelectedVariants"] as? Bool == true || stop["selectedVariants"] == nil || (stop["selectedVariants"] as? [[String: Any]])?.isEmpty == true ) {
+                    if ( ( isClosestStop ?? false && widgetData["selectedPerferredStopsInClosestStops"] as? Bool == false  ) || widgetData["noSelectedVariants"] as? Bool == true || stop.selectedVariants == nil || (stop.selectedVariants as? [Variant])?.isEmpty == true ) {
                         
-                        var selectedVariants: [[String: Any]] = []
+                        var selectedVariants: [Variant] = []
                         var processedVariants = Set<String>()
                         
                         for scheduleString in cleanedSchedule {
@@ -316,10 +316,10 @@ enum WidgetHelper {
                                     let entriesToAdd = multipleEntriesPerVariant ? Array(variantEntries.prefix(2)) : [variantEntries[0]]
                                     schedulesArray.append(contentsOf: entriesToAdd)
                                     
-                                    selectedVariants.append([
+                                    selectedVariants.append(Variant(from:[
                                         "key": variantKey,
                                         "name": variantName
-                                    ])
+                                    ]))
                                     processedVariants.insert(variantIdentifier)
                                     
                                     if selectedVariants.count >= maxVariants {
@@ -329,12 +329,12 @@ enum WidgetHelper {
                             }
                         }
                         
-                        stop["selectedVariants"] = selectedVariants
+                        stop.selectedVariants = selectedVariants
                     } else {
-                        if let selectedVariants = stop["selectedVariants"] as? [[String: Any]] {
+                        if let selectedVariants = stop.selectedVariants as? [Variant] {
                             for variant in selectedVariants {
-                                guard let variantKey = variant["key"] as? String,
-                                      let variantName = variant["name"] as? String else {
+                                guard let variantKey = variant.key as? String,
+                                      let variantName = variant.name as? String else {
                                     continue
                                 }
                                 
@@ -392,20 +392,37 @@ enum WidgetHelper {
         return Timeline(entries: [entry], policy: .after(nextUpdate))
     }
     
-    
     static func getCachedEntry(forId id: String) -> ([String: Any]?, [String]?, Date?)? {
         guard let sharedDefaults = SharedDefaults.userDefaults else { return nil }
         
-        let cachedWidgetData: [String: Any]? = sharedDefaults.dictionary(forKey: "widget_cache_data_\(id)")
+        var cachedWidgetData: [String: Any]? = nil
+        if let data = sharedDefaults.data(forKey: "widget_cache_data_\(id)") {
+            do {
+                let codableDict = try JSONDecoder().decode([String: AnyCodable].self, from: data)
+                cachedWidgetData = codableDict.mapValues { $0.value }
+            } catch {
+                print("Failed to decode cached widget data: \(error)")
+            }
+        }
+        
         let cachedScheduleData = sharedDefaults.array(forKey: "widget_cache_schedule_\(id)") as? [String]
         let cachedUpdatedAt = sharedDefaults.object(forKey: "widget_cache_updated_time_\(id)") as? Date
         
         return (cachedWidgetData, cachedScheduleData, cachedUpdatedAt)
     }
-    
+
     static func cacheEntry(id: String, widgetData: [String: Any], scheduleData: [String], lastUpdatedTime: Date?) {
         guard let sharedDefaults = SharedDefaults.userDefaults else { return }
-        sharedDefaults.set(widgetData, forKey: "widget_cache_data_\(id)")
+        
+        do {
+            let codableDict = widgetData.mapValues { AnyCodable($0) }
+            let data = try JSONEncoder().encode(codableDict)
+            sharedDefaults.set(data, forKey: "widget_cache_data_\(id)")
+        } catch {
+            print("Failed to cache widget data: \(error)")
+            return
+        }
+        
         sharedDefaults.set(scheduleData, forKey: "widget_cache_schedule_\(id)")
         
         if let lastUpdatedTime = lastUpdatedTime {

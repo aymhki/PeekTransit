@@ -2,7 +2,7 @@ import SwiftUI
 import WidgetKit
 
 struct WidgetStopView: View {
-    let stop: [String: Any]
+    let stop: Stop
     let scheduleData: [String]?
     let size: WidgetFamily
     let stopNamePrefixSize = getStopNameMaxPrefixLengthForWidget()
@@ -34,22 +34,22 @@ struct WidgetStopView: View {
 
         
         VStack(alignment: .leading, spacing: 4) {
-            let stopName = stop["name"] as? String ?? "Unknown"
-            let stopNumber = stop["number"] as? Int ?? 0
+            let stopName = stop.name
+            let stopNumber = stop.number
             let stopNamePrefix = "\(stopName.prefix(stopNamePrefixSize))..."
             
 
             if ( size != .accessoryRectangular && ( !(size == .systemSmall && !multipleEntriesPerVariant) || size == .systemSmall && (scheduleData)?.count ?? 0 <= 1)  && fullyLoaded) {
                 if (size == .systemSmall) {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == 0 ? getWidgetTextPlaceholder() : String(stopNumber) )")
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == -1 ? getWidgetTextPlaceholder() : String(stopNumber) )")
                         .widgetTheme(currentTheme, text: "stop", size: size, inPreview: forPreview)
                         .padding(.top, 2)
                 } else if (size == .systemLarge) {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == 0 ? getWidgetTextPlaceholder() : String(stopNumber) )")
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == -1 ? getWidgetTextPlaceholder() : String(stopNumber) )")
                         .widgetTheme(currentTheme, text: "stop", size: size, inPreview: forPreview)
                         .padding(.top, 2)
                 } else {
-                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == 0 ? getWidgetTextPlaceholder() : String(stopNumber) )")
+                    Text("• \(stopName.count > stopNamePrefixSize ? stopNamePrefix : stopName) - \(stopNumber == -1 ? getWidgetTextPlaceholder() : String(stopNumber) )")
                         .widgetTheme(currentTheme, text: "stop", size: size, inPreview: forPreview)
                         .padding(.bottom, 1)
                         .padding(.top, 8)
@@ -64,14 +64,14 @@ struct WidgetStopView: View {
             
             
             
-            if let variants = stop["selectedVariants"] as? [[String: Any]] {
+            if let variants = stop.selectedVariants as? [Variant] {
                 
 
                 
                 ForEach(variants.prefix(maxSchedules).indices, id: \.self) { variantIndex in
-                    if let key = variants[variantIndex]["key"] as? String,
+                    if let key = variants[variantIndex].key as? String,
                        let schedules = scheduleData,
-                       let variantName = variants[variantIndex]["name"] as? String {
+                       let variantName = variants[variantIndex].name as? String {
                         
                         let matchingSchedules = schedules.filter { scheduleString in
                             let components = scheduleString.components(separatedBy: getScheduleStringSeparator())

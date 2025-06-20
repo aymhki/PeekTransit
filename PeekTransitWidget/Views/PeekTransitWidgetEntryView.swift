@@ -24,13 +24,13 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
         let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(widgetSizeSystemFormat: family, widgetSizeStringFormat: nil)
         
         if scheduleDataSize > 0 {
-            if let widgetStops = widgetData["stops"] as? [[String: Any]] {
+            if let widgetStops = widgetData["stops"] as? [Stop] {
                 for stopIndex in widgetStops.prefix(maxStops).indices {
                     let stop = widgetStops[stopIndex]
                     
-                    let variants = stop["selectedVariants"]
+                    let variants = stop.selectedVariants
                     
-                    totalNumberOfVariantsInStops += (variants as? [[String: Any]])?.count ?? 0
+                    totalNumberOfVariantsInStops += (variants as? [Variant])?.count ?? 0
                 }
             }
         }
@@ -46,15 +46,15 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
         var availableScheduleVariantsSimplified: Set<String> = []
         
         if scheduleDataSize > 0 {
-            if let widgetStops = widgetData["stops"] as? [[String: Any]] {
+            if let widgetStops = widgetData["stops"] as? [Stop] {
                 for stopIndex in widgetStops.indices {
                     let stop = widgetStops[stopIndex]
                     
-                    let variants = stop["selectedVariants"]
+                    let variants = stop.selectedVariants
                     
-                    for variant in variants as? [[String: Any]] ?? [] {
-                        guard let variantKey = variant["key"] as? String,
-                              let variantName = variant["name"] as? String else {
+                    for variant in variants as? [Variant] ?? [] {
+                        guard let variantKey = variant.key as? String,
+                              let variantName = variant.name as? String else {
                             continue
                         }
                         
@@ -90,15 +90,15 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
         var selectedVariantsSimplified: Set<String> = []
         var availableScheduleVariantsSimplified: Set<String> = []
 
-        if let widgetStops = widgetData["stops"] as? [[String: Any]] {
+        if let widgetStops = widgetData["stops"] as? [Stop] {
             for stopIndex in widgetStops.indices {
                 let stop = widgetStops[stopIndex]
                 
-                let variants = stop["selectedVariants"]
+                let variants = stop.selectedVariants
                 
-                for variant in variants as? [[String: Any]] ?? [] {
-                    guard let variantKey = variant["key"] as? String,
-                          let variantName = variant["name"] as? String else {
+                for variant in variants as? [Variant] ?? [] {
+                    guard let variantKey = variant.key as? String,
+                          let variantName = variant.name as? String else {
                         continue
                     }
                     

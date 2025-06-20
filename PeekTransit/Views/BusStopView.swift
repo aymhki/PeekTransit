@@ -2,7 +2,7 @@ import SwiftUI
 import MapKit
 
 struct BusStopView: View {
-    let stop: [String: Any]
+    let stop: Stop
     let isDeepLink: Bool
     let stopLoadError: Error?
     
@@ -37,20 +37,14 @@ struct BusStopView: View {
     }
     
     private var coordinate: CLLocationCoordinate2D? {
-        guard let centre = stop["centre"] as? [String: Any],
-              let geographic = centre["geographic"] as? [String: Any],
-              let lat = Double(geographic["latitude"] as? String ?? ""),
-              let lon = Double(geographic["longitude"] as? String ?? "") else {
-            return nil
-        }
-        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+        return CLLocationCoordinate2D(latitude: stop.centre.geographic.latitude, longitude: stop.centre.geographic.longitude)
     }
     
-    init(stop: [String: Any], isDeepLink: Bool, stopLoadError: Error? = nil) {
+    init(stop: Stop, isDeepLink: Bool, stopLoadError: Error? = nil) {
         self.stop = stop
         self.isDeepLink = isDeepLink
         self.stopLoadError = stopLoadError
-        self._stopNumber = State(initialValue: stop["number"] as? Int ?? 0)
+        self._stopNumber = State(initialValue: stop.number)
     }
     
     private func getLiveUpdatePreference() -> Bool {
@@ -95,7 +89,7 @@ struct BusStopView: View {
             Section {
                 VStack(spacing: 30) {
                     HStack(spacing: 30) {
-                        Text((stop["name"] as? String ?? "Bus Stop"))
+                        Text((stop.name))
                             .font(.title3.bold())
                             .fixedSize(horizontal: false, vertical: true)
                             .lineLimit(nil)
@@ -127,7 +121,7 @@ struct BusStopView: View {
                 Section {
                     RealMapPreview(
                         coordinate: coordinate,
-                        direction: stop["direction"] as? String ?? "Unknown Direction"
+                        direction: stop.direction
                     )
                     .frame(maxWidth: .infinity)
                     .frame(height: 200)
@@ -286,8 +280,8 @@ struct BusStopView: View {
             await loadSchedules(isManual: true)
         })
         .onAppear {
-            if let number = stop["number"] as? Int {
-                stopNumber = number
+            if stop.number != -1 {
+                stopNumber = stop.number
             }
             
             networkMonitor.startMonitoring()

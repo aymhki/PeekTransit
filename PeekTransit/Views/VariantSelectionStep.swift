@@ -1,43 +1,28 @@
 import SwiftUI
 
 struct VariantSelectionStep: View {
-    let selectedStops: [[String: Any]]
-    @Binding var selectedVariants: [String: [[String: Any]]]
+    let selectedStops: [Stop]
+    @Binding var selectedVariants: [String: [Variant]]
     let maxVariantsPerStop: Int
     let settingNotification: Bool
     @Binding var stopsWithoutService: [Int]
     @Binding var showNoServiceAlert: Bool
     @Binding var noSelectedVariants: Bool
-    @State private var stopSchedules: [String: Set<UniqueVariant>] = [:]
+    @State private var stopSchedules: [String: Set<Variant>] = [:]
     @State private var isLoading = false
     @State private var error: Error?
     
-
     
-    struct UniqueVariant: Hashable {
-        let key: String
-        let name: String
-        
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(key)
-            hasher.combine(name)
-        }
-        
-        static func == (lhs: UniqueVariant, rhs: UniqueVariant) -> Bool {
-            return lhs.key == rhs.key && lhs.name == rhs.name
-        }
-    }
-    
-    private func processSchedules(_ schedules: [String]) -> Set<UniqueVariant> {
-        var uniqueVariants = Set<UniqueVariant>()
+    private func processSchedules(_ schedules: [String]) -> Set<Variant> {
+        var uniqueVariants = Set<Variant>()
         
         for schedule in schedules {
             let components = schedule.components(separatedBy: getScheduleStringSeparator())
             if components.count >= 2 {
-                let variant = UniqueVariant(
-                    key: components[0],
-                    name: components[1]
-                )
+                let variant = Variant(from: [
+                    "key": components[0],
+                    "name": components[1]
+                ])
                 uniqueVariants.insert(variant)
             }
         }
@@ -45,25 +30,27 @@ struct VariantSelectionStep: View {
         return uniqueVariants
     }
     
-    private func convertVariantArrayToUniqueSet(_ variants: [[String: Any]]) -> Set<UniqueVariant> {
-        var uniqueVariants = Set<UniqueVariant>()
+    private func convertVariantArrayToUniqueSet(_ variants: [Variant]) -> Set<Variant> {
+        var uniqueVariants = Set<Variant>()
         
         for variantRouteObjects in variants {
-            guard let variant = variantRouteObjects["variant"] as? [String: Any],
-                  var key = variant["key"] as? String,
-                  let name = variant["name"] as? String else { continue }
+            var key = variantRouteObjects.key
             
-            
-                    if let firstPart = key.split(separator: "-").first {
-                        key = String(firstPart)
-                    }
-            
-            
-                    if (key.contains("BLUE")) {
-                        key = "B"
-                    }
-            
-                    uniqueVariants.insert(UniqueVariant(key: key, name: name))
+    
+    
+            if let firstPart = key.split(separator: "-").first {
+                key = String(firstPart)
+            }
+    
+    
+            if (key.contains("BLUE")) {
+                key = "B"
+            }
+    
+            uniqueVariants.insert(Variant(from: [
+                "key": key,
+                "name": variantRouteObjects.name
+            ]))
         }
         
         return uniqueVariants
@@ -79,9 +66,9 @@ struct VariantSelectionStep: View {
             var stopsNoService: [Int] = []
             
             for stop in selectedStops {
-                guard let stopNumber = stop["number"] as? Int else { continue }
+                guard stop.number != -1 else { continue }
                 
-                let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
+                let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stop.number)
                 let cleanSchedule =  TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: .default)
                 let stopVariants = try  await TransitAPI.shared.getOnlyVariantsForStop(stop: stop)
                 let stopVaraintsSet = convertVariantArrayToUniqueSet(stopVariants)
@@ -89,10 +76,10 @@ struct VariantSelectionStep: View {
                 if (!cleanSchedule.isEmpty) {
                                         
                     await MainActor.run {
-                        stopSchedules[String(stopNumber)] = stopVaraintsSet
+                        stopSchedules[String(stop.number)] = stopVaraintsSet
                     }
                 } else {
-                    stopsNoService.append(stopNumber)
+                    stopsNoService.append(stop.number)
                     
                     if !stopsNoService.isEmpty {
                         stopsWithoutService = stopsNoService
@@ -112,25 +99,25 @@ struct VariantSelectionStep: View {
         }
     }
     
-    private func isVariantSelected(stopNumber: Int, variant: UniqueVariant) -> Bool {
+    private func isVariantSelected(stopNumber: Int, variant: Variant) -> Bool {
         selectedVariants[String(stopNumber)]?.contains { selectedVariant in
-            selectedVariant["key"] as? String == variant.key &&
-            selectedVariant["name"] as? String == variant.name
+            selectedVariant.key  == variant.key &&
+            selectedVariant.name == variant.name
         } ?? false
     }
     
-    private func toggleVariantSelection(stopNumber: Int, variant: UniqueVariant) {
-        let variantData: [String: Any] = [
+    private func toggleVariantSelection(stopNumber: Int, variant: Variant) {
+        let variantData: Variant = Variant(from:[
             "key": variant.key,
             "name": variant.name
-        ]
+        ])
         
         let stopId = String(stopNumber)
         
         if var stopVariants = selectedVariants[stopId] {
             if let index = stopVariants.firstIndex(where: {
-                ($0["key"] as? String) == variant.key &&
-                ($0["name"] as? String) == variant.name
+                ($0.key) == variant.key &&
+                ($0.name) == variant.name
             }) {
                 stopVariants.remove(at: index)
                 if stopVariants.isEmpty {
@@ -213,18 +200,16 @@ struct VariantSelectionStep: View {
                         
                         if !noSelectedVariants || settingNotification {
                             
-                            ForEach(selectedStops.indices, id: \.self) { index in
-                                let stop = selectedStops[index]
-                                if let stopNumber = stop["number"] as? Int,
-                                   let variants = stopSchedules[String(stopNumber)] {
+                            ForEach(Array(selectedStops.enumerated()), id: \.offset) { index, stop in
+                                if let variants = stopSchedules[String(stop.number)] {
                                     StopScheduleSection(
                                         stop: stop,
                                         variants: Array(variants),
-                                        selectedVariants: selectedVariants[String(stopNumber)] ?? [],
+                                        selectedVariants: selectedVariants[String(stop.number)] ?? [],
                                         maxVariants: maxVariantsPerStop,
                                         onVariantSelect: { variant in
                                             withAnimation {
-                                                toggleVariantSelection(stopNumber: stopNumber, variant: variant)
+                                                toggleVariantSelection(stopNumber: stop.number, variant: variant)
                                             }
                                         }
                                     )

@@ -58,14 +58,12 @@ class SavedStopsManager: ObservableObject {
         }
     }
     
-    func isStopSaved(_ stop: [String: Any]) -> Bool {
-        guard let stopNumber = stop["number"] as? Int else { return false }
-        return savedStops.contains { $0.id == "\(stopNumber)" }
+    func isStopSaved(_ stop: Stop) -> Bool {
+        return savedStops.contains { $0.id == "\(stop.number)" }
     }
     
-    func toggleSavedStatus(for stop: [String: Any]) {
-        guard let stopNumber = stop["number"] as? Int else { return }
-        let stopId = "\(stopNumber)"
+    func toggleSavedStatus(for stop: Stop) {
+        let stopId = "\(stop.number)"
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }

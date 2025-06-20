@@ -5,7 +5,7 @@ class DeepLinkHandler: ObservableObject {
     
     @Published var selectedStopNumber: Int?
     @Published var isShowingBusStop = false
-    @Published var lastDeepLinkTimestamp: Date? = nil // Track when links are processed
+    @Published var lastDeepLinkTimestamp: Date? = nil
     
     private init() {}
     
@@ -26,7 +26,6 @@ class DeepLinkHandler: ObservableObject {
             return
         }
         
-        // If the same stop is already displayed, trigger a refresh by updating the timestamp
         if self.selectedStopNumber == stopNumber && isShowingBusStop {
             self.lastDeepLinkTimestamp = Date()
         }

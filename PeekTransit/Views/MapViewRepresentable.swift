@@ -4,7 +4,7 @@ import Foundation
 import SwiftUI
 
 struct MapViewRepresentable: UIViewRepresentable {
-    let stops: [[String: Any]]
+    let stops: [Stop]
     let userLocation: CLLocation?
     let onAnnotationTapped: (MKAnnotation) -> Void
     @Binding var centerMapOnUser: Bool
@@ -68,29 +68,21 @@ struct MapViewRepresentable: UIViewRepresentable {
         var newAnnotationsToAdd: [MKAnnotation] = []
 
         for stop in stops {
-            guard let number = stop["number"] as? Int,
-                  let centre = stop["centre"] as? [String: Any],
-                  let geographic = centre["geographic"] as? [String: Any],
-                  let latString = geographic["latitude"] as? String, let lat = Double(latString),
-                  let lonString = geographic["longitude"] as? String, let lon = Double(lonString) else {
-                continue
-            }
-
             // group.enter()
 
-            updatedStopNumbers.insert(number)
-            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            updatedStopNumbers.insert(stop.number)
+            let coordinate = CLLocationCoordinate2D(latitude: stop.centre.geographic.latitude, longitude: stop.centre.geographic.longitude)
 
-            if let existingAnnotation = existingAnnotations[number] as? CustomStopAnnotation {
+            if let existingAnnotation = existingAnnotations[stop.number] as? CustomStopAnnotation {
                 existingAnnotation.coordinate = coordinate
-                existingAnnotation.title = stop["name"] as? String
+                existingAnnotation.title = stop.name
                 existingAnnotation.subtitle = formatSubtitle(for: stop)
                 existingAnnotation.stopData = stop
                 // group.leave()
             } else {
-                let annotation = CustomStopAnnotation(stopNumber: number, stopData: stop)
+                let annotation = CustomStopAnnotation(stopNumber: stop.number, stopData: stop)
                 annotation.coordinate = coordinate
-                annotation.title = stop["name"] as? String
+                annotation.title = stop.name
                 annotation.subtitle = formatSubtitle(for: stop)
                 newAnnotationsToAdd.append(annotation)
                 // group.leave()
@@ -108,7 +100,7 @@ struct MapViewRepresentable: UIViewRepresentable {
             mapView.addAnnotations(newAnnotationsToAdd)
         }
 
-        // group.notify(queue: .main) {} // Re-evaluate if DispatchGroup is needed
+        // group.notify(queue: .main) {} 
     }
     
     private func updateOverlay(on mapView: MKMapView) {
@@ -119,15 +111,13 @@ struct MapViewRepresentable: UIViewRepresentable {
         }
     }
     
-    private func formatSubtitle(for stop: [String: Any]) -> String {
-        var subtitle = "#\(stop["number"] as? Int ?? 0)"
+    private func formatSubtitle(for stop:Stop) -> String {
+        var subtitle = "#\(stop.number)"
         
-        if let variants = stop["variants"] as? [[String: Any]] {
+        if !stop.variants.isEmpty {
             var variantsString = ""
-            let uniqueRoutes = Set(variants.compactMap { variant -> String? in
-                guard let variantDict = variant["variant"] as? [String: Any],
-                      let key = variantDict["key"] as? String else { return nil }
-                return key.split(separator: "-")[0].description
+            let uniqueRoutes = Set(stop.variants.compactMap { variant -> String? in
+                return variant.key.split(separator: "-")[0].description
             })
             variantsString = uniqueRoutes.joined(separator: ", ")
             if !variantsString.isEmpty {
@@ -135,10 +125,9 @@ struct MapViewRepresentable: UIViewRepresentable {
             }
         }
         
-        if let direction = stop["direction"] as? String {
-            subtitle += " - " + direction
-        }
         
+        subtitle += " - " + stop.direction
+    
         return subtitle
     }
     
@@ -175,11 +164,11 @@ struct MapViewRepresentable: UIViewRepresentable {
             
             let markerImage: UIImage?
             switch direction.lowercased() {
-            case "southbound": markerImage = UIImage(named: "GreenBall")
-            case "northbound": markerImage = UIImage(named: "OrangeBall")
-            case "eastbound": markerImage = UIImage(named: "PinkBall")
-            case "westbound": markerImage = UIImage(named: "BlueBall")
-            default: markerImage = UIImage(named: "DefaultBall")
+                case "southbound": markerImage = UIImage(named: "GreenBall")
+                case "northbound": markerImage = UIImage(named: "OrangeBall")
+                case "eastbound": markerImage = UIImage(named: "PinkBall")
+                case "westbound": markerImage = UIImage(named: "BlueBall")
+                default: markerImage = UIImage(named: "DefaultBall")
             }
             
             if let image = markerImage {

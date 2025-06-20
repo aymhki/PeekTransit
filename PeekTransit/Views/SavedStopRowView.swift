@@ -5,17 +5,14 @@ struct SavedStopRowView: View {
     @ObservedObject private var savedStopsManager = SavedStopsManager.shared
     
     var body: some View {
-        if let variants = savedStop.stopData["variants"] as? [[String: Any]] {
+        if let variants = savedStop.stopData.variants as? [Variant] {
             let uniqueVariants = variants.filter { item in
-                guard let variant = item["variant"] as? [String: Any],
-                      let key = variant["key"] as? String else {
-                    return false
-                }
+                
                 var seenKeys = Set<String>()
-                if seenKeys.contains(key.split(separator: "-")[0].description) {
+                if seenKeys.contains(item.key.split(separator: "-")[0].description) {
                     return false
                 }
-                seenKeys.insert(key.split(separator: "-")[0].description)
+                seenKeys.insert(item.key.split(separator: "-")[0].description)
                 return true
             }
             

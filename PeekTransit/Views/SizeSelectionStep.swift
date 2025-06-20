@@ -170,7 +170,7 @@ struct SizeSelectionStep: View {
                             HStack(alignment: .center, spacing: 8) {
                                 CircularCheckbox(isSelected: multipleEntriesPerVariant)
                                     .frame(width: 24)
-                                Text("Mixed format, one entry in minutes and one in clock format (Available only for the 'Multiple Varaints' option)")
+                                Text("Mixed format, one entry in minutes and one in clock format (Available only for the 'Multiple Variants' option)")
                                     .foregroundColor(.primary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .multilineTextAlignment(.leading)

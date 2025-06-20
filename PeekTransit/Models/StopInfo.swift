@@ -11,10 +11,8 @@ struct StopInfo: Hashable {
               let name = dict["name"] as? String,
               let centre = dict["centre"] as? [String: Any],
               let geographic = centre["geographic"] as? [String: Any],
-              let latStr = geographic["latitude"] as? String,
-              let lonStr = geographic["longitude"] as? String,
-              let lat = Double(latStr),
-              let lon = Double(lonStr) else {
+              let lat = geographic["latitude"] as? Double,
+              let lon = geographic["longitude"] as? Double else {
             return nil
         }
         

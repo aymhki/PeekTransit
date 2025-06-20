@@ -6,9 +6,10 @@ import MapKit
 struct StopMapPreview: View {
     let coordinate: CLLocationCoordinate2D
     let direction: String
+    
     @State private var snapshotImage: UIImage?
     @State private var isVisible = false
-    @State private var loadingToken = UUID()
+    @State private var requestId = UUID()
     
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject private var themeManager: ThemeManager
@@ -26,17 +27,20 @@ struct StopMapPreview: View {
         guard isVisible else { return }
         
         let isDarkMode = getPreferredStyle()
-        let token = UUID()
-        self.loadingToken = token
+        let newRequestId = UUID()
+        self.requestId = newRequestId
         
         MapSnapshotCache.shared.snapshot(
             for: coordinate,
             size: CGSize(width: 80, height: 80),
             direction: direction,
-            isDarkMode: isDarkMode
-        ) { image in
-            if self.loadingToken == token {
-                self.snapshotImage = image
+            isDarkMode: isDarkMode,
+            requestId: newRequestId
+        ) { [requestId = newRequestId] image in
+            if self.requestId == requestId {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    self.snapshotImage = image
+                }
             }
         }
     }
@@ -48,6 +52,7 @@ struct StopMapPreview: View {
                     .resizable()
                     .frame(width: 80, height: 80)
                     .cornerRadius(8)
+                    .transition(.opacity)
             } else {
                 Color.gray.opacity(0.2)
                     .frame(width: 80, height: 80)
@@ -65,11 +70,14 @@ struct StopMapPreview: View {
         }
         .onDisappear {
             isVisible = false
+            MapSnapshotCache.shared.cancelRequest(id: requestId)
         }
         .onChange(of: colorScheme) { _ in
+            snapshotImage = nil
             loadSnapshot()
         }
         .onChange(of: themeManager.currentTheme) { _ in
+            snapshotImage = nil
             loadSnapshot()
         }
     }

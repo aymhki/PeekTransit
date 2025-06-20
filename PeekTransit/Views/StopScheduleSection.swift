@@ -1,16 +1,16 @@
 import SwiftUI
 
 struct StopScheduleSection: View {
-    let stop: [String: Any]
-    let variants: [VariantSelectionStep.UniqueVariant]
-    let selectedVariants: [[String: Any]]
+    let stop: Stop
+    let variants: [Variant]
+    let selectedVariants: [Variant]
     let maxVariants: Int
-    let onVariantSelect: (VariantSelectionStep.UniqueVariant) -> Void
+    let onVariantSelect: (Variant) -> Void
     
-    private func isVariantSelected(_ variant: VariantSelectionStep.UniqueVariant) -> Bool {
+    private func isVariantSelected(_ variant: Variant) -> Bool {
         selectedVariants.contains { selectedVariant in
-            selectedVariant["key"] as? String == variant.key &&
-            selectedVariant["name"] as? String == variant.name
+            selectedVariant.key  == variant.key &&
+            selectedVariant.name == variant.name
         }
     }
     
@@ -18,9 +18,9 @@ struct StopScheduleSection: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading) {
-                    Text(stop["name"] as? String ?? "Unknown Stop")
+                    Text(stop.name)
                         .font(.headline)
-                    Text("#\(stop["number"] as? Int ?? 0)")
+                    Text("#\(stop.number)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

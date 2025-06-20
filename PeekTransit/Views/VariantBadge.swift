@@ -1,25 +1,54 @@
 import SwiftUI
 
 struct VariantBadge: View {
-    let route: [String: Any]
-    let variant: [String: Any]
+    let variant: Variant
+    let showFullVariantKey: Bool
+    let showVariantName: Bool
     
     private var variantNumber: String {
-        if let key = variant["key"] as? String {
-            return key.split(separator: "-")[0].description
+        if showFullVariantKey {
+            return variant.key
+        } else {
+            return variant.key.split(separator: "-")[0].description
         }
-        return ""
+    }
+    
+    private var finalTextToShow: String {
+        if showVariantName {
+            return "\(variantNumber) - \(variant.name)"
+        } else {
+            return variantNumber
+        }
     }
     
     var body: some View {
-        HStack(spacing: 4) {
-            Text(variantNumber)
-                .fontWeight(.bold)
-                .font(.caption)
+        if variant.textColor != nil  && variant.backgroundColor != nil  && variant.borderColor != nil {
+            HStack(spacing: 4) {
+                Text(finalTextToShow)
+                    .fontWeight(.bold)
+                    .font(.caption)
+                    .foregroundColor(variant.textColor)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(variant.backgroundColor)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(variant.borderColor ?? Color.clear, lineWidth: 1)
+            )
+            
+        } else {
+            HStack(spacing: 4) {
+                Text(finalTextToShow)
+                    .fontWeight(.bold)
+                    .font(.caption)
+                
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.accentColor)
+            .cornerRadius(8)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(Color.accentColor.opacity(0.3))
-        .cornerRadius(8)
     }
 }

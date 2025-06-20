@@ -78,11 +78,11 @@ struct TripPlan: Hashable {
     
     
     static func calculateRouteScore(route: TripPlan) -> Double {
-        let normalizedDuration = Double(route.duration) / 90.0        // Normalized to 90 min
-        let transferCount = route.segments.count - 1                  // Actual transfer count
-        let normalizedTransfers = Double(max(0, transferCount)) / 3.0 // Normalized to 3 transfers
-        let normalizedWalking = Double(route.walkingDuration) / 20.0  // Normalized to 20 min
-        let normalizedWaiting = Double(route.waitingDuration) / 15.0  // Normalized to 15 min
+        let normalizedDuration = Double(route.duration) / 90.0
+        let transferCount = route.segments.count - 1
+        let normalizedTransfers = Double(max(0, transferCount)) / 3.0
+        let normalizedWalking = Double(route.walkingDuration) / 20.0
+        let normalizedWaiting = Double(route.waitingDuration) / 15.0
         
         var score = 0.0
         
@@ -167,7 +167,7 @@ struct TripPlan: Hashable {
                 var segmentGroupRoutes: [TripPlan] = []
                 for group in startTimeGroups {
                     let sortedByDuration = group.sorted { route1, route2 in
-                        if abs(route1.duration - route2.duration) <= 60 { // Within 1 minute threshold
+                        if abs(route1.duration - route2.duration) <= 60 {
                             return calculateRouteScore(route: route1) < calculateRouteScore(route: route2)
                         }
                         return route1.duration < route2.duration

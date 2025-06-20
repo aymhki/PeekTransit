@@ -2,6 +2,7 @@ import CoreLocation
 import WidgetKit
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    static let shared = LocationManager()
     private var manager: CLLocationManager?
     private let minimumDistanceThreshold: CLLocationDistance = getDistanceChangeAllowedBeforeRefreshingStops()
     
@@ -9,7 +10,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var authorizationStatus: CLAuthorizationStatus?
     private var lastRefreshLocation: CLLocation?
     
-    override init() {
+    
+    private override init() {
         super.init()
     }
     
@@ -19,6 +21,8 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         manager = CLLocationManager()
         manager?.delegate = self
         manager?.desiredAccuracy = kCLLocationAccuracyBest
+        
+        authorizationStatus = manager?.authorizationStatus
     }
     
     func startUpdatingLocation() {
@@ -45,9 +49,10 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         guard let manager = manager else { return }
         
         let status = manager.authorizationStatus
-        if status == .notDetermined {
-            manager.requestWhenInUseAuthorization()
+        if status == .notDetermined || status == .restricted {
+            manager.requestAlwaysAuthorization()
         } else if status == .authorizedWhenInUse || status == .authorizedAlways {
+            manager.startUpdatingLocation()
             manager.requestLocation()
         }
     }
@@ -59,6 +64,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         authorizationStatus = status
         if status == .authorizedWhenInUse || status == .authorizedAlways {
+            manager.startUpdatingLocation()
             manager.requestLocation()
         }
     }

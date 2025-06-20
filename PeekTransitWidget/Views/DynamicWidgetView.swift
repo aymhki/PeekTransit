@@ -254,11 +254,12 @@ struct DynamicWidgetView: View {
     @ViewBuilder
     private var selectedStopsView: some View {
         
-        if let stops = widgetDataToUse["stops"] as? [[String: Any]] {
+        if let stops = widgetDataToUse["stops"] as? [Stop] {
+            let stopsToShow: [Stop] = Array(stops.prefix(maxStops))
             VStack(alignment: .leading, spacing: 4) {
-                ForEach(Array(stops.prefix(maxStops)).indices, id: \.self) { stopIndex in
-                    let stop = stops[stopIndex]
-                    let stopNumber = stop["number"] as? Int ?? 0
+                ForEach(Array(stopsToShow.enumerated()), id: \.offset) { stopIndex, stop in
+                    //let stop = stops[stopIndex]
+                    let stopNumber = stop.number
                     let multipleEntriesPerVariant = widgetDataToUse["multipleEntriesPerVariant"] as? Bool ?? true
                     let destinationUrl = createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!
                     
@@ -268,8 +269,6 @@ struct DynamicWidgetView: View {
                     } else {
                         Link(destination: destinationUrl ) {
                             WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
-                                
-                            
                        }
                     }
                     

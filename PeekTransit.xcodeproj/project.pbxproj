@@ -234,6 +234,7 @@
 				Managers/VariantsCacheManager.swift,
 				Models/AnyCodable.swift,
 				Models/SharedDefaults.swift,
+				Models/Stop.swift,
 				Models/WidgetModel.swift,
 				Services/Config.swift,
 				Services/WinnipegTransitAPI.swift,
@@ -305,6 +306,7 @@
 				Managers/VariantsCacheManager.swift,
 				Models/AnyCodable.swift,
 				Models/SharedDefaults.swift,
+				Models/Stop.swift,
 				Models/WidgetModel.swift,
 				Services/Config.swift,
 				Services/WinnipegTransitAPI.swift,
@@ -830,7 +832,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
@@ -871,7 +873,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 2.5;
-				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
