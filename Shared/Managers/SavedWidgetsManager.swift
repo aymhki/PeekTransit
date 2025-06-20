@@ -3,8 +3,6 @@ import CoreLocation
 import Foundation
 import WidgetKit
 
-
-
 class SavedWidgetsManager: ObservableObject {
     static let shared = SavedWidgetsManager()
     
@@ -21,20 +19,126 @@ class SavedWidgetsManager: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         
-        if let sharedDefaults = SharedDefaults.userDefaults,
-           let data = sharedDefaults.data(forKey: SharedDefaults.widgetsKey),
-           let widgets = try? JSONDecoder().decode([WidgetModel].self, from: data) {
+        guard let sharedDefaults = SharedDefaults.userDefaults,
+              let data = sharedDefaults.data(forKey: SharedDefaults.widgetsKey) else {
+            return
+        }
+        
+        do {
+            let decoder = createJSONDecoder()
+            let widgets = try decoder.decode([WidgetModel].self, from: data)
             savedWidgets = widgets
+        } catch {
+            do {
+                let oldDecoder = JSONDecoder()
+                let widgets = try oldDecoder.decode([WidgetModel].self, from: data)
+                
+                savedWidgets = widgets.map { oldWidget in
+                    let migratedData = WidgetDataMigrator.migrateWidgetDataIfNeeded(oldWidget.widgetData)
+                    return WidgetModel(widgetData: migratedData)
+                }
+                
+                saveToDisk()
+                
+            } catch {
+                savedWidgets = []
+                sharedDefaults.removeObject(forKey: SharedDefaults.widgetsKey)
+            }
         }
     }
     
     private func saveToDisk() {
-        if let encoded = try? JSONEncoder().encode(savedWidgets),
-           let sharedDefaults = SharedDefaults.userDefaults {
-            sharedDefaults.set(encoded, forKey: SharedDefaults.widgetsKey)
+        guard let sharedDefaults = SharedDefaults.userDefaults else {
+            return
         }
         
-        WidgetCenter.shared.reloadAllTimelines()
+        do {
+            let encoder = createJSONEncoder()
+            
+            for (index, widget) in savedWidgets.enumerated() {
+                do {
+                    _ = try encoder.encode(widget)
+                } catch {
+                    let cleanedWidget = cleanWidget(widget)
+                    savedWidgets[index] = cleanedWidget
+                }
+            }
+            
+            let encoded = try encoder.encode(savedWidgets)
+            
+            sharedDefaults.set(encoded, forKey: SharedDefaults.widgetsKey)
+            
+            
+            WidgetCenter.shared.reloadAllTimelines()
+            
+        } catch {
+            
+            var successfulWidgets: [WidgetModel] = []
+            let encoder = createJSONEncoder()
+            
+            for widget in savedWidgets {
+                do {
+                    _ = try encoder.encode(widget)
+                    successfulWidgets.append(widget)
+                } catch {
+                   
+                }
+            }
+            
+            if successfulWidgets.count != savedWidgets.count {
+                savedWidgets = successfulWidgets
+
+                
+                if let cleanedData = try? encoder.encode(successfulWidgets) {
+                    sharedDefaults.set(cleanedData, forKey: SharedDefaults.widgetsKey)
+                }
+            }
+        }
+    }
+    
+    private func createJSONEncoder() -> JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        encoder.nonConformingFloatEncodingStrategy = .convertToString(
+            positiveInfinity: "infinity",
+            negativeInfinity: "-infinity",
+            nan: "nan"
+        )
+        return encoder
+    }
+    
+    private func createJSONDecoder() -> JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.nonConformingFloatDecodingStrategy = .convertFromString(
+            positiveInfinity: "infinity",
+            negativeInfinity: "-infinity",
+            nan: "nan"
+        )
+        return decoder
+    }
+    
+    private func cleanWidget(_ widget: WidgetModel) -> WidgetModel {
+        var cleanedData: [String: Any] = [:]
+        
+        for (key, value) in widget.widgetData {
+            if isEncodable(value) {
+                cleanedData[key] = value
+            } else {
+                cleanedData[key] = String(describing: value)
+            }
+        }
+        
+        return WidgetModel(widgetData: cleanedData)
+    }
+    
+    private func isEncodable(_ value: Any) -> Bool {
+        do {
+            let encoder = createJSONEncoder()
+            _ = try encoder.encode(AnyCodable(value))
+            return true
+        } catch {
+            return false
+        }
     }
     
     func deleteWidget(for widgetData: [String: Any]) {
@@ -46,16 +150,22 @@ class SavedWidgetsManager: ObservableObject {
         
         if let index = savedWidgets.firstIndex(where: {$0.id == widgetId }) {
             savedWidgets.remove(at: index)
-        } else {
-            print("Could not find widget data to delete:\n\(widgetData)\n")
         }
         
         saveToDisk()
     }
     
     func addWidget(_ widget: WidgetModel) {
-        savedWidgets.append(widget)
-        saveToDisk()
+        do {
+            let encoder = createJSONEncoder()
+            _ = try encoder.encode(widget)
+            savedWidgets.append(widget)
+            saveToDisk()
+        } catch {
+            let cleanedWidget = cleanWidget(widget)
+            savedWidgets.append(cleanedWidget)
+            saveToDisk()
+        }
     }
     
     func hasWidgetWithName(_ name: String) -> Bool {
@@ -68,9 +178,18 @@ class SavedWidgetsManager: ObservableObject {
     
     func updateWidget(_ id: String, with newData: [String: Any]) {
         if let index = savedWidgets.firstIndex(where: { $0.id == id }) {
-            savedWidgets[index] = WidgetModel(widgetData: newData)
+            let newWidget = WidgetModel(widgetData: newData)
+            
+            do {
+                let encoder = createJSONEncoder()
+                _ = try encoder.encode(newWidget)
+                savedWidgets[index] = newWidget
+            } catch {
+                let cleanedWidget = cleanWidget(newWidget)
+                savedWidgets[index] = cleanedWidget
+            }
+            
             saveToDisk()
         }
     }
-
 }

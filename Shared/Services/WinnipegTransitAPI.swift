@@ -24,7 +24,7 @@ actor RequestRateLimiter {
         if callCount >= maxCallsPerMinute {
             let timeToWaitForNewMinute = 60.0 - timeElapsedSinceMinuteStart + minimumRequestInterval
             if timeToWaitForNewMinute > 0 {
-                print("\n***** Rate limit reached (\(maxCallsPerMinute) calls/minute). Waiting \(Int(timeToWaitForNewMinute)) seconds for next minute...")
+                // print("\n***** Rate limit reached (\(maxCallsPerMinute) calls/minute). Waiting \(Int(timeToWaitForNewMinute)) seconds for next minute...")
                 try? await Task.sleep(nanoseconds: UInt64(timeToWaitForNewMinute * 1_000_000_000))
                 
                 callCount = 0
@@ -40,7 +40,7 @@ actor RequestRateLimiter {
         callCount += 1
         lastRequestTime = Date()
         
-        print("\n***** API Call #\(callCount) in current minute")
+        // print("\n***** API Call #\(callCount) in current minute")
     }
     
     func getCallStats() -> (callCount: Int, timeRemaining: TimeInterval) {
@@ -104,7 +104,7 @@ class TransitAPI {
         }
         
         
-        print("\n***** Sent: \(url.absoluteString) at \(Date())")
+        // print("\n***** Sent: \(url.absoluteString) at \(Date())")
         
         let (data, response) = try await URLSession.shared.data(from: url)
         
