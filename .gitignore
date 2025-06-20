@@ -3,3 +3,11 @@ Shared/Assets/IPhone Preview
 
 PeekTransit/Config.plist
 PeekTransitWidget/Config.plist
+
+PeekTransit/Info.plist
+PeekTransitWidget/Info.plist
+PeekTransitWidgetIntentHelper/Info.plist
+
+PeekTransit/info.plist
+PeekTransitWidget/info.plist
+PeekTransitWidgetIntentHelper/info.plist
