@@ -96,8 +96,9 @@ struct DynamicWidgetView: View {
                             content
                                 .frame(maxWidth: .infinity, alignment: .center)
                             
-                            
-                            if ((!fullyLoaded || scheduleDataToUse == nil || widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
+                            // if ((!fullyLoaded || scheduleDataToUse == nil || widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {}
+
+                            if ((scheduleDataToUse == nil || widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
                                 Text("Open app")
                                     .foregroundColor(.red)
                                     .font(.caption)
