@@ -244,14 +244,14 @@ class TransitAPI {
                       let backgroundColor = badgeStyle["background-color"] as? String,
                       let borderColor = badgeStyle["border-color"] as? String,
                       let textColor = badgeStyle["color"] as? String,
-                      let effectiveFrom = routeSchedule["effective-from"] as? String,
-                      let effectiveTo = routeSchedule["effective-to"] as? String,
                       let variants = routeSchedule["variants"] as? [[String: Any]]
                 else {
                     print("Warning: Invalid route schedule format, skipping this route")
                     continue
                 }
                 
+                let effectiveFrom = routeSchedule["effective-from"] as? String ?? ""
+                let effectiveTo = routeSchedule["effective-to"] as? String ?? ""
                 let name = routeSchedule["name"] as? String ?? "No Route Name"
                 let number = routeSchedule["number"] as? String ?? "No Route Number"
                 
@@ -369,7 +369,7 @@ class TransitAPI {
             if stop.number != -1 {
                 var stopVariants: [Variant]
                 
-                if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stop.number) {
+                if let cachedVariants = VariantsCacheManager.shared.getCachedVariants(for: stop.number), cachedVariants.count > 0 {
                     stopVariants = cachedVariants
                 } else {
                     stopVariants = await createVariantsForStop(stop.number, currentDate: currentDate, endDate: endDate, forShort: getGlobalAPIForShortUsage())
