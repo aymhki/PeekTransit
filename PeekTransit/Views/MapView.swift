@@ -34,7 +34,10 @@ struct MapView: View {
     var currentlyAvailableStops: [Stop] {
         let currentDate = Date()
         return stopsStore.stops.filter { stop in
-            return currentDate >= stop.effectiveFrom && currentDate <= stop.effectiveTo
+            return (
+                (stop.effectiveFrom == nil || currentDate >= stop.effectiveFrom ?? Date()) &&
+                     (stop.effectiveTo == nil || currentDate <= stop.effectiveTo ?? Date())
+                )
         }
     }
     

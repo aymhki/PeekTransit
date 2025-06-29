@@ -5,8 +5,8 @@ struct Stop: Hashable, Codable {
     var key: Int
     var name: String
     let number: Int
-    var effectiveFrom: Date
-    var effectiveTo: Date
+    var effectiveFrom: Date?
+    var effectiveTo: Date?
     var direction: String
     var side: String
     var street: Street
@@ -33,8 +33,8 @@ struct Stop: Hashable, Codable {
         
         let effectiveFromString = json["effective-from"] as? String ?? ""
         let effectiveToString = json["effective-to"] as? String ?? ""
-        let effectiveFrom = dateFormatter.date(from: effectiveFromString) ?? Date()
-        let effectiveTo = dateFormatter.date(from: effectiveToString) ?? Date()
+        let effectiveFrom = dateFormatter.date(from: effectiveFromString) ?? nil
+        let effectiveTo = dateFormatter.date(from: effectiveToString) ?? nil
         
         let direction = json["direction"] as? String ?? "Unknown Direction"
         let side = json["side"] as? String ?? "Unknown Side"
@@ -240,8 +240,8 @@ struct Geographic: Hashable, Codable {
 struct Variant: Hashable, Codable {
     var key: String
     var name: String
-    var effectiveFrom: Date
-    var effectiveTo: Date
+    var effectiveFrom: Date?
+    var effectiveTo: Date?
     var backgroundColor: Color?
     var borderColor: Color?
     var textColor: Color?
@@ -265,8 +265,8 @@ struct Variant: Hashable, Codable {
         
         let effectiveFromString = variant["effective-from"] as? String ?? ""
         let effectiveToString = variant["effective-to"] as? String ?? ""
-        let effectiveFrom = dateFormatter.date(from: effectiveFromString) ?? Date()
-        let effectiveTo = dateFormatter.date(from: effectiveToString) ?? Date()
+        let effectiveFrom = dateFormatter.date(from: effectiveFromString) ?? nil
+        let effectiveTo = dateFormatter.date(from: effectiveToString) ?? nil
         
         self.effectiveFrom = effectiveFrom
         self.effectiveTo = effectiveTo

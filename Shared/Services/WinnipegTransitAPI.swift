@@ -169,7 +169,9 @@ class TransitAPI {
         
         let currentDate = Date()
         
-        processedStops = processedStops.filter { currentDate >= $0.stop.effectiveFrom  && currentDate <= $0.stop.effectiveTo }
+        processedStops = processedStops.filter { ($0.stop.effectiveFrom == nil || currentDate >= $0.stop.effectiveFrom ?? Date())  &&
+                                                ($0.stop.effectiveTo == nil || currentDate <= $0.stop.effectiveTo ?? Date())
+        }
         
         let sortedStops = processedStops
             .sorted { $0.distance < $1.distance }
@@ -442,7 +444,12 @@ class TransitAPI {
             if !stopVariants.isEmpty {
                 
                 stopVariants = stopVariants.filter { variantObjects in
-                    return !(variantObjects.key.prefix(1) == "S" || variantObjects.key.prefix(1) == "W" || variantObjects.key.prefix(1) == "I") && (currentDate >= variantObjects.effectiveFrom  && currentDate <= variantObjects.effectiveTo)
+                    return !(variantObjects.key.prefix(1) == "S" || variantObjects.key.prefix(1) == "W" || variantObjects.key.prefix(1) == "I") &&
+                    
+                    (
+                        (variantObjects.effectiveFrom == nil || currentDate >= variantObjects.effectiveFrom ?? Date())  &&
+                     (variantObjects.effectiveTo == nil || currentDate <= variantObjects.effectiveTo ?? Date())
+                    )
                 }
                 
                 return Array(Set<Variant>(stopVariants))

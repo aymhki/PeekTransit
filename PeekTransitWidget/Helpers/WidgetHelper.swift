@@ -393,42 +393,51 @@ enum WidgetHelper {
     }
     
     static func getCachedEntry(forId id: String) -> ([String: Any]?, [String]?, Date?)? {
-        guard let sharedDefaults = SharedDefaults.userDefaults else { return nil }
-        
-        var cachedWidgetData: [String: Any]? = nil
-        if let data = sharedDefaults.data(forKey: "widget_cache_data_\(id)") {
-            do {
-                let codableDict = try JSONDecoder().decode([String: AnyCodable].self, from: data)
-                cachedWidgetData = codableDict.mapValues { $0.value }
-            } catch {
-                print("Failed to decode cached widget data: \(error)")
+        do {
+            guard let sharedDefaults = SharedDefaults.userDefaults else { return nil }
+            
+            var cachedWidgetData: [String: Any]? = nil
+            if let data = sharedDefaults.data(forKey: "widget_cache_data_\(id)") {
+                do {
+                    let codableDict = try JSONDecoder().decode([String: AnyCodable].self, from: data)
+                    cachedWidgetData = codableDict.mapValues { $0.value }
+                } catch {
+                    print("Failed to decode cached widget data: \(error)")
+                }
             }
+            
+            let cachedScheduleData = sharedDefaults.array(forKey: "widget_cache_schedule_\(id)") as? [String]
+            let cachedUpdatedAt = sharedDefaults.object(forKey: "widget_cache_updated_time_\(id)") as? Date
+            
+            return (cachedWidgetData, cachedScheduleData, cachedUpdatedAt)
+        } catch {
+            print("Failed to get cached entry: \(error)")
+            return nil
         }
-        
-        let cachedScheduleData = sharedDefaults.array(forKey: "widget_cache_schedule_\(id)") as? [String]
-        let cachedUpdatedAt = sharedDefaults.object(forKey: "widget_cache_updated_time_\(id)") as? Date
-        
-        return (cachedWidgetData, cachedScheduleData, cachedUpdatedAt)
     }
 
     static func cacheEntry(id: String, widgetData: [String: Any], scheduleData: [String], lastUpdatedTime: Date?) {
-        guard let sharedDefaults = SharedDefaults.userDefaults else { return }
-        
         do {
-            let codableDict = widgetData.mapValues { AnyCodable($0) }
-            let data = try JSONEncoder().encode(codableDict)
-            sharedDefaults.set(data, forKey: "widget_cache_data_\(id)")
+            guard let sharedDefaults = SharedDefaults.userDefaults else { return }
+            
+            do {
+                let codableDict = widgetData.mapValues { AnyCodable($0) }
+                let data = try JSONEncoder().encode(codableDict)
+                sharedDefaults.set(data, forKey: "widget_cache_data_\(id)")
+            } catch {
+                print("Failed to cache widget data: \(error)")
+                return
+            }
+            
+            sharedDefaults.set(scheduleData, forKey: "widget_cache_schedule_\(id)")
+            
+            if let lastUpdatedTime = lastUpdatedTime {
+                sharedDefaults.set(lastUpdatedTime, forKey: "widget_cache_updated_time_\(id)")
+            } else {
+                sharedDefaults.set(Date(), forKey: "widget_cache_updated_time_\(id)")
+            }
         } catch {
-            print("Failed to cache widget data: \(error)")
-            return
-        }
-        
-        sharedDefaults.set(scheduleData, forKey: "widget_cache_schedule_\(id)")
-        
-        if let lastUpdatedTime = lastUpdatedTime {
-            sharedDefaults.set(lastUpdatedTime, forKey: "widget_cache_updated_time_\(id)")
-        } else {
-            sharedDefaults.set(Date(), forKey: "widget_cache_updated_time_\(id)")
+            print("Failed to cache entry: \(error)")
         }
     }
     

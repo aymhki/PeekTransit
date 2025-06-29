@@ -29,7 +29,10 @@ struct SelectableStopRow: View {
         var result: [Variant] = []
         
         for variant in variants {
-            if currentDate >= variant.effectiveFrom && currentDate <= variant.effectiveTo {
+            if (
+                (variant.effectiveFrom == nil || currentDate >= variant.effectiveFrom ?? Date()) &&
+                (variant.effectiveTo == nil || currentDate <= variant.effectiveTo ?? Date())
+            ) {
                 let currentVariantKey = variant.key.split(separator: "-")[0]
                 var isDuplicate = false
                 
@@ -57,7 +60,7 @@ struct SelectableStopRow: View {
         var result: [Variant] = []
         
         for variant in variants {
-            if variant.effectiveFrom > currentDate {
+            if (variant.effectiveFrom != nil && variant.effectiveFrom ?? Date() > currentDate) {
                 let currentVariantKey = variant.key.split(separator: "-")[0]
                 var isDuplicate = false
                 
@@ -76,6 +79,22 @@ struct SelectableStopRow: View {
         }
         
         return result.isEmpty ? nil : result
+    }
+    
+    private var theyAreBothTheSame: Bool {
+        if  currentlyAvailableVariants?.count ?? 0 == futureVariants?.count ?? 0 {
+            for (index, variant) in (currentlyAvailableVariants ?? []).enumerated() {
+                if index >= (futureVariants?.count ?? 0) {
+                    return false
+                } else if variant.key.split(separator: "-")[0].description != futureVariants?[index].key.split(separator: "-")[0].description {
+                    return false
+                }
+            }
+            
+            return true
+        } else {
+            return false
+        }
     }
     
     private var coordinate: CLLocationCoordinate2D? {
@@ -133,10 +152,10 @@ struct SelectableStopRow: View {
                             }
                         }
                         
-                        if let futureVariants = futureVariants {
+                        if let futureVariants = futureVariants, !theyAreBothTheSame {
                             VStack(alignment: .leading, spacing: 4) {
                                 let groupedFutureVariants = Dictionary(grouping: futureVariants) { variant in
-                                    Calendar.current.dateComponents([.year, .month, .day], from: variant.effectiveFrom)
+                                    Calendar.current.dateComponents([.year, .month, .day], from: variant.effectiveFrom ?? Date())
                                 }
                                 
                                 let sortedGroups = groupedFutureVariants.keys.sorted { components1, components2 in

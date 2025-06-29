@@ -19,10 +19,12 @@ struct VariantSelectionStep: View {
         for schedule in schedules {
             let components = schedule.components(separatedBy: getScheduleStringSeparator())
             if components.count >= 2 {
+                
                 let variant = Variant(from: [
                     "key": components[0],
                     "name": components[1]
                 ])
+                
                 uniqueVariants.insert(variant)
             }
         }
@@ -73,19 +75,23 @@ struct VariantSelectionStep: View {
                 let stopVariants = try  await TransitAPI.shared.getOnlyVariantsForStop(stop: stop)
                 let stopVaraintsSet = convertVariantArrayToUniqueSet(stopVariants)
                 
-                if (!cleanSchedule.isEmpty) {
-                                        
-                    await MainActor.run {
-                        stopSchedules[String(stop.number)] = stopVaraintsSet
-                    }
-                } else {
-                    stopsNoService.append(stop.number)
-                    
-                    if !stopsNoService.isEmpty {
-                        stopsWithoutService = stopsNoService
-                        showNoServiceAlert = true
-                    }
+                await MainActor.run {
+                    stopSchedules[String(stop.number)] = stopVaraintsSet
                 }
+                
+//                if (!cleanSchedule.isEmpty) {
+//                                        
+//                    await MainActor.run {
+//                        stopSchedules[String(stop.number)] = stopVaraintsSet
+//                    }
+//                } else {
+//                    stopsNoService.append(stop.number)
+//                    
+//                    if !stopsNoService.isEmpty {
+//                        stopsWithoutService = stopsNoService
+//                        showNoServiceAlert = true
+//                    }
+//                }
             }
             
             await MainActor.run {

@@ -33,7 +33,10 @@ struct ListView: View {
     var currentlyAvailableStops: [Stop] {
         let currentDate = Date()
         return combinedStops.filter { stop in
-            return currentDate >= stop.effectiveFrom && currentDate <= stop.effectiveTo
+            return (
+                (stop.effectiveFrom == nil || currentDate >= stop.effectiveFrom ?? Date()) &&
+                     (stop.effectiveTo == nil || currentDate <= stop.effectiveTo ?? Date())
+            )
         }
     }
     
