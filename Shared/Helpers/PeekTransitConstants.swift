@@ -162,7 +162,7 @@ public func getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: Widg
 }
 
 public func getStopsDistanceRadius() -> Double {
-    return 500
+    return 1000
 }
 
 

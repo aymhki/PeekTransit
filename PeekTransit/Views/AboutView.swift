@@ -30,7 +30,7 @@ struct AboutView: View {
                 VStack(spacing: 8) {
                     Text("Peek Transit")
                         .font(.title2.bold())
-                    Text("by Ayman Hkias")
+                    Text("by Ayman Agamy")
                         .foregroundColor(.secondary)
                     Text("agamyahk@myumanitoba")
                         .foregroundColor(.secondary)
