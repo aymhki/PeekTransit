@@ -898,36 +898,6 @@
             endingLineNumber = "309"
             landmarkName = "createVariantsForStop(_:currentDate:endDate:forShort:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "5988D3F7-22A5-4A9C-9669-4A9460960A14 - 502625dd79d61e0b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for Peek_Transit.TransitAPI.createVariantsForStop(_: Swift.Int, currentDate: Foundation.Date, endDate: Foundation.Date, forShort: Swift.Bool) async -&gt; Swift.Array&lt;Peek_Transit.Variant&gt;"
-                  moduleName = "Peek Transit.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/aymhki/IdeaProjects/Peek%20Transit/PeekTransit/Shared/Services/WinnipegTransitAPI.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "309"
-                  endingLineNumber = "309">
-               </Location>
-               <Location
-                  uuid = "5988D3F7-22A5-4A9C-9669-4A9460960A14 - 672cf1ceb6b9b004"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(4) suspend resume partial function for Peek_Transit.TransitAPI.createVariantsForStop(_: Swift.Int, currentDate: Foundation.Date, endDate: Foundation.Date, forShort: Swift.Bool) async -&gt; Swift.Array&lt;Peek_Transit.Variant&gt;"
-                  moduleName = "Peek Transit.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/aymhki/IdeaProjects/Peek%20Transit/PeekTransit/Shared/Services/WinnipegTransitAPI.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "309"
-                  endingLineNumber = "309">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -944,36 +914,6 @@
             endingLineNumber = "308"
             landmarkName = "createVariantsForStop(_:currentDate:endDate:forShort:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "34B05484-44E7-4C18-AB2B-7CB6B0955370 - 502625dd79d61e0b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for Peek_Transit.TransitAPI.createVariantsForStop(_: Swift.Int, currentDate: Foundation.Date, endDate: Foundation.Date, forShort: Swift.Bool) async -&gt; Swift.Array&lt;Peek_Transit.Variant&gt;"
-                  moduleName = "Peek Transit.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/aymhki/IdeaProjects/Peek%20Transit/PeekTransit/Shared/Services/WinnipegTransitAPI.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "309"
-                  endingLineNumber = "309">
-               </Location>
-               <Location
-                  uuid = "34B05484-44E7-4C18-AB2B-7CB6B0955370 - 672cf1ceb6b9b004"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(4) suspend resume partial function for Peek_Transit.TransitAPI.createVariantsForStop(_: Swift.Int, currentDate: Foundation.Date, endDate: Foundation.Date, forShort: Swift.Bool) async -&gt; Swift.Array&lt;Peek_Transit.Variant&gt;"
-                  moduleName = "Peek Transit.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/aymhki/IdeaProjects/Peek%20Transit/PeekTransit/Shared/Services/WinnipegTransitAPI.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "309"
-                  endingLineNumber = "309">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
