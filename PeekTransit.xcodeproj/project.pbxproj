@@ -606,7 +606,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -614,7 +614,7 @@
 				INFOPLIST_FILE = PeekTransit/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
 				INFOPLIST_KEY_NSLocationUsageDescription = "Peek Transit needs access your location to find nearby stops.";
@@ -648,7 +648,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -656,7 +656,7 @@
 				INFOPLIST_FILE = PeekTransit/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Peek Transit";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = NO;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "The app needs your location fetch nearby bus stops and bus times";
 				INFOPLIST_KEY_NSLocationUsageDescription = "Peek Transit needs access your location to find nearby stops.";
@@ -810,7 +810,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -851,7 +851,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -890,7 +890,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;
@@ -918,7 +918,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;
