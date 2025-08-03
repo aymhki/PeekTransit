@@ -824,7 +824,7 @@ class TransitAPI {
                                         arrivalState = getOKStatusTextString()
                                     }
                                     
-                                    if (timeDifference < 0 && timeDifference >= -getMinutesAllowedToKeepDueBusesInSchedule()) {
+                                    if (timeDifference <= 0 && timeDifference >= -getMinutesAllowedToKeepDueBusesInSchedule()) {
                                         timeInMinutes = getDueStatusTextString()
                                         sortValue = -1
                                     } else {

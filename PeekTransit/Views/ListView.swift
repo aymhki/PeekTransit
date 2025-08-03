@@ -14,6 +14,12 @@ struct ListView: View {
     @State private var isAppActive = true
     @State private var hasPerformedInitialLoad = false
     @State private var isLoadingInProgress = false
+    
+    var locationDenied: Bool {
+        locationManager.authorizationStatus == .denied ||
+        locationManager.authorizationStatus == .restricted
+    }
+
 
     
     var combinedStops: [Stop] {
@@ -95,11 +101,15 @@ struct ListView: View {
     @ViewBuilder
     private var emptyStateView: some View {
         
-        VStack {
-            Text("No stops found nearby")
-                .foregroundColor(.secondary)
-            
-            retryButton
+        if locationDenied {
+            LocationPermissionDeniedView()
+        } else {
+            VStack {
+                Text("No stops found nearby")
+                    .foregroundColor(.secondary)
+                
+                retryButton
+            }
         }
     }
     

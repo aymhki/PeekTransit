@@ -149,9 +149,11 @@ enum WidgetHelper {
                         filteredStops.append(updatedStop)
                         seenVariants.formUnion(stopVariants)
                         
-                        if filteredStops.count >= maxStops {
-                            break
-                        }
+
+                    }
+                    
+                    if filteredStops.count >= maxStops {
+                        break
                     }
                 } catch {
                     print("Error fetching schedule for stop \(stopNumber): \(error)")
@@ -419,6 +421,10 @@ enum WidgetHelper {
     static func cacheEntry(id: String, widgetData: [String: Any], scheduleData: [String], lastUpdatedTime: Date?) {
         do {
             guard let sharedDefaults = SharedDefaults.userDefaults else { return }
+            
+            if (widgetData.isEmpty || scheduleData.isEmpty || scheduleData.count == 0 || scheduleData.first == nil || scheduleData.first!.isEmpty) {
+                return
+            }
             
             do {
                 let codableDict = widgetData.mapValues { AnyCodable($0) }

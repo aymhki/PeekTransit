@@ -112,7 +112,6 @@ struct SelectableStopRow: View {
                         coordinate: coordinate,
                         direction: stop.direction
                     )
-                    .id(forceUpdate)
                 }
                 
                 VStack(alignment: .leading, spacing: 8) {

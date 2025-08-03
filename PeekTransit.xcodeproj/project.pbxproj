@@ -66,71 +66,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2F0B47ED2D8139A700F54AEA /* Exceptions for "Shared" folder in "Peek Transit" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Assets/IPad Preview/IMG_0007.PNG",
-				"Assets/IPad Preview/IMG_0008.PNG",
-				"Assets/IPad Preview/IMG_0009.PNG",
-				"Assets/IPad Preview/IMG_0010.PNG",
-				"Assets/IPad Preview/IMG_0011.PNG",
-				"Assets/IPad Preview/IMG_0012.PNG",
-				"Assets/IPad Preview/IMG_0013.PNG",
-				"Assets/IPad Preview/IMG_0014.PNG",
-				"Assets/IPad Preview/IMG_0015.PNG",
-				"Assets/IPad Preview/IMG_0016.PNG",
-				"Assets/IPad Preview/IMG_0017.PNG",
-				"Assets/IPad Preview/IMG_0018.PNG",
-				"Assets/IPad Preview/IMG_0019.PNG",
-				"Assets/IPad Preview/IMG_0020.PNG",
-				"Assets/IPad Preview/IMG_0021.PNG",
-				"Assets/IPad Preview/IMG_0022.PNG",
-				"Assets/IPad Preview/IMG_0023.PNG",
-				"Assets/IPad Preview/IMG_0024.PNG",
-				"Assets/IPad Preview/IMG_0025.PNG",
-				"Assets/IPad Preview/IMG_0026.PNG",
-				"Assets/IPad Preview/IMG_0027.PNG",
-				"Assets/IPad Preview/IMG_0028.PNG",
-				"Assets/IPad Preview/IMG_0029.PNG",
-				"Assets/IPad Preview/IMG_0030.PNG",
-				"Assets/IPad Preview/IMG_0031.PNG",
-				"Assets/IPad Preview/IMG_0032.PNG",
-				"Assets/IPad Preview/IMG_0033.PNG",
-				"Assets/IPad Preview/IMG_0034.PNG",
-				"Assets/IPad Preview/IMG_0035.PNG",
-				"Assets/IPad Preview/IMG_0036.PNG",
-				"Assets/IPad Preview/IMG_0037.PNG",
-				"Assets/IPad Preview/IMG_0038.PNG",
-				"Assets/IPad Preview/IMG_0039.PNG",
-				"Assets/IPad Preview/IMG_0040.PNG",
-				"Assets/IPad Preview/IMG_0041.PNG",
-				"Assets/IPhone Preview/IMG_0007.PNG",
-				"Assets/IPhone Preview/IMG_0008.PNG",
-				"Assets/IPhone Preview/IMG_0009.PNG",
-				"Assets/IPhone Preview/IMG_0010.PNG",
-				"Assets/IPhone Preview/IMG_0011.PNG",
-				"Assets/IPhone Preview/IMG_0012.PNG",
-				"Assets/IPhone Preview/IMG_0013.PNG",
-				"Assets/IPhone Preview/IMG_0014.PNG",
-				"Assets/IPhone Preview/IMG_0015.PNG",
-				"Assets/IPhone Preview/IMG_0016.PNG",
-				"Assets/IPhone Preview/IMG_0017.PNG",
-				"Assets/IPhone Preview/IMG_0018.PNG",
-				"Assets/IPhone Preview/IMG_0019.PNG",
-				"Assets/IPhone Preview/IMG_0020.PNG",
-				"Assets/IPhone Preview/IMG_0021.PNG",
-				"Assets/IPhone Preview/IMG_0022.PNG",
-				"Assets/IPhone Preview/IMG_0023.PNG",
-				"Assets/IPhone Preview/IMG_0024.PNG",
-				"Assets/IPhone Preview/IMG_0025.PNG",
-				"Assets/IPhone Preview/IMG_0026.PNG",
-				"Assets/IPhone Preview/IMG_0027.PNG",
-				"Assets/IPhone Preview/IMG_0028.PNG",
-				"Assets/IPhone Preview/IMG_0029.PNG",
-				"Assets/IPhone Preview/IMG_0030.PNG",
-			);
-			target = 2F570C112D45D5EE00C01563 /* Peek Transit */;
-		};
 		2F570C222D45D5EF00C01563 /* Exceptions for "PeekTransit" folder in "Peek Transit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -200,29 +135,7 @@
 			membershipExceptions = (
 				"Assets/Fonts/Consolas-Bold.ttf",
 				Assets/Fonts/consolas.ttf,
-				"Assets/Fonts/courier-bold.ttf",
-				"Assets/Fonts/courier-normal.ttf",
-				"Assets/Fonts/Doto_Rounded-Black.ttf",
-				"Assets/Fonts/Doto_Rounded-Bold.ttf",
-				"Assets/Fonts/Doto_Rounded-ExtraBold.ttf",
-				"Assets/Fonts/Doto_Rounded-ExtraLight.ttf",
-				"Assets/Fonts/Doto_Rounded-Light.ttf",
-				"Assets/Fonts/Doto_Rounded-Medium.ttf",
-				"Assets/Fonts/Doto_Rounded-Regular.ttf",
-				"Assets/Fonts/Doto_Rounded-SemiBold.ttf",
-				"Assets/Fonts/Doto_Rounded-Thin.ttf",
-				"Assets/Fonts/Doto-Black.ttf",
-				"Assets/Fonts/Doto-Bold.ttf",
-				"Assets/Fonts/Doto-ExtraBold.ttf",
-				"Assets/Fonts/Doto-ExtraLight.ttf",
-				"Assets/Fonts/Doto-Light.ttf",
-				"Assets/Fonts/Doto-Medium.ttf",
-				"Assets/Fonts/Doto-Regular.ttf",
-				"Assets/Fonts/Doto-SemiBold.ttf",
-				"Assets/Fonts/Doto-Thin.ttf",
-				"Assets/Fonts/Doto-VariableFont_ROND,wght.ttf",
 				Assets/Fonts/LCDDot.ttf,
-				"Assets/Fonts/SF-Pro-Text-Black.otf",
 				Helpers/PeekTransitConstants.swift,
 				Helpers/TimeFormat.swift,
 				Helpers/TransitError.swift,
@@ -272,29 +185,7 @@
 			membershipExceptions = (
 				"Assets/Fonts/Consolas-Bold.ttf",
 				Assets/Fonts/consolas.ttf,
-				"Assets/Fonts/courier-bold.ttf",
-				"Assets/Fonts/courier-normal.ttf",
-				"Assets/Fonts/Doto_Rounded-Black.ttf",
-				"Assets/Fonts/Doto_Rounded-Bold.ttf",
-				"Assets/Fonts/Doto_Rounded-ExtraBold.ttf",
-				"Assets/Fonts/Doto_Rounded-ExtraLight.ttf",
-				"Assets/Fonts/Doto_Rounded-Light.ttf",
-				"Assets/Fonts/Doto_Rounded-Medium.ttf",
-				"Assets/Fonts/Doto_Rounded-Regular.ttf",
-				"Assets/Fonts/Doto_Rounded-SemiBold.ttf",
-				"Assets/Fonts/Doto_Rounded-Thin.ttf",
-				"Assets/Fonts/Doto-Black.ttf",
-				"Assets/Fonts/Doto-Bold.ttf",
-				"Assets/Fonts/Doto-ExtraBold.ttf",
-				"Assets/Fonts/Doto-ExtraLight.ttf",
-				"Assets/Fonts/Doto-Light.ttf",
-				"Assets/Fonts/Doto-Medium.ttf",
-				"Assets/Fonts/Doto-Regular.ttf",
-				"Assets/Fonts/Doto-SemiBold.ttf",
-				"Assets/Fonts/Doto-Thin.ttf",
-				"Assets/Fonts/Doto-VariableFont_ROND,wght.ttf",
 				Assets/Fonts/LCDDot.ttf,
-				"Assets/Fonts/SF-Pro-Text-Black.otf",
 				Helpers/PeekTransitConstants.swift,
 				Helpers/TimeFormat.swift,
 				Helpers/TransitError.swift,
@@ -319,7 +210,6 @@
 		2F200FCD2D4EBCEE009E18AE /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2F0B47ED2D8139A700F54AEA /* Exceptions for "Shared" folder in "Peek Transit" target */,
 				2FBB714E2D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetExtension" target */,
 				2FBB71512D502CB3008998C8 /* Exceptions for "Shared" folder in "PeekTransitWidgetIntentHelper" target */,
 			);
@@ -522,6 +412,8 @@
 			);
 			mainGroup = 2F570C092D45D5EE00C01563;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2F570C132D45D5EE00C01563 /* Products */;
 			projectDirPath = "";
@@ -606,7 +498,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -628,7 +520,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -648,7 +540,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -670,7 +562,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -810,7 +702,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -831,7 +723,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -851,7 +743,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -872,7 +764,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -890,7 +782,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;
@@ -902,7 +794,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -918,7 +810,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;
@@ -930,7 +822,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aymanhki.PeekTransit.PeekTransitWidgetIntentHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

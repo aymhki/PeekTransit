@@ -613,10 +613,26 @@ public struct WidgetThemeModifier: ViewModifier {
     public func body(content: Content) -> some View {
         switch theme {
         case .modern:
-            content
-                .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
-                .foregroundStyle(.primary)
-                .foregroundStyle(foregroundColor(for: text))
+            if(widgetSize == .accessoryRectangular ) {
+                if (inPreview) {
+                    content
+                        .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
+                        .foregroundStyle(.primary)
+                        .foregroundStyle(foregroundColor(for: text))
+                        
+                }  else {
+                    content
+                        .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
+                        .foregroundStyle(.primary)
+                        .shadow(color: .black, radius: 10, x: 0, y: 1)
+                        
+                }
+            } else {
+                content
+                    .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
+                    .foregroundStyle(.primary)
+                    .foregroundStyle(foregroundColor(for: text))
+            }
             
         case .classic:
             if(widgetSize == .accessoryRectangular ) {
@@ -625,10 +641,14 @@ public struct WidgetThemeModifier: ViewModifier {
                         .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                         .fontWeight(.black)
                         .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
+                        
                 } else {
                     content
                         .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                         .fontWeight(.black)
+                        .foregroundStyle(.primary)
+                        .shadow(color: .black, radius: 10, x: 0, y: 1)
+                    
                 }
 
             } else {

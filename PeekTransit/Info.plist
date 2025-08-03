@@ -41,10 +41,6 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>LCDDot.ttf</string>
-		<string>SF-Pro-Text-Black.otf</string>
-		<string>courier-bold.ttf</string>
-		<string>courier-normal.ttf</string>
-		<string>consolas.ttf</string>
 		<string>Consolas-Bold.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>

@@ -85,7 +85,13 @@ struct WidgetStopView: View {
                         ForEach(Array(schedulesToShow.enumerated()), id: \.element) { (scheduleIndex, schedule) in
                             if (size == .systemSmall || size == .accessoryRectangular) {
                                 BusScheduleRow(schedule: schedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
-                                    .padding(.bottom, showLastUpdatedStatus ? 4 : 6)
+                                    .padding(.bottom, {
+                                        if size == .accessoryRectangular && showLastUpdatedStatus && scheduleIndex == schedulesToShow.count - 1 {
+                                            return 2
+                                        } else {
+                                            return showLastUpdatedStatus ? 4 : 6
+                                        }
+                                    }())
                             } else if (size == .systemLarge) {
                                 BusScheduleRow(schedule: schedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                                     .padding(.horizontal, 2)

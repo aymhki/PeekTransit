@@ -167,8 +167,17 @@ class MapSnapshotCache: ObservableObject {
         }
     }
     
+    func invalidateCache() {
+        serialQueue.async {
+            self.cache.removeAllObjects()
+            self.pendingRequests.removeAll()
+            self.requestQueue.removeAll()
+            self.activeSnapshots = 0
+        }
+    }
+    
     private func generateCacheKey(coordinate: CLLocationCoordinate2D, size: CGSize, direction: String, themeHash: String) -> String {
-        return "\(coordinate.latitude),\(coordinate.longitude),\(size.width),\(size.height),\(direction),\(themeHash)"
+        return "\(coordinate.latitude),\(coordinate.longitude),\(size.width),\(size.height),DIR:\(direction),\(themeHash)"
     }
     
     private func generateSnapshot(
@@ -250,17 +259,18 @@ class MapSnapshotCache: ObservableObject {
     }
     
     private func getMarkerImage(for direction: String) -> UIImage? {
+        let normalizedDirection = direction.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
         let imageName: String
-        switch direction.lowercased() {
-        case "southbound":
+        if normalizedDirection.contains("south") {
             imageName = "GreenBall"
-        case "northbound":
+        } else if normalizedDirection.contains("north") {
             imageName = "OrangeBall"
-        case "eastbound":
+        } else if normalizedDirection.contains("east") {
             imageName = "PinkBall"
-        case "westbound":
+        } else if normalizedDirection.contains("west") {
             imageName = "BlueBall"
-        default:
+        } else {
             imageName = "DefaultBall"
         }
         

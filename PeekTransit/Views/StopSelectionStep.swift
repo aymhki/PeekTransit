@@ -17,6 +17,11 @@ struct StopSelectionStep: View {
     @StateObject private var savedStopsManager = SavedStopsManager.shared
     @State private var selectedTab = 0
     
+    var locationDenied: Bool {
+        locationManager.authorizationStatus == .denied ||
+        locationManager.authorizationStatus == .restricted
+    }
+    
     private enum ViewState {
         case loading
         case ready
@@ -235,9 +240,15 @@ struct StopSelectionStep: View {
                                             .buttonStyle(.bordered)
                                         }
                                     } else if combinedStops.isEmpty {
-                                        Text("No stops found nearby")
-                                            .foregroundColor(.secondary)
-                                            .frame(maxWidth: .infinity, minHeight: 100)
+                                        if locationDenied {
+                                            Text("You have not granted this app permission to access your location, so it can't fetch nearby stops. You can still use the search bar to find stops manually.")
+                                                .foregroundColor(.secondary)
+                                                .frame(maxWidth: .infinity, minHeight: 100)
+                                        } else {
+                                            Text("No stops found nearby")
+                                                .foregroundColor(.secondary)
+                                                .frame(maxWidth: .infinity, minHeight: 100)
+                                        }
                                     } else {
                                         Group {
                                             if viewState != .transitioning {

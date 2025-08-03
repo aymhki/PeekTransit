@@ -1,5 +1,4 @@
 import SwiftUI
-import MapKit
 
 struct LiveIndicator: View {
     @State private var isAnimating = false
@@ -12,21 +11,22 @@ struct LiveIndicator: View {
     var body: some View {
         ZStack {
             if isAnimatingEnabled {
-                ForEach(0..<1) { i in
-                    Circle()
-                        .stroke(Color.red.opacity(0.5), lineWidth: 2)
-                        .scaleEffect(isAnimating ? 2 : 1)
-                        .opacity(isAnimating ? 0 : 1)
-                        .animation(
-                            .easeOut(duration: 1.5)
-                            .repeatForever(autoreverses: false)
-                            .delay(Double(i) * 1),
-                            value: isAnimating
-                        )
-                }
+                
+                Circle()
+                    .fill(Color.red.opacity(0.5))
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(isAnimating ? 6 : 1)
+                    .opacity(isAnimating ? 0 : 0.9)
+                    .animation(
+                        .easeOut(duration: 3)
+                        .repeatForever(autoreverses: false)
+                        .delay(3),
+                        value: isAnimating
+                    )
             }
+        
             Circle()
-                .fill(isAnimatingEnabled ? Color.red : Color.blue)
+                .fill(isAnimatingEnabled ? Color.red : Color.accentColor)
                 .frame(width: 8, height: 8)
         }
         .frame(width: 24, height: 24)
@@ -38,3 +38,5 @@ struct LiveIndicator: View {
         }
     }
 }
+
+

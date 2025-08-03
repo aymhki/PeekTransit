@@ -43,9 +43,6 @@ struct AboutView: View {
                         LinkItem(iconSystemName: "envelope.fill", text: "Email")
                     }
                     
-                    Link(destination: URL(string: "https://www.instagram.com/aymanhki/")!) {
-                        LinkItem(imageName: "InstagramIcon", text: "Instagram")
-                    }
                     
                     Link(destination: URL(string: "https://github.com/aymhki")!) {
                         LinkItem(imageName: "GithubIconSVG", text: "GitHub")

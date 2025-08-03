@@ -115,12 +115,26 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                 availableScheduleVariantsSimplified.insert("\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)")
             }
         }
+        
+        let widgetSize = widgetData["size"] as? String ?? "lockscreen"
+        let multipleEntriesPerVariant = widgetData["multipleEntriesPerVariant"] as? Bool ?? true
+        
+        var maxSchedules: Int {
+            if (multipleEntriesPerVariant) {
+                return getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            } else {
+                return  getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            }
+        }
 
-        for selectedVariant in selectedVariantsSimplified {
-            if !availableScheduleVariantsSimplified.contains(selectedVariant) {
-                let components = selectedVariant.components(separatedBy: "-")
-                if components.count >= 2 {
-                    filledScheduleData.append("\(components[0])\(getScheduleStringSeparator())\(components[1])\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getTimePeriodAllowedForNextBusRoutes())hrs+")
+
+        for _ in 0...(maxSchedules - filledScheduleData.count) {
+            for selectedVariant in selectedVariantsSimplified {
+                if !availableScheduleVariantsSimplified.contains(selectedVariant) {
+                    let components = selectedVariant.components(separatedBy: "-")
+                    if components.count >= 2 {
+                        filledScheduleData.append("\(components[0])\(getScheduleStringSeparator())\(components[1])\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getTimePeriodAllowedForNextBusRoutes())hrs+")
+                    }
                 }
             }
         }
@@ -137,38 +151,21 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
             if ( (widgetData["size"] as? String == "medium" && family == .systemMedium) || (widgetData["size"] as? String == "large" && family == .systemLarge) || (widgetData["size"] as? String == "small" && family == .systemSmall) || (widgetData["size"] as? String == "lockscreen" && family == .accessoryRectangular) ) {
                 
                 let filledScheduleData = getFilledScheduleData(widgetData: widgetData, scheduleData: entry.scheduleData)
+                let isDataComplete = isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData)
                 
                 
-                if (isWidgetFullyLoaded(widgetData: widgetData, scheduleData: filledScheduleData))  {
                     DynamicWidgetView(
                         widgetData: widgetData,
                         scheduleData: filledScheduleData,
                         size: family,
                         updatedAt: entry.date,
-                        fullyLoaded: true,
+                        fullyLoaded: isDataComplete,
                         forPreview: false,
                         isLoading: entry.isLoading
                     )
                     .accentedWidget()
                     .widgetAccentable()
                     
-                    
-                } else {
-                    DynamicWidgetView(
-                        widgetData: widgetData,
-                        scheduleData: filledScheduleData,
-                        size: family,
-                        updatedAt: entry.date,
-                        fullyLoaded: false,
-                        forPreview: false,
-                        isLoading: entry.isLoading
-                    )
-                    .accentedWidget()
-                    .widgetAccentable()
-                    
-                    
-                }
-                
             } else {
                 if (family != .accessoryRectangular) {
                     if(family != .systemSmall) {
@@ -203,27 +200,32 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
     
 
     var lockscreenNoConfigSelectedView: some View {
-        HStack {
+        ZStack {
+            Color.clear.edgesIgnoringSafeArea(.all)
+            OptionalBlurView(showBlur: true)
             
-            
-        Image(systemName: getGlobalBusIconSystemImageName())
-            .foregroundColor(.blue)
-            .font(.system(size: 10))
-            .bold()
-        
-    
-    
-        Text("P. T.: Hold on the wallpaper to customize your lockscreen then tap here twice to edit")
-            .foregroundColor(.blue)
-            .font(.system(size: 10) )
-            .bold()
-        
-            
-            
+            HStack {
+                
+                
+                Image(systemName: getGlobalBusIconSystemImageName())
+                    .foregroundStyle(.primary)
+                    .font(.system(size: 10))
+                    .bold()
+                
+                
+                
+                Text("P. T.: Hold on the wallpaper to customize your lockscreen then tap here twice to edit")
+                    .foregroundStyle(.primary)
+                    .font(.system(size: 10) )
+                    .bold()
+                
+                
+                
+            }
+            .padding(.horizontal, 1)
+            .accentedWidget()
+            .widgetAccentable()
         }
-        .padding(.horizontal, 1)
-        .accentedWidget()
-        .widgetAccentable()
     }
     
     

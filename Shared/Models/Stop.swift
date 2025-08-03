@@ -1,6 +1,9 @@
 import Foundation
 import SwiftUI
 
+import Foundation
+import SwiftUI
+
 struct Stop: Hashable, Codable {
     var key: Int
     var name: String
@@ -66,7 +69,6 @@ struct Stop: Hashable, Codable {
                 return Variant(from: variantDict)
             }
         }
-
         self.key = key
         self.name = name
         self.number = number
@@ -88,8 +90,10 @@ struct Stop: Hashable, Codable {
         key = try container.decode(Int.self, forKey: .key)
         name = try container.decode(String.self, forKey: .name)
         number = try container.decode(Int.self, forKey: .number)
-        effectiveFrom = try container.decode(Date.self, forKey: .effectiveFrom)
-        effectiveTo = try container.decode(Date.self, forKey: .effectiveTo)
+        
+        effectiveFrom = try container.decodeIfPresent(Date.self, forKey: .effectiveFrom)
+        effectiveTo = try container.decodeIfPresent(Date.self, forKey: .effectiveTo)
+        
         direction = try container.decode(String.self, forKey: .direction)
         side = try container.decode(String.self, forKey: .side)
         street = try container.decode(Street.self, forKey: .street)
@@ -106,8 +110,10 @@ struct Stop: Hashable, Codable {
         try container.encode(key, forKey: .key)
         try container.encode(name, forKey: .name)
         try container.encode(number, forKey: .number)
-        try container.encode(effectiveFrom, forKey: .effectiveFrom)
-        try container.encode(effectiveTo, forKey: .effectiveTo)
+        
+        try container.encodeIfPresent(effectiveFrom, forKey: .effectiveFrom)
+        try container.encodeIfPresent(effectiveTo, forKey: .effectiveTo)
+        
         try container.encode(direction, forKey: .direction)
         try container.encode(side, forKey: .side)
         try container.encode(street, forKey: .street)
@@ -265,11 +271,18 @@ struct Variant: Hashable, Codable {
         
         let effectiveFromString = variant["effective-from"] as? String ?? ""
         let effectiveToString = variant["effective-to"] as? String ?? ""
-        let effectiveFrom = dateFormatter.date(from: effectiveFromString) ?? nil
-        let effectiveTo = dateFormatter.date(from: effectiveToString) ?? nil
         
-        self.effectiveFrom = effectiveFrom
-        self.effectiveTo = effectiveTo
+        if !effectiveFromString.isEmpty {
+            effectiveFrom = dateFormatter.date(from: effectiveFromString)
+        } else {
+            effectiveFrom = nil
+        }
+        
+        if !effectiveToString.isEmpty {
+            effectiveTo = dateFormatter.date(from: effectiveToString)
+        } else {
+            effectiveTo = nil
+        }
         
         let backgroundColorHex = variant["background-color"] as? String ?? "None"
         let borderColorHex = variant["border-color"] as? String ?? "None"
@@ -286,7 +299,6 @@ struct Variant: Hashable, Codable {
         if textColorHex != "None" {
             self.textColor = Color(hex: textColorHex)
         }
-        
     }
     
     init(from decoder: Decoder) throws {
@@ -294,25 +306,19 @@ struct Variant: Hashable, Codable {
         
         key = try container.decode(String.self, forKey: .key)
         name = try container.decode(String.self, forKey: .name)
-        effectiveFrom = try container.decode(Date.self, forKey: .effectiveFrom)
-        effectiveTo = try container.decode(Date.self, forKey: .effectiveTo)
+        effectiveFrom = try container.decodeIfPresent(Date.self, forKey: .effectiveFrom)
+        effectiveTo = try container.decodeIfPresent(Date.self, forKey: .effectiveTo)
         
-        if let backgroundColorHex = try? container.decodeIfPresent(String.self, forKey: .backgroundColor) {
-            backgroundColor = Color(hex: backgroundColorHex)
-        } else {
-            backgroundColor = nil
-        }
-           
-        if let borderColorHex = try? container.decodeIfPresent(String.self, forKey: .borderColor) {
-            borderColor = Color(hex: borderColorHex)
-        } else {
-            borderColor = nil
+        if let backgroundColorHex = try container.decodeIfPresent(String.self, forKey: .backgroundColor) {
+            backgroundColor = backgroundColorHex != "None" ? Color(hex: backgroundColorHex) : nil
         }
         
-        if let textColorHex = try? container.decodeIfPresent(String.self, forKey: .textColor) {
-            textColor = Color(hex: textColorHex)
-        } else {
-            textColor = nil
+        if let borderColorHex = try container.decodeIfPresent(String.self, forKey: .borderColor) {
+            borderColor = borderColorHex != "None" ? Color(hex: borderColorHex) : nil
+        }
+        
+        if let textColorHex = try container.decodeIfPresent(String.self, forKey: .textColor) {
+            textColor = textColorHex != "None" ? Color(hex: textColorHex) : nil
         }
     }
     
@@ -321,8 +327,8 @@ struct Variant: Hashable, Codable {
         
         try container.encode(key, forKey: .key)
         try container.encode(name, forKey: .name)
-        try container.encode(effectiveFrom, forKey: .effectiveFrom)
-        try container.encode(effectiveTo, forKey: .effectiveTo)
+        try container.encodeIfPresent(effectiveFrom, forKey: .effectiveFrom)
+        try container.encodeIfPresent(effectiveTo, forKey: .effectiveTo)
 
         if let backgroundColor = backgroundColor {
             try container.encode(backgroundColor.toHex(), forKey: .backgroundColor)
@@ -344,14 +350,12 @@ struct Variant: Hashable, Codable {
     }
     
     public static func == (lhs: Variant, rhs: Variant) -> Bool {
-        return lhs.key.split(separator: "-")[0] == rhs.key.split(separator: "-")[0] && lhs.name == rhs.name // && lhs.effectiveTo == rhs.effectiveTo && lhs.effectiveFrom == rhs.effectiveFrom
+        return lhs.key.split(separator: "-")[0] == rhs.key.split(separator: "-")[0] && lhs.name == rhs.name
     }
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(key.split(separator: "-")[0])
         hasher.combine(name)
-//        hasher.combine(effectiveFrom)
-//        hasher.combine(effectiveTo)
     }
 }
 

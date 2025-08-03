@@ -80,5 +80,7 @@ struct StopMapPreview: View {
             snapshotImage = nil
             loadSnapshot()
         }
+        .id("mapPreview-\(coordinate.latitude)-\(coordinate.longitude)-\(direction)-\(colorScheme)-\(getPreferredStyle())")
+
     }
 }

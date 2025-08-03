@@ -119,6 +119,8 @@ struct StopRow: View {
                     }
                 }, preview: {
                     BusStopPreviewProvider(stop: stop)
+                        .environmentObject(themeManager)
+                        .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
                 })
                 .onChange(of: themeManager.currentTheme) { _ in
                     forceUpdate = UUID()
@@ -140,6 +142,9 @@ struct StopRow: View {
                         }
                     }, preview: {
                         BusStopPreviewProvider(stop: stop)
+                            .environmentObject(themeManager)
+                            .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
+                        
                     })
                     .onChange(of: themeManager.currentTheme) { _ in
                         forceUpdate = UUID()

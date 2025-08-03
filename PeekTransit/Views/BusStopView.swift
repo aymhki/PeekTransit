@@ -20,6 +20,7 @@ struct BusStopView: View {
     
     let timer = Timer.publish(every: 10, on: .main, in: .common).autoconnect()
     @EnvironmentObject private var themeManager: ThemeManager
+    @Environment(\.colorScheme) var colorScheme
     @State private var isRefreshCooldown = false
     @State private var isAppActive = true
     private let cooldownDuration: TimeInterval = 1.0
@@ -130,15 +131,19 @@ struct BusStopView: View {
             }
             
             Section {
-                if isLoading && isManualRefresh {
+                if isLoading && isManualRefresh  {
                     VStack(spacing: 16) {
                         ProgressView()
+                            .stopViewTheme(themeManager.currentTheme, text: "")
+                            .tint(themeManager.currentTheme == .classic ? Color(hex: "#EB8634", brightness: 300, saturation: 50) : colorScheme == .dark ? .white : .black)
+                        
                         Text("Loading schedules...")
                             .foregroundStyle(.secondary)
+                            .stopViewTheme(themeManager.currentTheme, text: "")
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding([.vertical, .horizontal])
-                    .font(.caption)
+                    .stopViewTheme(themeManager.currentTheme, text: "")
                     
                 } else if errorFetchingSchedule && isAppActive {
                     VStack(spacing: 16) {
@@ -210,12 +215,15 @@ struct BusStopView: View {
                                             .fixedSize(horizontal: false, vertical: true)
                                             .frame(width: columnWidths[1], alignment: .leading)
                                         
+                                        
                                         Text(components[2])
                                             .lineLimit(nil)
                                             .fixedSize(horizontal: false, vertical: true)
-                                            .frame(width: columnWidths[2], alignment: .center)
+                                            .frame(width: columnWidths[2], alignment: .trailing)
                                             .stopViewTheme(themeManager.currentTheme, text: components[2])
+                                            .padding(.trailing, 20)
                                         
+                                    
                                         if components.count > 3 && !components[2].contains(getCancelledStatusTextString()) {
                                             Text(components[3])
                                                 .lineLimit(nil)
@@ -236,13 +244,14 @@ struct BusStopView: View {
                     .stopViewTheme(themeManager.currentTheme, text: "")
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listSectionSeparator(.hidden)
                 }
             }
-            .listRowInsets(EdgeInsets())
+            .listRowSeparator(.hidden)
         }
         .listStyle(.plain)
+        .environment(\.defaultMinListRowHeight, 0)
+        .environment(\.defaultMinListHeaderHeight, 0)
+        .listSectionSeparator(.hidden)
         .navigationTitle("#\(String(stopNumber))")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

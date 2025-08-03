@@ -4,11 +4,16 @@ struct BusStopPreviewProvider: UIViewControllerRepresentable {
     let stop: Stop
     
     func makeUIViewController(context: Context) -> UIViewController {
+        let themeManager = ThemeManager.shared
+        
         let hostingController = UIHostingController(
             rootView: BusStopView(stop: stop, isDeepLink: false)
-                .environmentObject(ThemeManager.shared)
+                .environmentObject(themeManager)
+                .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
         )
-        hostingController.view.backgroundColor = .clear
+        
+        hostingController.view.backgroundColor = UIColor.systemBackground
+        
         return hostingController
     }
     

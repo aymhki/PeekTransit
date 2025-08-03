@@ -1,7 +1,6 @@
 import SwiftUI
 import WidgetKit
 
-
 struct DynamicWidgetView: View {
     let widgetData: [String: Any]
     let scheduleData: [String]?
@@ -43,7 +42,7 @@ struct DynamicWidgetView: View {
     }
     
     private var mightUseCacheData: Bool {
-        (!fullyLoaded || scheduleData == nil || scheduleData!.isEmpty || widgetData.isEmpty) && !forPreview
+        (scheduleData == nil || scheduleData!.isEmpty || widgetData.isEmpty) && !forPreview
     }
     
     private var updatedAtToUse: Date {
@@ -87,25 +86,32 @@ struct DynamicWidgetView: View {
                                 Color(.secondarySystemGroupedBackground)
                                     .edgesIgnoringSafeArea(.all)
                             }
+                        } else {
+                            Color.clear.edgesIgnoringSafeArea(.all)
+                            OptionalBlurView(showBlur: true)
                         }
-                        
                         
                         
                         VStack(alignment: .leading, spacing: 4) {
                             
-                            content
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            
-                            // if ((!fullyLoaded || scheduleDataToUse == nil || widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {}
-
-                            if ((scheduleDataToUse == nil || widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
-                                Text("Open app")
-                                    .foregroundColor(.red)
-                                    .font(.caption)
-                                    .padding(.horizontal)
-                                    .padding(.vertical)
+                            if (size == .accessoryRectangular) {
+                                content
                                     .frame(maxWidth: .infinity, alignment: .center)
-                                    .font(.caption)
+                                    .padding(.top, 8)
+                            } else {
+                                content
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                            
+                             if (( widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
+                                    Text("Open app")
+                                        .foregroundStyle(.primary)
+                                        .foregroundColor(.red)
+                                        .font(.caption)
+                                        .padding(.horizontal)
+                                        .padding(.vertical)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .font(.caption)
                             }
                             
                             if (widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true) {
@@ -141,6 +147,9 @@ struct DynamicWidgetView: View {
                     case .modern:
                         Color(.secondarySystemGroupedBackground)
                     }
+                } else {
+                    Color.clear.edgesIgnoringSafeArea(.all)
+                    OptionalBlurView(showBlur: true)
                 }
             })
         } else {
@@ -294,3 +303,26 @@ struct DynamicWidgetView: View {
 }
 
 
+@available(iOSApplicationExtension 16.0, *)
+struct OptionalBlurView: View {
+    @Environment(\.widgetFamily) var family
+
+    var showBlur: Bool
+
+        
+    
+    var body: some View {
+        if showBlur {
+            blurView
+        } else {
+            EmptyView()
+        }
+    }
+    
+    var blurView: some View {
+        AccessoryWidgetBackground()
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10), style: .continuous))
+            .edgesIgnoringSafeArea(.all)
+    }
+    
+}
