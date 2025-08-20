@@ -129,29 +129,31 @@ struct StopRow: View {
                     forceUpdate = UUID()
                 }
             } else {
-                stopRowBody()
-                    .buttonStyle(PlainButtonStyle())
-                    .contextMenu(menuItems: {
-                        Button(action: {
-                            savedStopsManager.toggleSavedStatus(for: stop)
-                        }) {
-                            Label(
-                                savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
-                                systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
-                            )
+                NavigationLink(destination: BusStopView(stop: stop, isDeepLink: false)) {
+                    stopRowBody()
+                        .buttonStyle(PlainButtonStyle())
+                        .contextMenu(menuItems: {
+                            Button(action: {
+                                savedStopsManager.toggleSavedStatus(for: stop)
+                            }) {
+                                Label(
+                                    savedStopsManager.isStopSaved(stop) ? "Remove Bookmark" : "Add Bookmark",
+                                    systemImage: savedStopsManager.isStopSaved(stop) ? "bookmark.slash" : "bookmark"
+                                )
+                            }
+                        }, preview: {
+                            BusStopPreviewProvider(stop: stop)
+                                .environmentObject(themeManager)
+                                .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
+                            
+                        })
+                        .onChange(of: themeManager.currentTheme) { _ in
+                            forceUpdate = UUID()
                         }
-                    }, preview: {
-                        BusStopPreviewProvider(stop: stop)
-                            .environmentObject(themeManager)
-                            .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
-                        
-                    })
-                    .onChange(of: themeManager.currentTheme) { _ in
-                        forceUpdate = UUID()
-                    }
-                    .onChange(of: colorScheme) { _ in
-                        forceUpdate = UUID()
-                    }
+                        .onChange(of: colorScheme) { _ in
+                            forceUpdate = UUID()
+                        }
+                }
             }
         }
         .onAppear {

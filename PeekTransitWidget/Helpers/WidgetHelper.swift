@@ -311,7 +311,7 @@ enum WidgetHelper {
                                         let entryComponents = entry.components(separatedBy: getScheduleStringSeparator())
                                         return entryComponents.count >= 2 &&
                                         entryComponents[0] == variantKey &&
-                                        entryComponents[1] == variantName
+                                        entryComponents[1].contains(variantName)
                                     }
                                     
                                     
@@ -344,7 +344,7 @@ enum WidgetHelper {
                                     let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                                     return components.count >= 2 &&
                                     components[0] == variantKey &&
-                                    components[1] == variantName
+                                    components[1].contains(variantName)
                                 }
                                 
                                 if multipleEntriesPerVariant {

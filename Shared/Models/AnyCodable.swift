@@ -95,7 +95,8 @@ struct AnyCodable: Codable {
             try container.encode(Double(float))
         case let double as Double:
             if double.isInfinite {
-                try container.encode(double.isSignalingNaN ? "-infinity" : "infinity")
+                // try container.encode(double.isSignalingNaN ? "-infinity" : "infinity")
+                try container.encode(double > 0 ? "Infinity" : "-Infinity")
             } else if double.isNaN {
                 try container.encode("nan")
             } else {
@@ -104,7 +105,8 @@ struct AnyCodable: Codable {
         case let cgFloat as CGFloat:
             let doubleValue = Double(cgFloat)
             if doubleValue.isInfinite {
-                try container.encode(doubleValue.isSignalingNaN ? "-infinity" : "infinity")
+                // try container.encode(doubleValue.isSignalingNaN ? "-infinity" : "infinity")
+                try container.encode(doubleValue > 0 ? "Infinity" : "-Infinity")
             } else if doubleValue.isNaN {
                 try container.encode("nan")
             } else {

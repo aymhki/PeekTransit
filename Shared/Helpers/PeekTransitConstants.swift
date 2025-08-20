@@ -500,32 +500,35 @@ public struct ThemeModifier: ViewModifier {
     let text: String
     
     let sizeFactor = isLargeDevice() ? 1.5 : 1.0
+    @Environment(\.colorScheme) var colorScheme
 
     
     public func body(content: Content) -> some View {
         switch theme {
         case .modern:
             content
-                .font(.custom("Consolas-Bold", fixedSize: 14 * sizeFactor)).bold()
+                .font(.custom("LCDDot", fixedSize: 15 * sizeFactor)).bold()
                 .background(Color(.secondarySystemGroupedBackground))
-                .foregroundStyle(.primary)
+                .fontWeight(.black)
                 .foregroundStyle(foregroundColor(for: text))
+                .lineSpacing(10)
         case .classic:
             content
-                .font(.custom("LCDDot", fixedSize: 14 * sizeFactor)).bold()
+                .font(.custom("LCDDot", fixedSize: 15 * sizeFactor)).bold()
                 .fontWeight(.black)
                 .background(.black)
                 .foregroundStyle(Color(hex: "#EB8634", brightness: 300, saturation: 50))
+                .lineSpacing(10)
         }
     }
     
     private func foregroundColor(for text: String) -> Color {
         if text.contains(getLateStatusTextString()) || text.contains(getCancelledStatusTextString()) {
-            return .red
-        } else if text.contains(getEarlyStatusTextString()) {
-            return .blue
+            return Color(hex: "#FF3B30", brightness: 300, saturation: 50)
+        } else if text.contains(getEarlyStatusTextString()) || text.contains(getDueStatusTextString()) {
+            return Color(hex: "#007AFF", brightness: 300, saturation: 50)
         }
-        return .primary
+        return colorScheme == .dark ? Color(hex: "#FFFFFF", brightness: 300, saturation: 50) : Color(hex: "#000000", brightness: 300, saturation: 50)
     }
 }
 
@@ -609,6 +612,7 @@ public struct WidgetThemeModifier: ViewModifier {
     let text: String
     let widgetSize: WidgetFamily
     let inPreview: Bool
+    @Environment(\.colorScheme) var colorScheme
     
     public func body(content: Content) -> some View {
         switch theme {
@@ -616,21 +620,20 @@ public struct WidgetThemeModifier: ViewModifier {
             if(widgetSize == .accessoryRectangular ) {
                 if (inPreview) {
                     content
-                        .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
+                        .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                         .foregroundStyle(.primary)
                         .foregroundStyle(foregroundColor(for: text))
                         
                 }  else {
                     content
-                        .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
+                        .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                         .foregroundStyle(.primary)
                         .shadow(color: .black, radius: 10, x: 0, y: 1)
                         
                 }
             } else {
                 content
-                    .font(.custom("Consolas-Bold", fixedSize: getFontSize())).bold()
-                    .foregroundStyle(.primary)
+                    .font(.custom("LCDDot", fixedSize: getFontSize())).bold()
                     .foregroundStyle(foregroundColor(for: text))
             }
             
@@ -687,15 +690,14 @@ public struct WidgetThemeModifier: ViewModifier {
         
         return baseFontSize
     }
-    
+        
     private func foregroundColor(for text: String) -> Color {
         if text.contains(getLateStatusTextString()) || text.contains(getCancelledStatusTextString()) {
-            return .red
-        } else if text.contains(getEarlyStatusTextString()) {
-            return .blue
+            return Color(hex: "#FF3B30", brightness: 300, saturation: 50)
+        } else if text.contains(getEarlyStatusTextString()) || text.contains(getDueStatusTextString()) {
+            return Color(hex: "#007AFF", brightness: 300, saturation: 50)
         }
-        
-        return .primary
+        return colorScheme == .dark ? Color(hex: "#FFFFFF", brightness: 300, saturation: 50) : Color(hex: "#000000", brightness: 300, saturation: 50)
     }
 }
 
@@ -779,16 +781,7 @@ extension CLLocationCoordinate2D: Identifiable {
     }
 }
 
-extension Bundle {
-    var iconFileName: String? {
-        guard let icons = infoDictionary?["CFBundleIcons"] as? [String: Any],
-              let primaryIcon = icons["CFBundlePrimaryIcon"] as? [String: Any],
-              let iconFiles = primaryIcon["CFBundleIconFiles"] as? [String],
-              let iconFileName = iconFiles.last
-        else { return nil }
-        return iconFileName
-    }
-}
+
 
 
 public func getRouteNumberWidth(size: WidgetFamily) -> CGFloat {
@@ -879,4 +872,31 @@ public func getGlobalPMText() -> String {
 }
 
 
+public func getMaximumTimesToShowTipBanner() -> Int {
+    return 3
+}
 
+public func getMaximumTimesToShowRateAppBanner() -> Int {
+    return 3
+}
+
+public func getUsageTimeToShowTipBannerAfterInSeconds() -> Double {
+    return Double(60 * 3)
+}
+
+public func getUsageTimeToShowRateAppBannerAfterInSeconds() -> Double {
+    return Double(60 * 3)
+}
+
+
+public func getTestScheduleList() -> [String] {
+    return  [
+        "671" + getScheduleStringSeparator() + "University of Manitoba" + getScheduleStringSeparator() + getLateStatusTextString() + getScheduleStringSeparator() + "12:45 AM",
+        "671" + getScheduleStringSeparator() + "University of Manitoba" + getScheduleStringSeparator() + getCancelledStatusTextString() + getScheduleStringSeparator() + "12:45 AM",
+        "671" + getScheduleStringSeparator() + "University of Manitoba" + getScheduleStringSeparator() + getEarlyStatusTextString() + getScheduleStringSeparator() + "12:45 AM",
+        "671" + getScheduleStringSeparator() + "University of Manitoba" + getScheduleStringSeparator() + getOKStatusTextString() + getScheduleStringSeparator() + "12:45 AM",
+        "671" + getScheduleStringSeparator() + "Markham Station" + getScheduleStringSeparator() + getOKStatusTextString() + getScheduleStringSeparator() + getDueStatusTextString(),
+        "671" + getScheduleStringSeparator() + "University of Manitoba" + getScheduleStringSeparator() + getLateStatusTextString() + getScheduleStringSeparator() + "12:45 AM",
+        "671" + getScheduleStringSeparator() + "Markham Station" + getScheduleStringSeparator() + getLateStatusTextString() + getScheduleStringSeparator() + "12:45 AM",
+    ]
+}

@@ -29,44 +29,92 @@ struct DynamicWidgetView: View {
         return components.url
     }
     
-    private var scheduleDataToUse: [String] {
-        if let scheduleData = scheduleData, !scheduleData.isEmpty, fullyLoaded {
-            return scheduleData
-        } else {
-            if let widgetId = widgetDataToUse["id"] as? String, let (_, cachedScheduleData, _) = WidgetHelper.getCachedEntry(forId: widgetId) {
-                return cachedScheduleData ?? scheduleData ?? []
-            } else {
-                return scheduleData ?? []
-            }
+    
+//    private var widgetDataToUse: [String: Any] {
+//        if !widgetData.isEmpty,  let scheduleData = scheduleData, !scheduleData.isEmpty, fullyLoaded {
+//            return widgetData
+//        } else {
+//            if let widgetId = widgetData["id"] as? String, let (cachedWidgetData, _, _) = WidgetHelper.getCachedEntry(forId: widgetId) {
+//                return cachedWidgetData ?? widgetData
+//            } else {
+//                return widgetData
+//            }
+//        }
+//    }
+//    
+//    private var scheduleDataToUse: [String] {
+//        if let scheduleData = scheduleData, !scheduleData.isEmpty, fullyLoaded {
+//            return scheduleData
+//        } else {
+//            if let widgetId = widgetDataToUse["id"] as? String, let (_, cachedScheduleData, _) = WidgetHelper.getCachedEntry(forId: widgetId) {
+//                return cachedScheduleData ?? scheduleData ?? []
+//            } else {
+//                return scheduleData ?? []
+//            }
+//        }
+//    }
+//    
+//    private var updatedAtToUse: Date {
+//        if mightUseCacheData {
+//            if let widgetId = widgetDataToUse["id"] as? String, let (_, _, lastUpdatedToUse) = WidgetHelper.getCachedEntry(forId: widgetId) {
+//                return lastUpdatedToUse ?? updatedAt
+//            } else {
+//                return updatedAt
+//            }
+//        } else {
+//            return updatedAt
+//        }
+//    }
+//
+//    private var mightUseCacheData: Bool {
+//        return (scheduleData == nil || scheduleData!.isEmpty || widgetData.isEmpty) && !forPreview
+//    }
+    
+    private var cachedData: ([String: Any]?, [String]?, Date?)? {
+        if let widgetId = widgetData["id"] as? String {
+            return WidgetHelper.getCachedEntry(forId: widgetId)
         }
+        return nil
     }
-    
-    private var mightUseCacheData: Bool {
-        (scheduleData == nil || scheduleData!.isEmpty || widgetData.isEmpty) && !forPreview
+
+    private var widgetDataToUse: [String: Any] {
+        if !widgetData.isEmpty && scheduleData != nil && !scheduleData!.isEmpty && fullyLoaded {
+            return widgetData
+        }
+        
+        if let (cachedWidgetData, _, _) = cachedData, (cachedWidgetData != nil ), !cachedWidgetData!.isEmpty {
+            return cachedWidgetData ?? widgetData
+        }
+        
+        return widgetData
     }
-    
+
+    private var scheduleDataToUse: [String] {
+        if let currentData = scheduleData, !currentData.isEmpty, fullyLoaded {
+            return currentData
+        }
+        
+        if let (_, cachedScheduleData, _) = cachedData, let data = cachedScheduleData, !data.isEmpty {
+            return data
+        }
+        
+        return scheduleData ?? []
+    }
+
     private var updatedAtToUse: Date {
-        if mightUseCacheData {
-            if let widgetId = widgetDataToUse["id"] as? String, let (_, _, lastUpdatedToUse) = WidgetHelper.getCachedEntry(forId: widgetId) {
-                return lastUpdatedToUse ?? updatedAt
-            } else {
-                return updatedAt
-            }
-        } else {
+        if !mightUseCacheData {
             return updatedAt
         }
-    }
-    
-    private var widgetDataToUse: [String: Any] {
-        if !widgetData.isEmpty,  let scheduleData = scheduleData, !scheduleData.isEmpty, fullyLoaded {
-            return widgetData
-        } else {
-            if let widgetId = widgetData["id"] as? String, let (cachedWidgetData, _, _) = WidgetHelper.getCachedEntry(forId: widgetId) {
-                return cachedWidgetData ?? widgetData
-            } else {
-                return widgetData
-            }
+        
+        if let (_, _, lastUpdated) = cachedData, let date = lastUpdated {
+            return date
         }
+        
+        return updatedAt
+    }
+
+    private var mightUseCacheData: Bool {
+        return (scheduleData == nil || scheduleData!.isEmpty || widgetData.isEmpty) && !forPreview
     }
     
     var body: some View {
@@ -103,15 +151,25 @@ struct DynamicWidgetView: View {
                                     .frame(maxWidth: .infinity, alignment: .center)
                             }
                             
-                             if (( widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
-                                    Text("Open app")
-                                        .foregroundStyle(.primary)
-                                        .foregroundColor(.red)
-                                        .font(.caption)
-                                        .padding(.horizontal)
-                                        .padding(.vertical)
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                        .font(.caption)
+//                             if (( widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && !forPreview) {
+//                                    Text("Open app")
+//                                        .foregroundStyle(.primary)
+//                                        .foregroundColor(.red)
+//                                        .font(.caption)
+//                                        .padding(.horizontal)
+//                                        .padding(.vertical)
+//                                        .frame(maxWidth: .infinity, alignment: .center)
+//                                        .font(.caption)
+//                            }
+                            
+                            if (widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && (cachedData == nil || (cachedData!.0?.isEmpty ?? true) || (cachedData!.1?.isEmpty ?? true)) && !forPreview {
+                                Text("Open app")
+                                    .foregroundStyle(.primary)
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                    .padding(.horizontal)
+                                    .padding(.vertical)
+                                    .frame(maxWidth: .infinity, alignment: .center)
                             }
                             
                             if (widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true) {

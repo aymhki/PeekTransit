@@ -1,8 +1,8 @@
 import CoreLocation
 import WidgetKit
 
-class LocationManager: NSObject, CLLocationManagerDelegate {
-    static let shared = LocationManager()
+class WidgetLocationManager: NSObject, CLLocationManagerDelegate {
+    static let shared = WidgetLocationManager()
     private var locationManager: CLLocationManager?
     
     override init() {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct BusStopPreviewProvider: UIViewControllerRepresentable {
     let stop: Stop
+
     
     func makeUIViewController(context: Context) -> UIViewController {
         let themeManager = ThemeManager.shared

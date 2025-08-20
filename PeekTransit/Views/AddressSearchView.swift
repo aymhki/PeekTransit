@@ -16,7 +16,7 @@ struct AddressSearchView: View {
     @State private var showingRouteDetails = false
     @State private var networkMonitor = NetworkMonitor()
     @StateObject private var searchHandler = SearchHandler()
-    @StateObject private var locationManager = LocationManager.shared
+    @StateObject private var locationManager = AppLocationManager.shared
     @FocusState private var isTextFieldFocused: Bool
     
     var onRouteSelected: (TripPlan) -> Void

@@ -19,6 +19,9 @@ struct Stop: Hashable, Codable {
     var variants: [Variant] = []
     var selectedVariants: [Variant] = []
     
+    private static let infinityPlaceholder: Double = -1.0
+
+    
     private enum CodingKeys: String, CodingKey {
         case key, name, number, direction, side, street, centre, distance, variants, selectedVariants
         case effectiveFrom = "effective-from"
@@ -49,6 +52,7 @@ struct Stop: Hashable, Codable {
         let street = Street(from: streetData)
         let crossStreet = Street(from: crossStreetData)
         let centre = Centre(from: centreData)
+        
         var distanceValue: Double = Double.infinity
         
         if let distances = json["distances"] as? [String: Any],
@@ -99,7 +103,10 @@ struct Stop: Hashable, Codable {
         street = try container.decode(Street.self, forKey: .street)
         crossStreet = try container.decode(Street.self, forKey: .crossStreet)
         centre = try container.decode(Centre.self, forKey: .centre)
-        distance = try container.decode(Double.self, forKey: .distance)
+        
+        let distanceValue = try container.decode(Double.self, forKey: .distance)
+        distance = distanceValue == Stop.infinityPlaceholder ? Double.infinity : distanceValue
+        
         variants = try container.decodeIfPresent([Variant].self, forKey: .variants) ?? []
         selectedVariants = try container.decodeIfPresent([Variant].self, forKey: .selectedVariants) ?? []
     }
@@ -119,7 +126,10 @@ struct Stop: Hashable, Codable {
         try container.encode(street, forKey: .street)
         try container.encode(crossStreet, forKey: .crossStreet)
         try container.encode(centre, forKey: .centre)
-        try container.encode(distance, forKey: .distance)
+        
+        let safeDistance = distance.isInfinite ? Stop.infinityPlaceholder : distance
+        try container.encode(safeDistance, forKey: .distance)
+        
         try container.encode(variants, forKey: .variants)
         try container.encode(selectedVariants, forKey: .selectedVariants)
     }

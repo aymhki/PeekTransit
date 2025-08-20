@@ -8,7 +8,7 @@ struct StopSelectionStep: View {
     let maxStopsAllowed: Int
     let settingNotification: Bool
     
-    @StateObject private var locationManager = LocationManager.shared
+    @StateObject private var locationManager = AppLocationManager.shared
     @StateObject private var stopsStore = StopsDataStore.shared
     @State private var searchText = ""
     @State private var maxPerferredstopsInClosestStops: Int = getMaxPerferredstopsInClosestStops()

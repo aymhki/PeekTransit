@@ -1,98 +1,151 @@
 import SwiftUI
 import SwiftData
 import WidgetKit
+import StoreKit
 
 struct ContentView: View {
     @State private var selection: Int = 0
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var deepLinkHandler = DeepLinkHandler.shared
+    @StateObject private var tipBannerManager = TipBannerManager.shared
+    @StateObject private var rateAppBannerManager = RateAppBannerManager.shared
     @AppStorage(settingsUserDefaultsKeys.defaultTab) private var defaultTab: Int = 0
     @State private var showUpdateAlert = false
     @State private var showStopView = false
+    @State private var navigateToTipSupport = false
     @State private var selectedStop: Stop? = nil
     @State private var isLoadingStop = false
     @State private var loadingError: Error? = nil
+    @State private var isSearchActive = false
+    @Environment(\.requestReview) private var requestReview
+    @State private var hasShownUpdateBannerThisSession = false
+    
+    private enum BannerType {
+        case update, rate, tip
+    }
+
+    private var activeBanner: BannerType? {
+        if rateAppBannerManager.hasShownRateAppBannerThisSession || tipBannerManager.hasShownTipBannerThisSession || hasShownUpdateBannerThisSession {
+            if rateAppBannerManager.hasShownRateAppBannerThisSession && rateAppBannerManager.shouldShowRateAppBanner { return .rate }
+            if tipBannerManager.hasShownTipBannerThisSession && tipBannerManager.shouldShowTipBanner { return .tip }
+            if hasShownUpdateBannerThisSession && showUpdateAlert { return .update }
+            return nil
+        }
+
+        if showUpdateAlert { return .update }
+        if rateAppBannerManager.shouldShowRateAppBanner { return .rate }
+        if tipBannerManager.shouldShowTipBanner { return .tip }
+        return nil
+    }
+
+    private var shouldShowBanner: Bool { activeBanner != nil }
+    private var isUpdateBanner: Bool { activeBanner == .update }
+    private var isRateAppBanner: Bool { activeBanner == .rate }
+    private var isTipBanner: Bool { activeBanner == .tip }
+
     
     var body: some View {
         ZStack {
-            TabView(selection: $selection) {
-                MapView()
+            GeometryReader { geometry in
+                TabView(selection: $selection) {
+                    MapView(isSearchingActive: $isSearchActive)
                     .tabItem {
                         Label("Map", systemImage: "map.fill")
                     }
                     .tag(0)
-                
-                ListView()
+                    
+                    ListView()
                     .tabItem {
                         Label("Stops", systemImage: "list.bullet")
                     }
                     .tag(1)
-                
-                SavedStopsView()
+                    
+                    SavedStopsView()
                     .tabItem {
                         Label("Saved", systemImage: "bookmark.fill")
                     }
                     .tag(2)
-                
-                WidgetsView()
+                    
+                    WidgetsView()
                     .tabItem {
                         Label("Widgets", systemImage: "note.text")
                     }
                     .tag(3)
-                
-                MoreTabView()
+                    
+                    MoreTabView()
                     .tabItem {
                         Label("More", systemImage: "ellipsis.circle.fill")
                     }
                     .tag(4)
-            }
-            .environmentObject(themeManager)
-            .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
-            .onAppear {
-                if selection == 0 {
-                    selection = defaultTab
                 }
-                
-                
-                
-                NotificationCenter.default.addObserver(
-                    forName: .appUpdateAvailable,
-                    object: nil,
-                    queue: .main
-                ) { _ in
-                    showUpdateAlert = true
-                }
-                
-                Task {
-                    await AppUpdateChecker().checkForUpdate()
-                }
-            }
-            .alert("Update Available", isPresented: $showUpdateAlert) {
-                
-                Button("Update Now") {
-                    if let appStoreURL = URL(string: "https://apps.apple.com/ca/app/peek-transit/id6741770809") {
-                        UIApplication.shared.open(appStoreURL)
+                .environmentObject(themeManager)
+                .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
+                .safeAreaInset(edge: .top) {
+                    if shouldShowBanner && selection == 0 && !isSearchActive && !isLargeDevice()  {
+                        bannerView(geometry: geometry)
                     }
                 }
-                
-                Button("Later", role: .cancel) {}
-                
-            } message: {
-                Text("A new version of the app is available. Would you like to update now?")
-            }
-            
-            if isLoadingStop {
-                VStack {
-                    ProgressView("Loading Stop...")
+                .safeAreaInset(edge: .bottom) {
+                    if shouldShowBanner && (selection != 0 || isLargeDevice()) {
+                        bannerView(geometry: geometry)
+                    }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black.opacity(0.4))
-                .zIndex(100)
+                .onAppear {
+                    if selection == 0 {
+                        selection = defaultTab
+                    }
+                    
+                    tipBannerManager.startTrackingAppUsage()
+                    rateAppBannerManager.startTrackingAppUsage()
+                    
+                    NotificationCenter.default.addObserver(
+                        forName: .appUpdateAvailable,
+                        object: nil,
+                        queue: .main
+                    ) { _ in
+                        showUpdateAlert = true
+                    }
+                    
+                    Task {
+                        await AppUpdateChecker().checkForUpdate()
+                    }
+                }
+                .onDisappear {
+                    tipBannerManager.stopTrackingAppUsage()
+                    rateAppBannerManager.stopTrackingAppUsage()
+                }
+                .sheet(isPresented: $navigateToTipSupport) {
+                    NavigationStack {
+                        TipSupportView()
+                            .navigationBarTitle("Support Development", displayMode: .inline)
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Back") {
+                                        navigateToTipSupport = false
+                                    }
+                                }
+                            }
+                        }
+                }
+
+
+                
+                if isLoadingStop {
+                    VStack {
+                        ProgressView("Loading Stop...")
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.4))
+                    .zIndex(100)
+                }
             }
         }
+        .animation(.easeInOut, value: shouldShowBanner)
+        .animation(.easeInOut, value: selection)
         .sheet(isPresented: $showStopView) {
             if let stop = selectedStop {
-                NavigationView {
+                NavigationStack {
                     BusStopView(stop: stop, isDeepLink: true, stopLoadError: loadingError)
                         .navigationBarItems(trailing: Button("Close") {
                             showStopView = false
@@ -111,6 +164,7 @@ struct ContentView: View {
                 })
             }
         }
+
         .onChange(of: deepLinkHandler.isShowingBusStop) { isShowing in
             if isShowing {
                 handleDeepLink()
@@ -119,6 +173,53 @@ struct ContentView: View {
         .onChange(of: deepLinkHandler.selectedStopNumber) { newStopNumber in
             if showStopView && deepLinkHandler.isShowingBusStop {
                 handleDeepLink()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func bannerView(geometry: GeometryProxy) -> some View {
+        let banner = activeBanner
+        
+        if (banner == nil) {
+            EmptyView()
+        } else {
+            HStack(spacing: 8) {
+                Image(systemName: banner == .update ? "arrow.down.circle.fill" : banner == .tip ? "heart.circle.fill" : banner == .rate ? "star.circle.fill" : "")
+                            .foregroundColor(.white)
+                            .font(.headline)
+                Text(banner == .update ? "Update Available" : banner == .tip ? "Support Development"  : banner == .rate ? "Rate Peek Transit" : "")
+                            .foregroundColor(.white)
+                            .font(.headline)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(banner == .update ? Color.accentColor : banner == .tip ?  Color.pink : banner == .rate ? Color.accentColor : Color.accentColor)
+                    .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 4)
+            )
+            .padding(.horizontal, 16)
+            .padding(.bottom, geometry.safeAreaInsets.bottom + 49)
+            .transition(.move(edge: selection == 0 ? .top : .bottom).combined(with: .opacity))
+            .onTapGesture {
+                switch banner {
+                    case .update:
+                        hasShownUpdateBannerThisSession = true
+
+                        if let appStoreURL = URL(string: "https://apps.apple.com/ca/app/peek-transit/id6741770809") {
+                            UIApplication.shared.open(appStoreURL)
+                            showUpdateAlert = false
+                        }
+                    case .tip:
+                        tipBannerManager.tipBannerWasTapped()
+                        navigateToTipSupport = true
+                    case .rate:
+                        rateAppBannerManager.rateAppBannerWasTapped()
+                        requestReview()
+                    case .none:
+                        break
+                }
             }
         }
     }
@@ -170,45 +271,3 @@ struct ContentView: View {
     }
 }
 
-struct StopLoadErrorView: View {
-    let error: Error?
-    let onRetry: () -> Void
-    let onClose: () -> Void
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.orange)
-                    .padding(.bottom, 10)
-                
-                Text("Error Loading Stop")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                Text(error?.localizedDescription ?? "Could not load stop information")
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                Button(action: onRetry) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("Retry")
-                    }
-                    .frame(minWidth: 120)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                }
-                .padding(.top, 20)
-            }
-            .padding()
-            .navigationBarItems(trailing: Button("Close") {
-                onClose()
-            })
-        }
-    }
-}

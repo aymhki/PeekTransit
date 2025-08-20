@@ -35,7 +35,7 @@ struct ProviderLockscreen: IntentTimelineProvider {
                 
                 do {
                     if widget.widgetData["isClosestStop"] as? Bool == true {
-                        if let location = await LocationManager.shared.getCurrentLocation() {
+                        if let location = await WidgetLocationManager.shared.getCurrentLocation() {
                             let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: getGlobalAPIForShortUsage())
                             if let stops = nearbyStops, !stops.isEmpty {
                                 let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(
@@ -109,7 +109,7 @@ struct ProviderLockscreen: IntentTimelineProvider {
             var widgetData = widget?.widgetData
             
             if widget?.widgetData["isClosestStop"] as? Bool == true {
-                if let location = await LocationManager.shared.getCurrentLocation() {
+                if let location = await WidgetLocationManager.shared.getCurrentLocation() {
                     let nearbyStops = try? await TransitAPI.shared.getNearbyStops(userLocation: location, forShort: getGlobalAPIForShortUsage())
                     if let stops = nearbyStops, !stops.isEmpty {
                         let maxStops = WidgetHelper.getMaxSopsAllowedForWidget(

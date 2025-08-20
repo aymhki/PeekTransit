@@ -7,7 +7,7 @@ import WidgetKit
 
 struct WidgetSetupView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var locationManager = LocationManager.shared
+    @StateObject private var locationManager = AppLocationManager.shared
     @State private var currentStep = 1
     @State private var selectedStops: [Stop] = []
     @State private var selectedVariants: [String: [Variant]] = [:]
@@ -276,7 +276,7 @@ struct WidgetSetupView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Group {
                     switch currentStep {

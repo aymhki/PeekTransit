@@ -419,8 +419,8 @@ class TransitAPI {
             guard let url = createURL(
                 path: "variants.json",
                 parameters: [
-                    "stop": stop.number
-                    
+                    "stop": stop.number,
+                    "usage": getGlobalAPIForShortUsage() ? "short" : "long"
                 ]
             ) else {
                 print("Warning: Invalid URL for stop \(stop.number), returning original variant")
@@ -1012,39 +1012,7 @@ class TransitAPI {
         
         return Array(Set(allPlans))
     }
-    
-    func getCurrentWinnipegDateTime() -> Date {
-        let utcCalendar = Calendar.current
-        var components = DateComponents()
-        components.timeZone = Self.winnipegTimeZone
-        
-        let now = Date()
-        let utcComponents = utcCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: now)
-        
-        components.year = utcComponents.year
-        components.month = utcComponents.month
-        components.day = utcComponents.day
-        components.hour = utcComponents.hour
-        components.minute = utcComponents.minute
-        components.second = utcComponents.second
-        
-        return Calendar(identifier: .gregorian).date(from: components) ?? now
-    }
-    
-    func formatDateForAPI(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeZone = Self.winnipegTimeZone
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
-    }
-    
-    func formatTimeForAPI(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeZone = Self.winnipegTimeZone
-        formatter.dateFormat = "HH:mm:ss"
-        return formatter.string(from: date)
-    }
-    
+
     func findTripWithLocationKey(
         from currentLocationKey: String,
         toLocationKey: String,
@@ -1060,9 +1028,7 @@ class TransitAPI {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "HH:mm:ss"
-        
-        // let currentDate = date ?? Date()
-        // let winnipegDate = date ?? getCurrentWinnipegDateTime()
+
         
         var allPlans: [TripPlan] = []
         
