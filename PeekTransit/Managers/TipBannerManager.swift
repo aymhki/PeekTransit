@@ -56,7 +56,7 @@ class TipBannerManager: ObservableObject {
     }
     
     private func checkAndShowTipBanner() async {
-        // guard await !storeManager.hasBoughtTip() else { return }
+        guard await !storeManager.hasBoughtTip() else { return }
         guard !hasShownTipBannerThisSession else { return }
         guard shouldShowBasedOnRules() else { return }
         shouldShowTipBanner = true
