@@ -71,7 +71,7 @@ class StopsDataStore: ObservableObject {
             guard !Task.isCancelled else { return }
             
             await MainActor.run {
-                self.searchResults = []
+                // self.searchResults = []
                 self.isLoading = true
                 self.error = nil
 
