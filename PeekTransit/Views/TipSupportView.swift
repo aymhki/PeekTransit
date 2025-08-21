@@ -219,6 +219,30 @@ struct TipSupportView: View {
                         .foregroundColor(.blue)
                         .underline()
                 }
+                
+                Spacer()
+            }
+            
+            
+            
+            HStack(spacing: 16) {
+                Button(action: openTermsOfUse) {
+                    Text("Terms of Use")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .underline()
+                }
+                
+                Text("•")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Button(action: restorePurchases) {
+                    Text("Restore Purchases")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .underline()
+                }
             }
         }
     }
@@ -522,6 +546,52 @@ struct TipSupportView: View {
                 try await AppStore.showManageSubscriptions(in: windowScene)
             }
         }
+    }
+    
+    private func openTermsOfUse() {
+        guard let url = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/") else {
+            return
+        }
+        UIApplication.shared.open(url)
+    }
+
+    private func restorePurchases() {
+        Task {
+            await handleRestorePurchases()
+        }
+    }
+    
+    @MainActor
+    private func handleRestorePurchases() async {
+        isProcessing = true
+        isLoadingSubscription = true
+        
+        do {
+            try await AppStore.sync()
+            
+            let newSubscription = await storeManager.checkSubscriptionStatus()
+            activeSubscription = newSubscription
+            
+            if newSubscription != nil {
+                alertMessage = "Purchases restored successfully! Your subscription has been activated."
+            } else {
+                let hasTips = await storeManager.hasBoughtTip()
+                if hasTips {
+                    alertMessage = "Purchases restored successfully!"
+                } else {
+                    alertMessage = "No previous purchases found to restore."
+                }
+            }
+            
+            showingAlert = true
+            
+        } catch {
+            alertMessage = "Failed to restore purchases. Please try again later."
+            showingAlert = true
+        }
+        
+        isLoadingSubscription = false
+        isProcessing = false
     }
 }
 
