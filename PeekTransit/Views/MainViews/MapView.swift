@@ -4,6 +4,7 @@ import WidgetKit
 
 struct MapView: View {
     @Binding var isSearchingActive: Bool
+    @Binding var isDetailViewPresented: Bool
     @StateObject private var locationManager = AppLocationManager.shared
     @StateObject private var stopsStore = StopsDataStore.shared
     @StateObject private var networkMonitor = NetworkMonitor()
@@ -146,6 +147,9 @@ struct MapView: View {
         }
         .onChange(of: isSearchingRoute) { newValue in
             isSearchingActive = newValue
+        }
+        .onChange(of: selectedStop) { newValue in
+            isDetailViewPresented = (newValue != nil)
         }
         .onAppear {
             handleViewAppear()

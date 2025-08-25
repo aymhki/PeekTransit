@@ -119,7 +119,7 @@ struct MapViewRepresentable: UIViewRepresentable {
             let uniqueRoutes = Set(stop.variants.compactMap { variant -> String? in
                 return variant.key.split(separator: "-")[0].description
             })
-            variantsString = uniqueRoutes.joined(separator: ", ")
+            variantsString = uniqueRoutes.sorted().joined(separator: ", ")
             if !variantsString.isEmpty {
                 subtitle += ": " + variantsString
             }

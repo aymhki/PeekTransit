@@ -19,9 +19,15 @@ struct ContentView: View {
     @State private var isSearchActive = false
     @Environment(\.requestReview) private var requestReview
     @State private var hasShownUpdateBannerThisSession = false
+    @State private var isDetailViewPresentedOnMap = false
+
     
     private enum BannerType {
         case update, rate, tip
+    }
+    
+    private var isBannerOnTop: Bool {
+        return selection == 0 && !isDetailViewPresentedOnMap && !isLargeDevice()
     }
 
     private var activeBanner: BannerType? {
@@ -48,7 +54,10 @@ struct ContentView: View {
         ZStack {
             GeometryReader { geometry in
                 TabView(selection: $selection) {
-                    MapView(isSearchingActive: $isSearchActive)
+                    MapView(
+                        isSearchingActive: $isSearchActive,
+                        isDetailViewPresented: $isDetailViewPresentedOnMap
+                    )
                     .tabItem {
                         Label("Map", systemImage: "map.fill")
                     }
@@ -81,12 +90,14 @@ struct ContentView: View {
                 .environmentObject(themeManager)
                 .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
                 .safeAreaInset(edge: .top) {
-                    if shouldShowBanner && selection == 0 && !isSearchActive && !isLargeDevice()  {
+                    if shouldShowBanner && selection == 0 && !isSearchActive && !isLargeDevice() && !isDetailViewPresentedOnMap {
                         bannerView(geometry: geometry)
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
-                    if shouldShowBanner && (selection != 0 || isLargeDevice()) {
+                    let showForMapDetail = (selection == 0 && isDetailViewPresentedOnMap)
+
+                    if shouldShowBanner && ((selection != 0 || isLargeDevice()) || showForMapDetail) {
                         bannerView(geometry: geometry)
                     }
                 }
@@ -95,8 +106,13 @@ struct ContentView: View {
                         selection = defaultTab
                     }
                     
-                    tipBannerManager.startTrackingAppUsage()
-                    rateAppBannerManager.startTrackingAppUsage()
+                    if (!rateAppBannerManager.hasAttemptedToStartTrackingRateAppBannerThisSession) {
+                        rateAppBannerManager.startTrackingAppUsage()
+                    }
+                    
+                    if (!tipBannerManager.hasAttemptedToStartTrackingTipBannerThisSession) {
+                        tipBannerManager.startTrackingAppUsage()
+                    }
                     
                     NotificationCenter.default.addObserver(
                         forName: .appUpdateAvailable,
@@ -143,6 +159,7 @@ struct ContentView: View {
         }
         .animation(.easeInOut, value: shouldShowBanner)
         .animation(.easeInOut, value: selection)
+        .animation(.easeInOut, value: isDetailViewPresentedOnMap)
         .sheet(isPresented: $showStopView) {
             if let stop = selectedStop {
                 NavigationStack {
@@ -201,7 +218,7 @@ struct ContentView: View {
             )
             .padding(.horizontal, 16)
             .padding(.bottom, geometry.safeAreaInsets.bottom + 49)
-            .transition(.move(edge: selection == 0 ? .top : .bottom).combined(with: .opacity))
+            .transition(.move(edge: isBannerOnTop ? .top : .bottom).combined(with: .opacity))
             .onTapGesture {
                 switch banner {
                     case .update:

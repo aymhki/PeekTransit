@@ -104,7 +104,7 @@ class TransitAPI {
         }
         
         
-        // print("\n***** Sent: \(url.absoluteString) at \(Date())")
+        print("\n***** Sent: \(url.absoluteString) at \(Date())")
         
         let (data, response) = try await URLSession.shared.data(from: url)
         

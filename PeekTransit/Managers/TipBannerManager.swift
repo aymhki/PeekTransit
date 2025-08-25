@@ -7,6 +7,7 @@ class TipBannerManager: ObservableObject {
     @Published var shouldShowTipBanner = false
     @Published var hasShownTipBannerThisSession = false
     @Published var wasTipBannerManuallyHidden = false
+    @Published var hasAttemptedToStartTrackingTipBannerThisSession = false
     
     private var storeManager = TipStoreManager.shared
 
@@ -15,6 +16,7 @@ class TipBannerManager: ObservableObject {
     private let tipBannerShowCountKey = "tipBannerShowCount"
     private let tipBannerFirstShownDateKey = "tipBannerFirstShownDate"
     private let tipBannerLastShownDateKey = "tipBannerLastShownDate"
+    private let appOpenCountKey = "tipBannerAppOpenCount"
     
     private var appUsageStartTime: Date?
     private var tipBannerTimer: Timer?
@@ -22,6 +24,13 @@ class TipBannerManager: ObservableObject {
     private init() {}
         
     func startTrackingAppUsage() {
+        let currentCount = userDefaults.integer(forKey: appOpenCountKey)
+        let newCount = currentCount + 1
+        userDefaults.set(newCount, forKey: appOpenCountKey)
+        hasAttemptedToStartTrackingTipBannerThisSession = true
+            
+        guard newCount >= 3 else { return }
+        
         appUsageStartTime = Date()
         startTipBannerTimer()
     }
@@ -65,6 +74,9 @@ class TipBannerManager: ObservableObject {
     private func shouldShowBasedOnRules() -> Bool {
         let showCount = userDefaults.integer(forKey: tipBannerShowCountKey)
         let firstShownDate = userDefaults.object(forKey: tipBannerFirstShownDateKey) as? Date
+        let countOfAppOpens = userDefaults.integer(forKey: appOpenCountKey)
+        
+        guard countOfAppOpens >= 3 else { return false }
         
         if showCount == 0 {
             return true

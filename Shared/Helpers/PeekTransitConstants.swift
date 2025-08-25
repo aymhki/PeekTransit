@@ -8,7 +8,7 @@ import CoreLocation
 public func isLargeDevice() -> Bool {
     #if os(macOS)
         return true
-    #else
+    #else 
         let screenSize = UIScreen.main.bounds.size
         let minDimension = min(screenSize.width, screenSize.height)
         return minDimension >= 768

@@ -8,7 +8,7 @@ struct BusStopView: View {
     
     @StateObject private var savedStopsManager = SavedStopsManager.shared
     @StateObject private var networkMonitor = NetworkMonitor()
-    @State private var schedules: [String] = []
+    @State private var schedules: [ScheduleItem] = []
     @State private var isLoading = true
     @State private var isManualRefresh = false
     @State private var errorFetchingSchedule = false
@@ -18,6 +18,7 @@ struct BusStopView: View {
     @State private var currentTheme: StopViewTheme = .default
     @State private var stopNumber: Int = 0
     @State private var isFirstAppearance = true
+    @State private var isSoftRefreshing = false
 
     
     let timer = Timer.publish(every: 59, on: .main, in: .common).autoconnect()
@@ -68,11 +69,20 @@ struct BusStopView: View {
             }
         }
         
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            isSoftRefreshing = false
+        }
         
         do {
             let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
-            schedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
+            let cleanedSchedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
+            
+            self.schedules = cleanedSchedules.map { scheduleString in
+                        let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
+                        return ScheduleItem(components: components)
+            }
+            
             errorFetchingSchedule = false
             errorText = ""
             
@@ -190,12 +200,10 @@ struct BusStopView: View {
                 } else {
                     VStack(spacing: 0) {
                         Spacer()
-                        ForEach(schedules, id: \.self) { schedule in
-                            let components = schedule.components(separatedBy: getScheduleStringSeparator())
-                            
-                            if components.count > 1 {
+                        ForEach(schedules) { scheduleItem in
+                            if scheduleItem.components.count > 1 {
                                 ScheduleRowView(
-                                    components: components,
+                                    components: scheduleItem.components,
                                     themeManager: themeManager
                                 )
                                 .stopViewTheme(themeManager.currentTheme, text: "")
@@ -204,6 +212,8 @@ struct BusStopView: View {
                         }
                         Spacer()
                     }
+                    .opacity(isSoftRefreshing ? 0.5 : 1.0)
+                    .animation(.easeInOut(duration: 0.5), value: isSoftRefreshing)
                     .padding(.bottom, 50)
                     .stopViewTheme(themeManager.currentTheme, text: "")
                     .listRowInsets(EdgeInsets())
@@ -292,6 +302,7 @@ struct BusStopView: View {
         .onReceive(timer) { _ in
             guard isAppActive && isLiveUpdatesEnabled else { return }
             isManualRefresh = false
+            isSoftRefreshing = true
             
             Task {
                 await loadSchedules(isManual: false)
@@ -379,5 +390,10 @@ struct ScheduleRowView: View {
         return ratios.map { $0 * scalingFactor }
     }
     
+}
+
+struct ScheduleItem: Identifiable {
+    let id = UUID()
+    let components: [String]
 }
 

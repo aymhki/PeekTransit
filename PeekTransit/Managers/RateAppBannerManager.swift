@@ -7,12 +7,15 @@ class RateAppBannerManager: ObservableObject {
     @Published var shouldShowRateAppBanner = false
     @Published var hasShownRateAppBannerThisSession = false
     @Published var wasRateAppBannerManuallyHidden = false
+    @Published var hasAttemptedToStartTrackingRateAppBannerThisSession = false
     
     private let userDefaults = UserDefaults.standard
     private let rateAppShowCountKey = "rateAppShowCount"
     private let rateAppFirstShownDateKey = "rateAppFirstShownDate"
     private let rateAppLastShownDateKey = "rateAppLastShownDate"
     private let rateAppUserClickedKey = "rateAppUserClicked"
+    private let appOpenCountKey = "rateAppAppOpenCount"
+
     
     private var appUsageStartTime: Date?
     private var rateAppTimer: Timer?
@@ -20,6 +23,12 @@ class RateAppBannerManager: ObservableObject {
     private init() {}
     
     func startTrackingAppUsage() {
+        let currentCount = userDefaults.integer(forKey: appOpenCountKey)
+        let newCount = currentCount + 1
+        userDefaults.set(newCount, forKey: appOpenCountKey)
+        hasAttemptedToStartTrackingRateAppBannerThisSession = true
+        guard newCount >= 3 else { return }
+        
         appUsageStartTime = Date()
         startRateAppTimer()
     }
@@ -64,6 +73,10 @@ class RateAppBannerManager: ObservableObject {
         let userHasClicked = userDefaults.bool(forKey: rateAppUserClickedKey)
         let lastShownDate = userDefaults.object(forKey: rateAppLastShownDateKey) as? Date
         let firstShownDate = userDefaults.object(forKey: rateAppFirstShownDateKey) as? Date
+        let countOfAppOpens = userDefaults.integer(forKey: appOpenCountKey)
+        
+        guard countOfAppOpens >= 3 else { return false }
+        
         
         if showCount == 0 {
             return true

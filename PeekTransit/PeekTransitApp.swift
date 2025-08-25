@@ -55,7 +55,7 @@ struct PeekTransitApp: App {
                 let locationStatus = locationManager.authorizationStatus ?? .notDetermined
                 showSplashScreen = !hasSeenSplashScreen && locationStatus == .notDetermined
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     isInitialized = true
                 }
             }
