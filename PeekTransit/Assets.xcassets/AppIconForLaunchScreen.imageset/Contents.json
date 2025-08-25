@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "PeekTransitAppIcon-iOS-Default-1024x1024@1x.png",
+      "filename" : "AppIcon-iOS-Default-1024x1024@1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
@@ -12,7 +12,7 @@
           "value" : "light"
         }
       ],
-      "filename" : "PeekTransitAppIcon-iOS-Default-1024x1024@1x 1.png",
+      "filename" : "AppIcon-iOS-Default-1024x1024@1x 1.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
@@ -23,7 +23,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "PeekTransitAppIcon-iOS-Dark-1024x1024@1x.png",
+      "filename" : "AppIcon-macOS-Dark-1024x1024@1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
