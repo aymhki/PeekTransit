@@ -222,7 +222,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                 
                 
             }
-            .padding(.horizontal, 1)
+            .padding(2)
             .accentedWidget()
             .widgetAccentable()
         }
@@ -258,6 +258,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
             
             Spacer(minLength: 4)
         }
+        .widgetBackground(backgroundView: Group {Color(.secondarySystemGroupedBackground)})
         .accentedWidget()
         .widgetAccentable()
     }
@@ -287,6 +288,7 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
             
             Spacer()
         }
+        .widgetBackground(backgroundView: Group {Color(.secondarySystemGroupedBackground)})
         .accentedWidget()
         .widgetAccentable()
     }

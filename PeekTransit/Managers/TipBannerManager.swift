@@ -29,7 +29,7 @@ class TipBannerManager: ObservableObject {
         userDefaults.set(newCount, forKey: appOpenCountKey)
         hasAttemptedToStartTrackingTipBannerThisSession = true
             
-        guard newCount >= 3 else { return }
+        guard newCount >= getNumberOfLaunchesNeededBeforeStartingUsageTrackingForTipBanner() else { return }
         
         appUsageStartTime = Date()
         startTipBannerTimer()
@@ -76,7 +76,7 @@ class TipBannerManager: ObservableObject {
         let firstShownDate = userDefaults.object(forKey: tipBannerFirstShownDateKey) as? Date
         let countOfAppOpens = userDefaults.integer(forKey: appOpenCountKey)
         
-        guard countOfAppOpens >= 3 else { return false }
+        guard countOfAppOpens >= getNumberOfLaunchesNeededBeforeStartingUsageTrackingForTipBanner() else { return false }
         
         if showCount == 0 {
             return true

@@ -888,6 +888,14 @@ public func getUsageTimeToShowRateAppBannerAfterInSeconds() -> Double {
     return Double(60 * 3)
 }
 
+public func getNumberOfLaunchesNeededBeforeStartingUsageTrackingForRateAppBanner() -> Int {
+    return 3
+}
+
+public func getNumberOfLaunchesNeededBeforeStartingUsageTrackingForTipBanner() -> Int {
+    return (getNumberOfLaunchesNeededBeforeStartingUsageTrackingForRateAppBanner() * 2)
+}
+
 
 public func getTestScheduleList() -> [String] {
     return  [

@@ -27,7 +27,7 @@ class RateAppBannerManager: ObservableObject {
         let newCount = currentCount + 1
         userDefaults.set(newCount, forKey: appOpenCountKey)
         hasAttemptedToStartTrackingRateAppBannerThisSession = true
-        guard newCount >= 3 else { return }
+        guard newCount >= getNumberOfLaunchesNeededBeforeStartingUsageTrackingForRateAppBanner() else { return }
         
         appUsageStartTime = Date()
         startRateAppTimer()
@@ -75,7 +75,7 @@ class RateAppBannerManager: ObservableObject {
         let firstShownDate = userDefaults.object(forKey: rateAppFirstShownDateKey) as? Date
         let countOfAppOpens = userDefaults.integer(forKey: appOpenCountKey)
         
-        guard countOfAppOpens >= 3 else { return false }
+        guard countOfAppOpens >= getNumberOfLaunchesNeededBeforeStartingUsageTrackingForRateAppBanner() else { return false }
         
         
         if showCount == 0 {
