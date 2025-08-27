@@ -8,6 +8,7 @@ struct PeekTransitLockscreenWidget: Widget {
     var body: some WidgetConfiguration {
         IntentConfiguration(kind: kind, intent: ConfigurationLockscreenIntent.self, provider: ProviderLockscreen()) { entry in
             PeekTransitWidgetEntryView(entry: entry)
+            
         }
         .configurationDisplayName("Transit Widget - Lock Screen")
         .description("Shows transit schedules on lock screen")

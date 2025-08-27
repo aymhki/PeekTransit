@@ -7,8 +7,22 @@ struct PeekTransitMediumWidget: Widget {
     
     var body: some WidgetConfiguration {
         IntentConfiguration(kind: kind, intent: ConfigurationMediumIntent.self, provider: ProviderMedium()) { entry in
-            PeekTransitWidgetEntryView(entry: entry)
+            Group {
+                ZStack {
+                    
+                    Color(.secondarySystemGroupedBackground).edgesIgnoringSafeArea(.all)
+                    
+                    ContainerRelativeShape()
+                        .stroke(Color(UIColor.separator), lineWidth: 3)
+                        .ignoresSafeArea(.all)
 
+                    
+                    PeekTransitWidgetEntryView(entry: entry)
+                    
+                }
+                    
+            }
+            .widgetBackground(backgroundView: Group {Color(.secondarySystemGroupedBackground)})
         }
         .configurationDisplayName("Transit Widget - Medium")
         .description("Shows transit schedules in medium size")

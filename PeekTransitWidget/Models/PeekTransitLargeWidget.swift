@@ -8,7 +8,22 @@ struct PeekTransitLargeWidget: Widget {
     
     var body: some WidgetConfiguration {
         IntentConfiguration(kind: kind, intent: ConfigurationLargeIntent.self, provider: ProviderLarge()) { entry in
-            PeekTransitWidgetEntryView(entry: entry)
+            Group {
+                ZStack {
+                    
+                    Color(.secondarySystemGroupedBackground).edgesIgnoringSafeArea(.all)
+                    
+                    ContainerRelativeShape()
+                        .stroke(Color(UIColor.separator), lineWidth: 3)
+                        .ignoresSafeArea(.all)
+
+                    
+                    PeekTransitWidgetEntryView(entry: entry)
+                    
+                }
+                    
+            }
+            .widgetBackground(backgroundView: Group {Color(.secondarySystemGroupedBackground)})
         }
         .configurationDisplayName("Transit Widget - Large")
         .description("Shows transit schedules in large size")
