@@ -19,10 +19,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="AppIconForLaunchScreen" translatesAutoresizingMaskIntoConstraints="NO" id="ZIM-pw-EfZ">
-                                <rect key="frame" x="145" y="385" width="100" height="100"/>
+                                <rect key="frame" x="95" y="335" width="200" height="200"/>
                                 <color key="tintColor" name="AccentColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="100" id="FAy-fQ-md5"/>
+                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="200" id="FAy-fQ-md5"/>
                                     <constraint firstAttribute="width" secondItem="ZIM-pw-EfZ" secondAttribute="height" multiplier="1:1" id="uHc-bw-gpd"/>
                                 </constraints>
                             </imageView>

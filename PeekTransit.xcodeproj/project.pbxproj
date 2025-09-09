@@ -90,10 +90,12 @@
 				Helpers/WidgetHelper.swift,
 				Managers/WidgetRefreshManager.swift,
 				Models/BaseEntry.swift,
+				Models/RefreshTimelineIntent.swift,
 				PeekTransitWidget.intentdefinition,
 				Views/BusScheduleRowView.swift,
 				Views/DynamicWidgetView.swift,
 				Views/LastUpdatedView.swift,
+				Views/RefreshButton.swift,
 				Views/WidgetErrorView.swift,
 				Views/WidgetStopView.swift,
 			);
@@ -111,10 +113,12 @@
 			membershipExceptions = (
 				Helpers/WidgetHelper.swift,
 				Models/BaseEntry.swift,
+				Models/RefreshTimelineIntent.swift,
 				PeekTransitWidget.intentdefinition,
 				Views/BusScheduleRowView.swift,
 				Views/DynamicWidgetView.swift,
 				Views/LastUpdatedView.swift,
+				Views/RefreshButton.swift,
 				Views/WidgetErrorView.swift,
 				Views/WidgetStopView.swift,
 			);
@@ -510,7 +514,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -552,7 +556,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = PeekTransit/PeekTransit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"PeekTransit/Preview Content\"";
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_PREVIEWS = YES;
@@ -714,7 +718,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -755,7 +759,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidget/PeekTransitWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -794,7 +798,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;
@@ -822,7 +826,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_TEAM = Q4RWJ7728F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PeekTransitWidgetIntentHelper/Info.plist;

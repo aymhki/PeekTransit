@@ -91,6 +91,7 @@ struct BusStopView: View {
             }
         } catch {
             print("Error loading schedules: \(error)")
+            self.schedules = []
             errorText = "Error loading schedules: \(error.localizedDescription)"
             errorFetchingSchedule = true
             isLiveUpdatesEnabled = false
@@ -156,7 +157,7 @@ struct BusStopView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .stopViewTheme(themeManager.currentTheme, text: "")
                     
-                } else if errorFetchingSchedule && isAppActive {
+                } else if errorFetchingSchedule {
                     VStack(spacing: 16) {
                         Image(systemName: getGlobalBusIconSystemImageName())
                             .font(.system(size: 48))
@@ -183,6 +184,7 @@ struct BusStopView: View {
                         }
                         .padding(.top, 10)
                     }
+                    .frame(maxWidth: .infinity)
                     .padding()
                     .padding([.vertical, .horizontal])
                     
@@ -351,7 +353,7 @@ struct ScheduleRowView: View {
                         .stopViewTheme(themeManager.currentTheme, text: components[0])
                     
                     Text(components[1])
-                        .lineLimit(nil)
+                        .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(width: geometry.size.width * widthRatios[1], alignment: .leading)
                         .stopViewTheme(themeManager.currentTheme, text: components[1])

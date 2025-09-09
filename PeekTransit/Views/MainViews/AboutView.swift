@@ -32,10 +32,6 @@ struct AboutView: View {
                         .font(.title2.bold())
                     Text("by Ayman Agamy")
                         .foregroundColor(.secondary)
-                    Text("If you have any feedback or suggestions,")
-                        .foregroundStyle(.secondary)
-                    Text("agamyahk@myumanitoba")
-                        .foregroundColor(.secondary)
                     Text("Version \(appVersion) (\(buildNumber))")
                         .foregroundColor(.secondary)
                 }

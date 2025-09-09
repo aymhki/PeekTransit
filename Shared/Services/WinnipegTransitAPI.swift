@@ -104,19 +104,27 @@ class TransitAPI {
         }
         
         
-        print("\n***** Sent: \(url.absoluteString) at \(Date())")
         
-        let (data, response) = try await URLSession.shared.data(from: url)
+        let data: Data
+        let response: URLResponse
         
+        do {
+            (data, response) = try await URLSession.shared.data(from: url)
+        } catch {
+            throw TransitError.networkError(error)
+        }
+        
+        // print("\n***** Sent: \(url.absoluteString) at \(Date())")
+
         guard let httpResponse = response as? HTTPURLResponse else {
             throw TransitError.invalidResponse
         }
-        
+
         guard httpResponse.statusCode == 200 else {
             // print(httpResponse)
             throw TransitError.networkError(NSError(domain: "", code: httpResponse.statusCode))
-            
         }
+        
         
 //        do {
 //            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -125,7 +133,7 @@ class TransitAPI {
 //            print("Error occurred during JSON deserialization: \(error)")
 //        }
         
-        
+    
         
         return data
     }

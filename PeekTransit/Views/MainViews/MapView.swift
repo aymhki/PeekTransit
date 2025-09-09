@@ -41,6 +41,14 @@ struct MapView: View {
         }
     }
     
+    var shouldShowError: Bool {
+        return stopsStore.error != nil && currentlyAvailableStops.isEmpty && !stopsStore.isLoading
+    }
+    
+    var shouldShowTripPlanError: Bool {
+        return stopsStore.errorForGetStopFromTripPlan != nil && !stopsStore.isLoading
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -121,16 +129,14 @@ struct MapView: View {
                         .cornerRadius(8)
                 }
                 
-                if let error = stopsStore.error {
+                if shouldShowError, let error = stopsStore.error {
                     ErrorViewForMapView(error: error) {
-                        self.stopsStore.error = nil
                         retryLoadingStops()
                     }
-                } else if let error = stopsStore.errorForGetStopFromTripPlan {
+                } else if shouldShowTripPlanError, let error = stopsStore.errorForGetStopFromTripPlan {
                     ErrorViewForMapView(error: error) {
                         self.stopsStore.errorForGetStopFromTripPlan = nil
                         isManualRefresh = true
-                        stopsStore.isLoading = true
                         selectAndDisplayStop(withNumber: focusedStopNumber, navigateToBusStopView: navigateToFocusedStop)
                     }
                 }
@@ -150,6 +156,12 @@ struct MapView: View {
         }
         .onChange(of: selectedStop) { newValue in
             isDetailViewPresented = (newValue != nil)
+        }
+        .onChange(of: stopsStore.stops) { newStops in
+            if !newStops.isEmpty {
+                stopsStore.error = nil
+                stopsStore.errorForGetStopFromTripPlan = nil
+            }
         }
         .onAppear {
             handleViewAppear()
@@ -211,6 +223,9 @@ struct MapView: View {
     private func attemptToLoadStops() {
         initialLoadTimer?.invalidate()
         
+        stopsStore.error = nil
+
+        
         if let location = locationManager.location {
             loadStopsWithLocation(location)
         } else {
@@ -237,11 +252,17 @@ struct MapView: View {
             await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
             await MainActor.run {
                 hasAttemptedInitialLoad = true
+                
+                if !currentlyAvailableStops.isEmpty {
+                    stopsStore.error = nil
+                }
             }
         }
     }
     
     private func retryLoadingStops() {
+        stopsStore.error = nil
+        stopsStore.errorForGetStopFromTripPlan = nil
         isManualRefresh = true
         hasAttemptedInitialLoad = false
         attemptToLoadStops()
@@ -262,6 +283,10 @@ struct MapView: View {
                 await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
                 await MainActor.run {
                     isManualRefresh = false
+                    
+                    if !currentlyAvailableStops.isEmpty {
+                        stopsStore.error = nil
+                    }
                 }
             }
         } else {
@@ -278,6 +303,12 @@ struct MapView: View {
         } else if locationManager.shouldRefresh(for: location) && !stopsStore.isLoading {
             Task {
                 await stopsStore.loadStops(userLocation: location, loadingFromWidgetSetup: false)
+                
+                await MainActor.run {
+                    if !currentlyAvailableStops.isEmpty {
+                        stopsStore.error = nil
+                    }
+                }
             }
         }
     }

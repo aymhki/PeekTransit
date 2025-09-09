@@ -110,9 +110,9 @@ struct ContentView: View {
                         rateAppBannerManager.startTrackingAppUsage()
                     }
                     
-                    if (!tipBannerManager.hasAttemptedToStartTrackingTipBannerThisSession) {
-                        tipBannerManager.startTrackingAppUsage()
-                    }
+                    // if (!tipBannerManager.hasAttemptedToStartTrackingTipBannerThisSession) {
+                        // tipBannerManager.startTrackingAppUsage()
+                    // }
                     
                     NotificationCenter.default.addObserver(
                         forName: .appUpdateAvailable,

@@ -58,6 +58,7 @@ class StopsDataStore: ObservableObject {
         
         loadStopsTask?.cancel()
         
+        
         if isCacheValid(for: userLocation) && !stops.isEmpty {
             await MainActor.run {
                 self.stops = self.cachedStops

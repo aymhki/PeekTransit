@@ -140,6 +140,21 @@ struct DynamicWidgetView: View {
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .ignoresSafeArea(.all)
                         
+//                        if #available(iOS 17.0, *) {
+//                            let showRefreshButton = widgetDataToUse["showRefreshButton"] as? Bool ?? true
+//                            
+//                            if showRefreshButton && size != .accessoryRectangular {
+//                                VStack {
+//                                    Spacer()
+//                                    HStack {
+//                                        Spacer()
+//                                        RefreshButton()
+//                                    }
+//                                }
+//                                .padding(.trailing, size == .systemSmall ? 8 : 12)
+//                                .padding(.bottom, size == .systemSmall ? 8 : 12)
+//                            }
+//                        }
                     }
                 }
                 
