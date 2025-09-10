@@ -37,6 +37,7 @@ enum WidgetHelper {
     static func getFilteredStopsForWidget(_ stops: [Stop], maxStops: Int, widgetData: [String: Any]?) async -> [Stop] {
         var filteredStops: [Stop] = []
         var seenVariants = Set<String>()
+        var theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys: Bool = false
         
         let nearbyStopsDict = Dictionary(uniqueKeysWithValues: stops.compactMap { stop -> (Int, Stop)? in
             guard let number = stop.number as? Int else { return nil }
@@ -49,8 +50,13 @@ enum WidgetHelper {
                 if let selectedVariants = preferredStop.selectedVariants as? [Variant] {
                     for variant in selectedVariants {
                         if let key = variant.key as? String, let name = variant.name as? String {
-                            let variantCombo = "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
-                            preferredVariants.insert(variantCombo)
+                            if (key.contains(getVariantKeySeperator())) {
+                                preferredVariants.insert(key)
+                                theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys = true
+                            } else {
+                                let variantCombo = "\(key)\(getCompositKeyLinkerForDictionaries())\(name)"
+                                preferredVariants.insert(variantCombo)
+                            }
                         }
                     }
                 }
@@ -77,15 +83,21 @@ enum WidgetHelper {
                     
                     let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                         schedule: schedule,
-                        timeFormat: .default
+                        timeFormat: .default,
+                        providerOriginalVariantKeys: theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys
                     )
                     
                     var stopVariants = Set<String>()
                     for scheduleString in cleanedSchedule {
                         let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                         if components.count >= 2 {
-                            let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
-                            stopVariants.insert(variantCombo)
+                            if (components[0].contains(getVariantKeySeperator())) {
+                                stopVariants.insert(components[0])
+                                theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys = true
+                            } else {
+                                let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
+                                stopVariants.insert(variantCombo)
+                            }
                         }
                     }
                     
@@ -118,15 +130,21 @@ enum WidgetHelper {
                     
                     let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                         schedule: schedule,
-                        timeFormat: .default
+                        timeFormat: .default,
+                        providerOriginalVariantKeys: theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys
                     )
                     
                     var stopVariants = Set<String>()
                     for scheduleString in cleanedSchedule {
                         let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                         if components.count >= 2 {
-                            let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
-                            stopVariants.insert(variantCombo)
+                            if (components[0].contains(getVariantKeySeperator())) {
+                                stopVariants.insert(components[0])
+                                theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys = true
+                            } else {
+                                let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
+                                stopVariants.insert(variantCombo)
+                            }
                         }
                     }
                     
@@ -134,14 +152,22 @@ enum WidgetHelper {
                     if !matchingPreferredVariants.isEmpty {
                         var updatedStop = stop
                         var selectedVariants: [Variant] = []
+        
                         
                         for variantCombo in matchingPreferredVariants {
-                            let components = variantCombo.components(separatedBy: getCompositKeyLinkerForDictionaries())
-                            if components.count == 2 {
-                                selectedVariants.append(Variant(from:[
-                                    "key": components[0],
-                                    "name": components[1]
+                            if (theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys) {
+                                selectedVariants.append(Variant(from: [
+                                    "key": variantCombo,
+                                    "name": getVariantNameUnavailablePlaceHolderText()
                                 ]))
+                            } else {
+                                let components = variantCombo.components(separatedBy: getCompositKeyLinkerForDictionaries())
+                                if components.count == 2 {
+                                    selectedVariants.append(Variant(from:[
+                                        "key": components[0],
+                                        "name": components[1]
+                                    ]))
+                                }
                             }
                         }
                         
@@ -179,15 +205,22 @@ enum WidgetHelper {
                     
                     let cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                         schedule: schedule,
-                        timeFormat: .default
+                        timeFormat: .default,
+                        providerOriginalVariantKeys: theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys
                     )
                     
                     var stopVariants = Set<String>()
                     for scheduleString in cleanedSchedule {
                         let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
-                        if components.count >= 2 {
-                            let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
-                            stopVariants.insert(variantCombo)
+                        
+                        if (components[0].contains(getVariantKeySeperator())) {
+                            stopVariants.insert(components[0])
+                            theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys = true
+                        } else {
+                            if components.count >= 2 {
+                                let variantCombo = "\(components[0])\(getCompositKeyLinkerForDictionaries())\(components[1])"
+                                stopVariants.insert(variantCombo)
+                            }
                         }
                     }
                     
@@ -250,6 +283,7 @@ enum WidgetHelper {
         var maxVariants = 0
         var maxStops = 0
         var currentStop = 0
+        var theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys: Bool = false
         
         if (multipleEntriesPerVariant) {
             maxVariants = getMaxVariantsAllowedForMultipleEntries(
@@ -277,8 +311,21 @@ enum WidgetHelper {
             
             if currentStop < maxStops {
                 
+                let isAutoPopulate = (isClosestStop ?? false && widgetData["selectedPerferredStopsInClosestStops"] as? Bool == false) || widgetData["noSelectedVariants"] as? Bool == true || stop.selectedVariants.isEmpty
+                
+                if (!isAutoPopulate) {
+                    for tempVariant in stop.selectedVariants {
+                        if (tempVariant.key.contains(getVariantKeySeperator())) {
+                            theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys = true
+                            break
+                        }
+                    }
+                } else {
+                    theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys = true
+                }
+                
                 currentStop = currentStop + 1
-                guard let stopNumber = stop.number as? Int else { continue }
+                let stopNumber = stop.number
                 
                 do {
                     let schedule = try await retryRequest {
@@ -286,15 +333,15 @@ enum WidgetHelper {
                     }
                     
                     if (multipleEntriesPerVariant) {
-                        cleanedSchedule = TransitAPI.shared.cleanScheduleMixedTimeFormat(schedule: schedule)
+                        cleanedSchedule = TransitAPI.shared.cleanScheduleMixedTimeFormat(schedule: schedule, provideOriginalVariantKeys: theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys)
                     } else {
                         cleanedSchedule = TransitAPI.shared.cleanStopSchedule(
                             schedule: schedule,
                             timeFormat: widgetData["timeFormat"] as? String == TimeFormat.clockTime.formattedValue ? TimeFormat.clockTime : TimeFormat.minutesRemaining
-                        )
+                        , providerOriginalVariantKeys: theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys)
                     }
                     
-                    if ( ( isClosestStop ?? false && widgetData["selectedPerferredStopsInClosestStops"] as? Bool == false  ) || widgetData["noSelectedVariants"] as? Bool == true || stop.selectedVariants == nil || (stop.selectedVariants as? [Variant])?.isEmpty == true ) {
+                    if ( isAutoPopulate ) {
                         
                         var selectedVariants: [Variant] = []
                         var processedVariants = Set<String>()
@@ -303,15 +350,12 @@ enum WidgetHelper {
                             let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                             if components.count >= 2 {
                                 let variantKey = components[0]
-                                let variantName = components[1]
-                                let variantIdentifier = "\(variantKey)\(getCompositKeyLinkerForDictionaries())\(variantName)"
+                                let variantIdentifier = "\(variantKey)"
                                 
                                 if !processedVariants.contains(variantIdentifier) {
                                     let variantEntries = cleanedSchedule.filter { entry in
                                         let entryComponents = entry.components(separatedBy: getScheduleStringSeparator())
-                                        return entryComponents.count >= 2 &&
-                                        entryComponents[0] == variantKey &&
-                                        entryComponents[1].contains(variantName)
+                                        return entryComponents.count >= 1 && entryComponents[0] == variantKey
                                     }
                                     
                                     
@@ -320,7 +364,7 @@ enum WidgetHelper {
                                     
                                     selectedVariants.append(Variant(from:[
                                         "key": variantKey,
-                                        "name": variantName
+                                        "name": getVariantNameUnavailablePlaceHolderText()
                                     ]))
                                     processedVariants.insert(variantIdentifier)
                                     
@@ -333,25 +377,28 @@ enum WidgetHelper {
                         
                         stop.selectedVariants = selectedVariants
                     } else {
-                        if let selectedVariants = stop.selectedVariants as? [Variant] {
-                            for variant in selectedVariants {
-                                guard let variantKey = variant.key as? String,
-                                      let variantName = variant.name as? String else {
-                                    continue
+                        
+                        for variant in stop.selectedVariants {
+                            var matchingSchedules: [String] = []
+                            
+                            if (theWidgetIsSavedAfterTheUpdateThatProvideOriginalKeys) {
+                                matchingSchedules = cleanedSchedule.filter { scheduleString in
+                                    let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
+                                    return components.count >= 1 && components[0] == variant.key
                                 }
-                                
-                                let matchingSchedules = cleanedSchedule.filter { scheduleString in
+                            } else {
+                                matchingSchedules = cleanedSchedule.filter { scheduleString in
                                     let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
                                     return components.count >= 2 &&
-                                    components[0] == variantKey &&
-                                    components[1].contains(variantName)
+                                    components[0] == variant.key &&
+                                    components[1].contains(variant.name)
                                 }
-                                
-                                if multipleEntriesPerVariant {
-                                    schedulesArray.append(contentsOf: Array(matchingSchedules.prefix(2)))
-                                } else if let firstMatch = matchingSchedules.first {
-                                    schedulesArray.append(firstMatch)
-                                }
+                            }
+                            
+                            if multipleEntriesPerVariant {
+                                schedulesArray.append(contentsOf: Array(matchingSchedules.prefix(2)))
+                            } else if let firstMatch = matchingSchedules.first {
+                                schedulesArray.append(firstMatch)
                             }
                         }
                     }

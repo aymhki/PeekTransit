@@ -116,5 +116,113 @@
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CA42E422-F8AC-47C2-A114-63ADC931B740"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PeekTransitWidget/Helpers/WidgetHelper.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "38"
+            endingLineNumber = "38"
+            landmarkName = "getFilteredStopsForWidget(_:maxStops:widgetData:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A8236548-0B3C-481B-8451-79616DEEB6D0"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PeekTransitWidget/Helpers/WidgetHelper.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "275"
+            endingLineNumber = "275"
+            landmarkName = "getScheduleForWidget(_:isClosestStop:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "EED84B34-E499-4244-8D86-8130AAAFC2AF"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PeekTransitWidget/Helpers/WidgetHelper.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "274"
+            endingLineNumber = "274"
+            landmarkName = "getScheduleForWidget(_:isClosestStop:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "EED84B34-E499-4244-8D86-8130AAAFC2AF - 151c833644db596"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for static Peek_Transit.WidgetHelper.getScheduleForWidget(_: Swift.Dictionary&lt;Swift.String, Any&gt;, isClosestStop: Swift.Optional&lt;Swift.Bool&gt;) async -&gt; (Swift.Optional&lt;Swift.Array&lt;Swift.String&gt;&gt;, Swift.Dictionary&lt;Swift.String, Any&gt;)"
+                  moduleName = "Peek Transit.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/aymhki/IdeaProjects/Peek%20Transit/PeekTransit/PeekTransitWidget/Helpers/WidgetHelper.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "274"
+                  endingLineNumber = "274">
+               </Location>
+               <Location
+                  uuid = "EED84B34-E499-4244-8D86-8130AAAFC2AF - d49a5eaf71baf190"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(3) suspend resume partial function for static Peek_Transit.WidgetHelper.getScheduleForWidget(_: Swift.Dictionary&lt;Swift.String, Any&gt;, isClosestStop: Swift.Optional&lt;Swift.Bool&gt;) async -&gt; (Swift.Optional&lt;Swift.Array&lt;Swift.String&gt;&gt;, Swift.Dictionary&lt;Swift.String, Any&gt;)"
+                  moduleName = "Peek Transit.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/aymhki/IdeaProjects/Peek%20Transit/PeekTransit/PeekTransitWidget/Helpers/WidgetHelper.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "274"
+                  endingLineNumber = "274">
+               </Location>
+               <Location
+                  uuid = "EED84B34-E499-4244-8D86-8130AAAFC2AF - e871a61742f5393"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(4) suspend resume partial function for static Peek_Transit.WidgetHelper.getScheduleForWidget(_: Swift.Dictionary&lt;Swift.String, Any&gt;, isClosestStop: Swift.Optional&lt;Swift.Bool&gt;) async -&gt; (Swift.Optional&lt;Swift.Array&lt;Swift.String&gt;&gt;, Swift.Dictionary&lt;Swift.String, Any&gt;)"
+                  moduleName = "Peek Transit.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/aymhki/IdeaProjects/Peek%20Transit/PeekTransit/PeekTransitWidget/Helpers/WidgetHelper.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "274"
+                  endingLineNumber = "274">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "70A3AA83-85C7-467A-B7D4-E058166CF14C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PeekTransitWidget/Views/PeekTransitWidgetEntryView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "122"
+            endingLineNumber = "122"
+            landmarkName = "getFilledScheduleData(widgetData:scheduleData:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

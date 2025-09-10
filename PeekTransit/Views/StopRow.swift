@@ -32,11 +32,11 @@ struct StopRow: View {
                 (variant.effectiveFrom == nil || currentDate >= variant.effectiveFrom ?? Date()) &&
                 (variant.effectiveTo == nil || currentDate <= variant.effectiveTo ?? Date())
             ) {
-                let currentVariantKey = variant.key.split(separator: "-")[0]
+                let currentVariantKey = variant.key.split(separator: getVariantKeySeperator())[0]
                 var isDuplicate = false
                 
                 for existingVariant in seen {
-                    if existingVariant.key.split(separator: "-")[0] == currentVariantKey {
+                    if existingVariant.key.split(separator: getVariantKeySeperator())[0] == currentVariantKey {
                         isDuplicate = true
                         break
                     }
@@ -61,11 +61,11 @@ struct StopRow: View {
         
         for variant in variants {
             if (variant.effectiveFrom != nil && variant.effectiveFrom ?? Date() > currentDate) {
-                let currentVariantKey = variant.key.split(separator: "-")[0]
+                let currentVariantKey = variant.key.split(separator: getVariantKeySeperator())[0]
                 var isDuplicate = false
                 
                 for existingVariant in seen {
-                    if existingVariant.key.split(separator: "-")[0] == currentVariantKey {
+                    if existingVariant.key.split(separator: getVariantKeySeperator())[0] == currentVariantKey {
                         isDuplicate = true
                         break
                     }
@@ -86,7 +86,7 @@ struct StopRow: View {
             for (index, variant) in (currentlyAvailableVariants ?? []).enumerated() {
                 if index >= (futureVariants?.count ?? 0) {
                     return false
-                } else if variant.key.split(separator: "-")[0].description != futureVariants?[index].key.split(separator: "-")[0].description {
+                } else if variant.key.split(separator: getVariantKeySeperator())[0].description != futureVariants?[index].key.split(separator: getVariantKeySeperator())[0].description {
                     return false
                 }
             }

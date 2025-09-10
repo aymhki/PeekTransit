@@ -117,7 +117,7 @@ struct MapViewRepresentable: UIViewRepresentable {
         if !stop.variants.isEmpty {
             var variantsString = ""
             let uniqueRoutes = Set(stop.variants.compactMap { variant -> String? in
-                return variant.key.split(separator: "-")[0].description
+                return variant.key.split(separator: getVariantKeySeperator())[0].description
             })
             variantsString = uniqueRoutes.sorted().joined(separator: ", ")
             if !variantsString.isEmpty {

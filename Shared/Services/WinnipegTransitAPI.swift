@@ -345,7 +345,7 @@ class TransitAPI {
         
         
         let bulkVariantsSet = Set(allVariantsToUse.compactMap { variant -> String? in
-            return variant.key.split(separator: "-").first?.description
+            return variant.key.split(separator: getVariantKeySeperator()).first?.description
         })
         
         for enrichedStop in enrichedStops {
@@ -353,7 +353,7 @@ class TransitAPI {
             
             for variant in variants {
                 
-                let variantIdentifier = variant.key.split(separator: "-").first?.description ?? ""
+                let variantIdentifier = variant.key.split(separator: getVariantKeySeperator()).first?.description ?? ""
                 
                 if !bulkVariantsSet.contains(variantIdentifier) {
                     
@@ -527,7 +527,7 @@ class TransitAPI {
         return json
     }
     
-    func cleanStopSchedule(schedule: [String: Any], timeFormat: TimeFormat) -> [String] {
+    func cleanStopSchedule(schedule: [String: Any], timeFormat: TimeFormat, providerOriginalVariantKeys: Bool) -> [String] {
         var busScheduleList: [String] = []
         let currentDate = Date()
         let dateFormatter = DateFormatter()
@@ -628,13 +628,15 @@ class TransitAPI {
                                 finalArrivalText = "Time Unavailable"
                             }
                             
-                            if let firstPart = variantKey.split(separator: "-").first {
-                                variantKey = String(firstPart)
-                            }
-                            
-                            
-                            if (variantKey.contains("BLUE")) {
-                                variantKey = "B"
+                            if (!providerOriginalVariantKeys) {
+                                if let firstPart = variantKey.split(separator: getVariantKeySeperator()).first {
+                                    variantKey = String(firstPart)
+                                }
+                                
+                                
+                                if (variantKey.contains("BLUE")) {
+                                    variantKey = "B"
+                                }
                             }
                             
                             busScheduleList.append("\(variantKey)\(getScheduleStringSeparator())\(variantName)\(getScheduleStringSeparator())\(arrivalState)\(getScheduleStringSeparator())\(finalArrivalText)")
@@ -732,7 +734,7 @@ class TransitAPI {
         })
     }
     
-    func cleanScheduleMixedTimeFormat(schedule: [String: Any]) -> [String] {
+    func cleanScheduleMixedTimeFormat(schedule: [String: Any], provideOriginalVariantKeys: Bool) -> [String] {
         var busScheduleList: [String] = []
         let currentDate = Date()
         let dateFormatter = DateFormatter()
@@ -839,12 +841,14 @@ class TransitAPI {
                                         sortValue = Int(timeDifference)
                                     }
                                     
-                                    if let firstPart = variantKey.split(separator: "-").first {
-                                        variantKey = String(firstPart)
-                                    }
-                                    
-                                    if (variantKey.contains("BLUE")) {
-                                        variantKey = "B"
+                                    if (!provideOriginalVariantKeys) {
+                                        if let firstPart = variantKey.split(separator: getVariantKeySeperator()).first {
+                                            variantKey = String(firstPart)
+                                        }
+                                        
+                                        if (variantKey.contains("BLUE")) {
+                                            variantKey = "B"
+                                        }
                                     }
                                     
                                     let variantIdentifier = "\(variantKey)\(getScheduleStringSeparator())\(variantName)"

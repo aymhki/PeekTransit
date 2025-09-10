@@ -20,8 +20,11 @@ struct BusScheduleRow: View {
         let components = schedule.components(separatedBy: getScheduleStringSeparator())
         if components.count >= 4 {
             HStack(spacing: 4) {
-                Text(components[0])
-                    .widgetTheme(currentTheme, text: components[0], size: size, inPreview: forPreview)
+                let variantKeyPieces = components[0].split(separator: getVariantKeySeperator())
+                let finalVariantNumber = variantKeyPieces.first.map { String($0) } ?? components[0]
+                let finalFinalVariantNumber = finalVariantNumber.replacingOccurrences(of: "BLUE", with: "B")
+                Text(finalFinalVariantNumber)
+                    .widgetTheme(currentTheme, text:finalFinalVariantNumber, size: size, inPreview: forPreview)
                     .frame(width: getRouteNumberWidth(size: size), alignment: .leading)
                 
                 if !components[1].isEmpty {

@@ -33,6 +33,11 @@ struct StopScheduleSection: View {
             
             VStack(spacing: 8) {
                 ForEach(variants, id: \.self) { variant in
+                    
+                    let variantKeyPieces = variant.key.split(separator: getVariantKeySeperator())
+                    let finalVariantNumber = variantKeyPieces.first.map { String($0) } ?? variant.key
+                    let finalFinalVariantNumber = finalVariantNumber.replacingOccurrences(of: "BLUE", with: "B")
+                    
                     Button(action: {
                         onVariantSelect(variant)
                     }) {
@@ -41,7 +46,7 @@ struct StopScheduleSection: View {
                                 .padding(.trailing, 8)
                             
                             HStack(spacing: 16) {
-                                Text(variant.key)
+                                Text(finalFinalVariantNumber)
                                     .font(.system(.body, design: .monospaced))
                                     .bold()
                                 

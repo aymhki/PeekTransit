@@ -40,14 +40,14 @@ struct VariantSelectionStep: View {
             
     
     
-            if let firstPart = key.split(separator: "-").first {
-                key = String(firstPart)
-            }
-    
-    
-            if (key.contains("BLUE")) {
-                key = "B"
-            }
+//            if let firstPart = key.split(separator: getVariantKeySeperator()).first {
+//                key = String(firstPart)
+//            }
+//    
+//    
+//            if (key.contains("BLUE")) {
+//                key = "B"
+//            }
     
             uniqueVariants.insert(Variant(from: [
                 "key": key,
@@ -71,7 +71,7 @@ struct VariantSelectionStep: View {
                 guard stop.number != -1 else { continue }
                 
                 let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stop.number)
-                let cleanSchedule =  TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: .default)
+//                let cleanSchedule =  TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: .default, providerOriginalVariantKeys: false)
                 let stopVariants = try  await TransitAPI.shared.getOnlyVariantsForStop(stop: stop)
                 let stopVaraintsSet = convertVariantArrayToUniqueSet(stopVariants)
                 

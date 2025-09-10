@@ -78,7 +78,12 @@ struct WidgetSetupView: View {
             
             if (!noSelectedVariants) {
                 variantKeys = selectedVariants.values.flatMap { variants in
-                    variants.compactMap { $0.key }
+                    variants
+                        .compactMap { $0.key
+                                .split(separator: getVariantKeySeperator()).first
+                                .map { String($0) }?
+                                .replacingOccurrences(of: "BLUE", with: "B")
+                        }
                 }.joined(separator: ", ")
             } else {
                 variantKeys = "Up Coming Buses"

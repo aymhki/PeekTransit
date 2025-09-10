@@ -908,3 +908,11 @@ public func getTestScheduleList() -> [String] {
         "671" + getScheduleStringSeparator() + "Markham Station" + getScheduleStringSeparator() + getLateStatusTextString() + getScheduleStringSeparator() + "12:45 AM",
     ]
 }
+
+public func getVariantNameUnavailablePlaceHolderText() -> String {
+    return getWidgetTextPlaceholder()
+}
+
+public func getVariantKeySeperator()-> String {
+    return "-"
+}

@@ -46,10 +46,10 @@ struct SavedStopsView: View {
                                 let uniqueVariants = variants.filter { item in
                                     
                                     var seenKeys = Set<String>()
-                                    if seenKeys.contains(item.key.split(separator: "-")[0].description) {
+                                    if seenKeys.contains(item.key.split(separator: getVariantKeySeperator())[0].description) {
                                         return false
                                     }
-                                    seenKeys.insert(item.key.split(separator: "-")[0].description)
+                                    seenKeys.insert(item.key.split(separator: getVariantKeySeperator())[0].description)
                                     return true
                                 }
                                 

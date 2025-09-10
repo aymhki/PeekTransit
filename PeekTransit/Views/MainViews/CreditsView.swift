@@ -23,8 +23,6 @@ struct CreditsView: View {
                 
                 Spacer()
                 
-                Text("Built using SwiftUI and Winnipeg Transit API")
-                    .foregroundColor(.primary)
             }
             .padding()
         }

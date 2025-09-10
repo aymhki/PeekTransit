@@ -76,7 +76,7 @@ struct BusStopView: View {
         
         do {
             let schedule = try await TransitAPI.shared.getStopSchedule(stopNumber: stopNumber)
-            let cleanedSchedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining)
+            let cleanedSchedules = TransitAPI.shared.cleanStopSchedule(schedule: schedule, timeFormat: TimeFormat.minutesRemaining, providerOriginalVariantKeys: false)
             
             self.schedules = cleanedSchedules.map { scheduleString in
                         let components = scheduleString.components(separatedBy: getScheduleStringSeparator())

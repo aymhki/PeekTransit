@@ -9,7 +9,7 @@ struct VariantBadge: View {
         if showFullVariantKey {
             return variant.key
         } else {
-            return variant.key.split(separator: "-")[0].description
+            return variant.key.split(separator: getVariantKeySeperator())[0].description
         }
     }
     

@@ -69,16 +69,23 @@ struct WidgetStopView: View {
 
                 
                 ForEach(variants.prefix(maxSchedules).indices, id: \.self) { variantIndex in
-                    if let key = variants[variantIndex].key as? String,
-                       let schedules = scheduleData,
-                       let variantName = variants[variantIndex].name as? String {
+                    if let schedules = scheduleData {
                         
-                        let matchingSchedules = schedules.filter { scheduleString in
-                            let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
-                            return components.count >= 2 &&
-                                   components[0] == key &&
-                                   components[1] == variantName
-                        }
+                        let matchingSchedules: [String] = {
+                            if (variants[variantIndex].key.contains(getVariantKeySeperator())) {
+                                return schedules.filter { scheduleString in
+                                    let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
+                                    return components.count >= 1 && components[0] == variants[variantIndex].key
+                                }
+                            } else {
+                                return schedules.filter { scheduleString in
+                                    let components = scheduleString.components(separatedBy: getScheduleStringSeparator())
+                                    return components.count >= 2 &&
+                                    components[0] == variants[variantIndex].key &&
+                                    components[1] == variants[variantIndex].name
+                                }
+                            }
+                        }()
                         
                         let schedulesToShow = multipleEntriesPerVariant ? matchingSchedules.prefix(2) : matchingSchedules.prefix(1)
                         

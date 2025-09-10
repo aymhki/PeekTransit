@@ -274,7 +274,7 @@ struct Variant: Hashable, Codable {
     
     init(from variant: [String: Any]) {
         key = variant["key"] as? String ?? "Undefined Key"
-        name = variant["name"] as? String ?? "Unknown Name"
+        name = variant["name"] as? String ?? getVariantNameUnavailablePlaceHolderText()
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
@@ -360,12 +360,20 @@ struct Variant: Hashable, Codable {
     }
     
     public static func == (lhs: Variant, rhs: Variant) -> Bool {
-        return lhs.key.split(separator: "-")[0] == rhs.key.split(separator: "-")[0] && lhs.name == rhs.name
+        if (lhs.key.contains(getVariantKeySeperator())) {
+            return lhs.key == rhs.key
+        } else {
+            return lhs.key.split(separator: getVariantKeySeperator())[0] == rhs.key.split(separator: getVariantKeySeperator())[0] && lhs.name == rhs.name
+        }
     }
     
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(key.split(separator: "-")[0])
-        hasher.combine(name)
+        if (key.contains(getVariantKeySeperator())) {
+            hasher.combine(key)
+        } else {
+            hasher.combine(key.split(separator: getVariantKeySeperator())[0])
+            hasher.combine(name)
+        }
     }
 }
 

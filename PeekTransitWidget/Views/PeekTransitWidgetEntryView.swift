@@ -126,14 +126,28 @@ struct PeekTransitWidgetEntryView<T: BaseEntry>: View {
                 return  getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
             }
         }
+        
+        var maxStops: Int {
+            if (multipleEntriesPerVariant) {
+                return getMaxSopsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            } else {
+                return  getMaxSopsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            }
+        }
+        
+        var totalScheduleEntriesShouldBe = maxStops * maxSchedules
+        var numOfSchedulesNeeded = totalScheduleEntriesShouldBe -  filledScheduleData.count
+        var shouldFillSchedule = numOfSchedulesNeeded > 0
 
-
-        for _ in 0...(maxSchedules - filledScheduleData.count) {
-            for selectedVariant in selectedVariantsSimplified {
-                if !availableScheduleVariantsSimplified.contains(selectedVariant) {
-                    let components = selectedVariant.components(separatedBy: "-")
-                    if components.count >= 2 {
-                        filledScheduleData.append("\(components[0])\(getScheduleStringSeparator())\(components[1])\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getTimePeriodAllowedForNextBusRoutes())hrs+")
+        if (shouldFillSchedule) {
+        
+            for _ in 0...(numOfSchedulesNeeded) {
+                for selectedVariant in selectedVariantsSimplified {
+                    if !availableScheduleVariantsSimplified.contains(selectedVariant) {
+                        let components = selectedVariant.components(separatedBy: getVariantKeySeperator())
+                        if components.count >= 2 {
+                            filledScheduleData.append("\(components[0])\(getScheduleStringSeparator())\(components[1])\(getScheduleStringSeparator())\(getOKStatusTextString())\(getScheduleStringSeparator())\(getTimePeriodAllowedForNextBusRoutes())hrs+")
+                        }
                     }
                 }
             }

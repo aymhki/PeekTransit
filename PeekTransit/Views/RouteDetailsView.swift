@@ -95,7 +95,7 @@ struct RouteDetailsView: View {
                                         Text(displayText)
                                             .fontWeight(.medium)
                                     } else {
-                                        if let variantKey = segment.variantKey?.split(separator: "-")[0], let variantName = segment.variantName?.replacingOccurrences(of: variantKey, with: "") {
+                                        if let variantKey = segment.variantKey?.split(separator: getVariantKeySeperator())[0], let variantName = segment.variantName?.replacingOccurrences(of: variantKey, with: "") {
                                             Text("\(variantKey) \(variantName)")
                                                 .fontWeight(.medium)
                                         }
