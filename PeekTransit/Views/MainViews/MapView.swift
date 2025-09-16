@@ -64,6 +64,9 @@ struct MapView: View {
                     highlightedStopNumber: highlightedStopNumber
                 )
                 .edgesIgnoringSafeArea(.top)
+                .if(iOS26OrLater()) { view in
+                    view.ignoresSafeArea(.container, edges: .all)
+                }
                 
                 if locationDenied {
                     LocationPermissionDeniedView()
@@ -419,3 +422,10 @@ struct MapView: View {
     }
 }
 
+func iOS26OrLater() -> Bool {
+    if #available(iOS 26.0, *) {
+        return true
+    } else {
+        return false
+    }
+}
