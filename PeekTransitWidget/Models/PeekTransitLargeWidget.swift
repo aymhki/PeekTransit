@@ -10,9 +10,7 @@ struct PeekTransitLargeWidget: Widget {
         IntentConfiguration(kind: kind, intent: ConfigurationLargeIntent.self, provider: ProviderLarge()) { entry in
             Group {
                 ZStack {
-                    
-                    Color(.secondarySystemGroupedBackground).edgesIgnoringSafeArea(.all)
-                    
+                                        
                     ContainerRelativeShape()
                         .stroke(Color(UIColor.separator), lineWidth: 3)
                         .ignoresSafeArea(.all)
