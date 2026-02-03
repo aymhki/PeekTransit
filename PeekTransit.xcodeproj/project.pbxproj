@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -37,9 +37,8 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		2F2010AC2D4EF93A009E18AE /* Embed ExtensionKit Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
 			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
-			dstSubfolderSpec = 16;
+			dstSubfolder = Product;
 			files = (
 			);
 			name = "Embed ExtensionKit Extensions";
@@ -47,15 +46,13 @@
 		};
 		2FB3B8D22D4DB2B1003BFF19 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 13;
+			dstSubfolder = PlugIns;
 			files = (
 				2FBB70AC2D500E0D008998C8 /* PeekTransitWidgetExtension.appex in Embed Foundation Extensions */,
 				2FBB712A2D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -263,27 +260,21 @@
 /* Begin PBXFrameworksBuildPhase section */
 		2F570C0F2D45D5EE00C01563 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2FBB70962D500E0C008998C8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				2FBB709E2D500E0C008998C8 /* SwiftUI.framework in Frameworks */,
 				2FBB709C2D500E0C008998C8 /* WidgetKit.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2FBB711E2D501CC0008998C8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				2FBB71232D501CC0008998C8 /* Intents.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -345,8 +336,6 @@
 				2F570C142D45D5EE00C01563 /* PeekTransit */,
 			);
 			name = "Peek Transit";
-			packageProductDependencies = (
-			);
 			productName = PeekTransit;
 			productReference = 2F570C122D45D5EE00C01563 /* Peek Transit.app */;
 			productType = "com.apple.product-type.application";
@@ -361,14 +350,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				2FBB709F2D500E0C008998C8 /* PeekTransitWidget */,
 			);
 			name = PeekTransitWidgetExtension;
-			packageProductDependencies = (
-			);
 			productName = PeekTransitWidgetExtension;
 			productReference = 2FBB70992D500E0C008998C8 /* PeekTransitWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -383,14 +368,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				2FBB71242D501CC0008998C8 /* PeekTransitWidgetIntentHelper */,
 			);
 			name = PeekTransitWidgetIntentHelper;
-			packageProductDependencies = (
-			);
 			productName = PeekTransitWidgetIntentHelper;
 			productReference = 2FBB71212D501CC0008998C8 /* PeekTransitWidgetIntentHelper.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -427,7 +408,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 			);
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 2F570C132D45D5EE00C01563 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -442,51 +423,39 @@
 /* Begin PBXResourcesBuildPhase section */
 		2F570C102D45D5EE00C01563 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				008F5D262E5076C70028AEC2 /* Peek Transit.storekit in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2FBB70972D500E0C008998C8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				008F5D272E5076C70028AEC2 /* Peek Transit.storekit in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2FBB711F2D501CC0008998C8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				008F5D282E5076C70028AEC2 /* Peek Transit.storekit in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2F570C0E2D45D5EE00C01563 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2FBB70952D500E0C008998C8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2FBB711D2D501CC0008998C8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -506,7 +475,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		2F570C242D45D5EF00C01563 /* Debug */ = {
+		2F570C242D45D5EF00C01563 /* Debug configuration for PBXNativeTarget "Peek Transit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -548,7 +517,7 @@
 			};
 			name = Debug;
 		};
-		2F570C252D45D5EF00C01563 /* Release */ = {
+		2F570C252D45D5EF00C01563 /* Release configuration for PBXNativeTarget "Peek Transit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -590,7 +559,7 @@
 			};
 			name = Release;
 		};
-		2F570C262D45D5EF00C01563 /* Debug */ = {
+		2F570C262D45D5EF00C01563 /* Debug configuration for PBXProject "PeekTransit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -654,7 +623,7 @@
 			};
 			name = Debug;
 		};
-		2F570C272D45D5EF00C01563 /* Release */ = {
+		2F570C272D45D5EF00C01563 /* Release configuration for PBXProject "PeekTransit" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -711,7 +680,7 @@
 			};
 			name = Release;
 		};
-		2FBB70AD2D500E0D008998C8 /* Debug */ = {
+		2FBB70AD2D500E0D008998C8 /* Debug configuration for PBXNativeTarget "PeekTransitWidgetExtension" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -752,7 +721,7 @@
 			};
 			name = Debug;
 		};
-		2FBB70AE2D500E0D008998C8 /* Release */ = {
+		2FBB70AE2D500E0D008998C8 /* Release configuration for PBXNativeTarget "PeekTransitWidgetExtension" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -793,7 +762,7 @@
 			};
 			name = Release;
 		};
-		2FBB712C2D501CC0008998C8 /* Debug */ = {
+		2FBB712C2D501CC0008998C8 /* Debug configuration for PBXNativeTarget "PeekTransitWidgetIntentHelper" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
@@ -821,7 +790,7 @@
 			};
 			name = Debug;
 		};
-		2FBB712D2D501CC0008998C8 /* Release */ = {
+		2FBB712D2D501CC0008998C8 /* Release configuration for PBXNativeTarget "PeekTransitWidgetIntentHelper" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = PeekTransitWidgetIntentHelper/PeekTransitWidgetIntentHelper.entitlements;
@@ -855,37 +824,33 @@
 		2F570C0D2D45D5EE00C01563 /* Build configuration list for PBXProject "PeekTransit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2F570C262D45D5EF00C01563 /* Debug */,
-				2F570C272D45D5EF00C01563 /* Release */,
+				2F570C262D45D5EF00C01563 /* Debug configuration for PBXProject "PeekTransit" */,
+				2F570C272D45D5EF00C01563 /* Release configuration for PBXProject "PeekTransit" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		2F570C232D45D5EF00C01563 /* Build configuration list for PBXNativeTarget "Peek Transit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2F570C242D45D5EF00C01563 /* Debug */,
-				2F570C252D45D5EF00C01563 /* Release */,
+				2F570C242D45D5EF00C01563 /* Debug configuration for PBXNativeTarget "Peek Transit" */,
+				2F570C252D45D5EF00C01563 /* Release configuration for PBXNativeTarget "Peek Transit" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		2FBB70AF2D500E0D008998C8 /* Build configuration list for PBXNativeTarget "PeekTransitWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2FBB70AD2D500E0D008998C8 /* Debug */,
-				2FBB70AE2D500E0D008998C8 /* Release */,
+				2FBB70AD2D500E0D008998C8 /* Debug configuration for PBXNativeTarget "PeekTransitWidgetExtension" */,
+				2FBB70AE2D500E0D008998C8 /* Release configuration for PBXNativeTarget "PeekTransitWidgetExtension" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		2FBB712B2D501CC0008998C8 /* Build configuration list for PBXNativeTarget "PeekTransitWidgetIntentHelper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				2FBB712C2D501CC0008998C8 /* Debug */,
-				2FBB712D2D501CC0008998C8 /* Release */,
+				2FBB712C2D501CC0008998C8 /* Debug configuration for PBXNativeTarget "PeekTransitWidgetIntentHelper" */,
+				2FBB712D2D501CC0008998C8 /* Release configuration for PBXNativeTarget "PeekTransitWidgetIntentHelper" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
