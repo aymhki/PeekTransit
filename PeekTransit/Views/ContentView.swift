@@ -106,9 +106,9 @@ struct ContentView: View {
                         selection = defaultTab
                     }
                     
-                    if (!rateAppBannerManager.hasAttemptedToStartTrackingRateAppBannerThisSession) {
-                        rateAppBannerManager.startTrackingAppUsage()
-                    }
+//                    if (!rateAppBannerManager.hasAttemptedToStartTrackingRateAppBannerThisSession) {
+//                        rateAppBannerManager.startTrackingAppUsage()
+//                    }
                     
                     // if (!tipBannerManager.hasAttemptedToStartTrackingTipBannerThisSession) {
                         // tipBannerManager.startTrackingAppUsage()
