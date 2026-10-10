@@ -104,6 +104,24 @@ struct ProviderLarge: IntentTimelineProvider {
     func getTimeline(for configuration: ConfigurationLargeIntent, in context: Context, completion: @escaping (Timeline<SimpleEntryLarge>) -> Void) {
         Task {
             let widgetId = configuration.widgetConfig?.identifier
+            
+            if let cooldownTimeline = WidgetHelper.refreshCooldownTimeline(
+                widgetId: widgetId,
+                currentDate: Date(),
+                configuration: configuration,
+                createEntry: { date, config, data, schedule in
+                    SimpleEntryLarge(
+                        date: date,
+                        configuration: config as! ConfigurationLargeIntent,
+                        widgetData: data,
+                        scheduleData: schedule
+                    )
+                }
+            ) {
+                completion(cooldownTimeline)
+                return
+            }
+            
             let widget = widgetId.flatMap { WidgetHelper.getWidgetFromDefaults(withId: $0) }
             var widgetData = widget?.widgetData
             

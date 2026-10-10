@@ -26,7 +26,13 @@ struct WidgetModel: Codable, Identifiable  {
         id = try container.decode(String.self, forKey: .id)
         
         let codableDict = try container.decode([String: AnyCodable].self, forKey: .widgetData)
-        widgetData = codableDict.mapValues { $0.value }
+        var decodedWidgetData = codableDict.mapValues { $0.value }
+        
+        if decodedWidgetData["showRefreshButton"] as? Bool == nil {
+            decodedWidgetData["showRefreshButton"] = false
+        }
+        
+        widgetData = decodedWidgetData
     }
     
     func encode(to encoder: Encoder) throws {
@@ -41,6 +47,10 @@ struct WidgetModel: Codable, Identifiable  {
 class WidgetDataMigrator {
     static func migrateWidgetDataIfNeeded(_ widgetData: [String: Any]) -> [String: Any] {
         var migratedData = widgetData
+        
+        if migratedData["showRefreshButton"] as? Bool == nil {
+            migratedData["showRefreshButton"] = false
+        }
         
         if let stops = widgetData["stops"] as? [[String: Any]] {
             let migratedStops = stops.map { Stop(from: $0) }

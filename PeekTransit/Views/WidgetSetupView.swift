@@ -24,6 +24,7 @@ struct WidgetSetupView: View {
     @State private var stopsWithoutService: [Int] = []
     @State private var noSelectedVariants: Bool = false
     @State private var multipleEntriesPerVariant: Bool = true
+    @State private var showRefreshButton = false
     @State private var selectedPerferredStopsInClosestStops = false
     @State private var isTransitioning = false
     let editingWidget: WidgetModel?
@@ -42,6 +43,7 @@ struct WidgetSetupView: View {
             _widgetName = State(initialValue:widget.widgetData["name"] as? String ?? "")
             _noSelectedVariants = State(initialValue: widget.widgetData["noSelectedVariants"] as? Bool ?? false)
             _multipleEntriesPerVariant = State(initialValue: widget.widgetData["multipleEntriesPerVariant"] as? Bool ?? true)
+            _showRefreshButton = State(initialValue: widget.widgetData["showRefreshButton"] as? Bool ?? false)
             _selectedPerferredStopsInClosestStops = State(initialValue: widget.widgetData["selectedPerferredStopsInClosestStops"] as? Bool ?? false)
             
             var counter = 0
@@ -60,6 +62,8 @@ struct WidgetSetupView: View {
                 
                 _selectedVariants = State(initialValue: variants)
             }
+        } else {
+            _showRefreshButton = State(initialValue: true)
         }
     }
 
@@ -67,7 +71,7 @@ struct WidgetSetupView: View {
         
         
         if isClosestStop {
-            return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
+            return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status") - \(showRefreshButton && widgetSize != "lockscreen" ? "Show Refresh Button" : "Don't Show Refresh Button")"
         } else {
             let stopNumbers = selectedStops.compactMap { stop -> String? in
                 guard  stop.number != -1 else { return nil }
@@ -89,7 +93,7 @@ struct WidgetSetupView: View {
                 variantKeys = "Up Coming Buses"
             }
             
-             return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status")"
+             return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status") - \(showRefreshButton && widgetSize != "lockscreen" ? "Show Refresh Button" : "Don't Show Refresh Button")"
             
             
         }
@@ -111,7 +115,8 @@ struct WidgetSetupView: View {
             "showLastUpdatedStatus": showLastUpdatedStatus,
             "noSelectedVariants": noSelectedVariants,
             "multipleEntriesPerVariant": multipleEntriesPerVariant,
-            "selectedPerferredStopsInClosestStops": selectedPerferredStopsInClosestStops
+            "selectedPerferredStopsInClosestStops": selectedPerferredStopsInClosestStops,
+            "showRefreshButton": showRefreshButton && widgetSize != "lockscreen"
         ]
         
         if isClosestStop {
@@ -202,9 +207,16 @@ struct WidgetSetupView: View {
             
             if currentStep == 2 {
                 if editingWidget != nil {
+                    let stopKeys = selectedStops.filter { $0.number != -1 }.map { String($0.number) }
+                    let allowedCounts = getAllowedVariantCountsPerStop(
+                        selectedCounts: stopKeys.map { selectedVariants[$0]?.count ?? 0 },
+                        totalAllowed: maxVariantsTotal
+                    )
                     var newSelectedVariants = [String: [Variant]]()
-                    for (key, values) in selectedVariants {
-                        newSelectedVariants[key] = Array(values.prefix(maxVariantsPerStop))
+                    for (index, key) in stopKeys.enumerated() {
+                        if let values = selectedVariants[key], allowedCounts[index] > 0 {
+                            newSelectedVariants[key] = Array(values.prefix(allowedCounts[index]))
+                        }
                     }
                     selectedVariants = newSelectedVariants
                 }
@@ -271,13 +283,16 @@ struct WidgetSetupView: View {
         }
     }
     
+    private var maxVariantsTotal: Int {
+        return getTotalVariantsAllowedInWidget(
+            multipleEntriesPerVariant: multipleEntriesPerVariant,
+            widgetSizeSystemFormat: nil,
+            widgetSizeStringFormat: widgetSize
+        )
+    }
+    
     private var maxVariantsPerStop: Int {
-        if (multipleEntriesPerVariant) {
-            return getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
-        } else {
-            return getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
-        }
-        
+        return min(getMaxVariantsAllowedPerSingleStop(), maxVariantsTotal)
     }
     
     var body: some View {
@@ -287,7 +302,7 @@ struct WidgetSetupView: View {
                     switch currentStep {
                     case 1:
                         VStack {
-                            SizeSelectionStep(selectedSize: $widgetSize, selectedTimeFormat: $selectedTimeFormat, showLastUpdatedStatus: $showLastUpdatedStatus, multipleEntriesPerVariant: $multipleEntriesPerVariant)
+                            SizeSelectionStep(selectedSize: $widgetSize, selectedTimeFormat: $selectedTimeFormat, showLastUpdatedStatus: $showLastUpdatedStatus, multipleEntriesPerVariant: $multipleEntriesPerVariant, showRefreshButton: $showRefreshButton, isEditing: editingWidget != nil)
                             
                             ContinueButton(
                                 title: "Continue",
@@ -318,6 +333,7 @@ struct WidgetSetupView: View {
                                     selectedStops: selectedStops,
                                     selectedVariants: $selectedVariants,
                                     maxVariantsPerStop: maxVariantsPerStop,
+                                    maxVariantsTotal: maxVariantsTotal,
                                     settingNotification: false,
                                     stopsWithoutService: $stopsWithoutService,
                                     showNoServiceAlert: $showNoServiceAlert,

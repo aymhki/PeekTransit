@@ -62,6 +62,10 @@ struct DynamicWidgetView: View {
 
     private var updatedAtToUse: Date {
         if !mightUseCacheData {
+            if let dataTimestamp = widgetData["refreshDataDate"] as? Double {
+                return Date(timeIntervalSince1970: dataTimestamp)
+            }
+            
             return updatedAt
         }
         
@@ -72,6 +76,77 @@ struct DynamicWidgetView: View {
         return updatedAt
     }
 
+    private var showRefreshButton: Bool {
+        guard size == .systemSmall || size == .systemMedium || size == .systemLarge else {
+            return false
+        }
+        
+        return (widgetData["showRefreshButton"] as? Bool) ?? (widgetDataToUse["showRefreshButton"] as? Bool) ?? false
+    }
+    
+    private var widgetIdForRefresh: String? {
+        return widgetData["id"] as? String
+    }
+    
+    private var refreshButtonIsInteractive: Bool {
+        guard showRefreshButton, !forPreview, let widgetId = widgetIdForRefresh, !widgetId.isEmpty else {
+            return false
+        }
+        
+        if #available(iOS 17.0, *) {
+            return true
+        }
+        
+        return false
+    }
+    
+    private var refreshOwnsLastUpdatedText: Bool {
+        return refreshButtonIsInteractive && (widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
+    }
+    
+    private var isRefreshCoolingDown: Bool {
+        guard refreshButtonIsInteractive, let widgetId = widgetIdForRefresh else {
+            return false
+        }
+        
+        return WidgetRefreshState.isCoolingDown(widgetId, now: updatedAt)
+    }
+    
+    private var lastUpdatedReservedSpace: CGFloat {
+        if showRefreshButton && (size == .systemSmall || size == .systemMedium) {
+            return getRefreshButtonReservedSpace(for: size)
+        }
+        
+        return 0
+    }
+    
+    private var bottomContentPadding: CGFloat {
+        return (showRefreshButton && size == .systemLarge) ? 28 : 8
+    }
+    
+    private var refreshLastUpdatedContent: ((Bool) -> AnyView)? {
+        guard refreshOwnsLastUpdatedText else {
+            return nil
+        }
+        
+        return { loading in
+            self.refreshLastUpdatedView(isLoading: loading)
+        }
+    }
+    
+    private func refreshLastUpdatedView(isLoading: Bool) -> AnyView {
+        return AnyView(
+            LastUpdatedView(
+                updatedAt: updatedAtToUse,
+                size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : "large",
+                isLoading: isLoading,
+                usingCached: mightUseCacheData,
+                forPreview: false,
+                reservedTrailingSpace: lastUpdatedReservedSpace
+            )
+        )
+    }
+    
     private var mightUseCacheData: Bool {
         return (scheduleData == nil || scheduleData!.isEmpty || widgetData.isEmpty) && !forPreview
     }
@@ -108,6 +183,7 @@ struct DynamicWidgetView: View {
                             } else {
                                 content
                                     .frame(maxWidth: .infinity, alignment: .center)
+                                    .refreshInvalidatable(refreshButtonIsInteractive)
                             }
                             
                             if (widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && (cachedData == nil || (cachedData!.0?.isEmpty ?? true) || (cachedData!.1?.isEmpty ?? true)) && !forPreview {
@@ -128,33 +204,32 @@ struct DynamicWidgetView: View {
                                 }
                                 
                                 if (size != .accessoryRectangular) {
-                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading,  usingCached: mightUseCacheData, forPreview: forPreview)
+                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading,  usingCached: mightUseCacheData, forPreview: forPreview, reservedTrailingSpace: lastUpdatedReservedSpace)
                                         .frame(maxWidth: .infinity, alignment: .center)
+                                        .opacity(refreshOwnsLastUpdatedText ? 0 : 1)
                                 } else {
-                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading, usingCached: mightUseCacheData, forPreview: forPreview)
+                                    LastUpdatedView(updatedAt: updatedAtToUse, size: size == .systemSmall ? "small" : size == .systemMedium ? "medium" : size == .systemLarge ? "large" : "lockscreen", isLoading: isLoading, usingCached: mightUseCacheData, forPreview: forPreview, reservedTrailingSpace: lastUpdatedReservedSpace)
                                         .frame(maxWidth: .infinity, alignment: .center)
+                                        .opacity(refreshOwnsLastUpdatedText ? 0 : 1)
                                 }
                             }
                         }
-                        .padding(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                        .padding(EdgeInsets(top: 8, leading: 8, bottom: bottomContentPadding, trailing: 8))
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .ignoresSafeArea(.all)
                         
-//                        if #available(iOS 17.0, *) {
-//                            let showRefreshButton = widgetDataToUse["showRefreshButton"] as? Bool ?? true
-//                            
-//                            if showRefreshButton && size != .accessoryRectangular {
-//                                VStack {
-//                                    Spacer()
-//                                    HStack {
-//                                        Spacer()
-//                                        RefreshButton()
-//                                    }
-//                                }
-//                                .padding(.trailing, size == .systemSmall ? 8 : 12)
-//                                .padding(.bottom, size == .systemSmall ? 8 : 12)
-//                            }
-//                        }
+                        if showRefreshButton {
+                            RefreshButtonOverlay(
+                                widgetId: widgetIdForRefresh,
+                                family: size,
+                                isLoading: isLoading,
+                                isCoolingDown: isRefreshCoolingDown,
+                                forPreview: forPreview,
+                                borderColor: currentTheme == .classic ? Color(hex: "#EB8634", brightness: 300, saturation: 50) : Color.primary,
+                                containerSize: geometry.size,
+                                lastUpdatedContent: refreshLastUpdatedContent
+                            )
+                        }
                     }
                 }
                 
@@ -287,19 +362,28 @@ struct DynamicWidgetView: View {
         
         if let stops = widgetDataToUse["stops"] as? [Stop] {
             let stopsToShow: [Stop] = Array(stops.prefix(maxStops))
+            let allowedVariantCounts = getAllowedVariantCountsPerStop(
+                selectedCounts: stopsToShow.map { $0.selectedVariants.count },
+                totalAllowed: getTotalVariantsAllowedInWidget(
+                    multipleEntriesPerVariant: widgetDataToUse["multipleEntriesPerVariant"] as? Bool ?? true,
+                    widgetSizeSystemFormat: size,
+                    widgetSizeStringFormat: nil
+                )
+            )
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(Array(stopsToShow.enumerated()), id: \.offset) { stopIndex, stop in
                     //let stop = stops[stopIndex]
                     let stopNumber = stop.number
                     let multipleEntriesPerVariant = widgetDataToUse["multipleEntriesPerVariant"] as? Bool ?? true
+                    let maxVariantsToShow = stopIndex < allowedVariantCounts.count ? allowedVariantCounts[stopIndex] : 0
                     let destinationUrl = createStopURL(stopNumber: stopNumber) ?? URL(string: "peektransit://")!
                     
                     if (size == .accessoryRectangular || size == .systemSmall) {
-                        WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
+                        WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true, maxVariantsToShow: maxVariantsToShow)
                             .widgetURL(destinationUrl)
                     } else {
                         Link(destination: destinationUrl ) {
-                            WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true)
+                            WidgetStopView(stop: stop, scheduleData: scheduleDataToUse, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview, multipleEntriesPerVariant: multipleEntriesPerVariant, showLastUpdatedStatus: widgetDataToUse["showLastUpdatedStatus"] as? Bool ?? true, maxVariantsToShow: maxVariantsToShow)
                        }
                     }
                     

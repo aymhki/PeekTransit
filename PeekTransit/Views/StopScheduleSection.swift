@@ -5,6 +5,7 @@ struct StopScheduleSection: View {
     let variants: [Variant]
     let selectedVariants: [Variant]
     let maxVariants: Int
+    let canSelectMore: Bool
     let onVariantSelect: (Variant) -> Void
     
     private func isVariantSelected(_ variant: Variant) -> Bool {
@@ -25,7 +26,7 @@ struct StopScheduleSection: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                Text("\(selectedVariants.count)/\(maxVariants)")
+                Text("\(selectedVariants.count) | \(maxVariants)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -64,7 +65,7 @@ struct StopScheduleSection: View {
                         )
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .disabled(selectedVariants.count >= maxVariants && !isVariantSelected(variant))
+                    .disabled(!canSelectMore && !isVariantSelected(variant))
                 }
             }
             .padding(.horizontal)

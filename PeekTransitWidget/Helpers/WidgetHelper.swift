@@ -307,9 +307,19 @@ enum WidgetHelper {
             )
         }
         
+        let allowedVariantCounts = getAllowedVariantCountsPerStop(
+            selectedCounts: stops.prefix(maxStops).map { $0.selectedVariants.count },
+            totalAllowed: getTotalVariantsAllowedInWidget(
+                multipleEntriesPerVariant: multipleEntriesPerVariant,
+                widgetSizeSystemFormat: nil,
+                widgetSizeStringFormat: widgetData["size"] as? String
+            )
+        )
+        
         for var stop in stops {
             
             if currentStop < maxStops {
+                let stopPosition = currentStop
                 
                 let isAutoPopulate = (isClosestStop ?? false && widgetData["selectedPerferredStopsInClosestStops"] as? Bool == false) || widgetData["noSelectedVariants"] as? Bool == true || stop.selectedVariants.isEmpty
                 
@@ -378,6 +388,10 @@ enum WidgetHelper {
                         stop.selectedVariants = selectedVariants
                     } else {
                         
+                        if stopPosition < allowedVariantCounts.count {
+                            stop.selectedVariants = Array(stop.selectedVariants.prefix(allowedVariantCounts[stopPosition]))
+                        }
+                        
                         for variant in stop.selectedVariants {
                             var matchingSchedules: [String] = []
                             
@@ -437,8 +451,49 @@ enum WidgetHelper {
             cacheEntry(id: widgetId, widgetData: schedule.1, scheduleData: finalScheduleDataToCache, lastUpdatedTime: currentDate)
         }
         
+        if let widgetId = widgetId, schedule.1["showRefreshButton"] as? Bool == true {
+            WidgetRefreshState.markCompletedIfPending(widgetId, now: Date())
+            
+            if let cooldownEnd = WidgetRefreshState.cooldownEnd(widgetId), cooldownEnd > currentDate {
+                var refreshData = schedule.1
+                refreshData["refreshDataDate"] = currentDate.timeIntervalSince1970
+                
+                let cooldownEntry = createEntry(currentDate, configuration, refreshData, schedule.0)
+                let enabledEntry = createEntry(cooldownEnd, configuration, refreshData, schedule.0)
+                
+                return Timeline(entries: [cooldownEntry, enabledEntry], policy: .after(cooldownEnd))
+            }
+        }
+        
         let entry = createEntry(currentDate, configuration, schedule.1, schedule.0)
         return Timeline(entries: [entry], policy: .after(nextUpdate))
+    }
+    
+    static func refreshCooldownTimeline<T: BaseEntry>(
+        widgetId: String?,
+        currentDate: Date,
+        configuration: Any,
+        createEntry: @escaping (Date, Any, [String: Any]?, [String]?) -> T
+    ) -> Timeline<T>? {
+        guard let widgetId = widgetId,
+              let widget = getWidgetFromDefaults(withId: widgetId),
+              widget.widgetData["showRefreshButton"] as? Bool == true,
+              !WidgetRefreshState.isPending(widgetId, now: currentDate),
+              WidgetRefreshState.isCoolingDown(widgetId, now: currentDate),
+              let cooldownEnd = WidgetRefreshState.cooldownEnd(widgetId),
+              let cached = getCachedEntry(forId: widgetId),
+              var cachedData = cached.0,
+              let cachedSchedule = cached.1,
+              !cachedSchedule.isEmpty else {
+            return nil
+        }
+        
+        cachedData["refreshDataDate"] = (cached.2 ?? currentDate).timeIntervalSince1970
+        
+        let cooldownEntry = createEntry(currentDate, configuration, cachedData, cachedSchedule)
+        let enabledEntry = createEntry(cooldownEnd, configuration, cachedData, cachedSchedule)
+        
+        return Timeline(entries: [cooldownEntry, enabledEntry], policy: .after(cooldownEnd))
     }
     
     static func getCachedEntry(forId id: String) -> ([String: Any]?, [String]?, Date?)? {

@@ -10,6 +10,7 @@ struct WidgetStopView: View {
     let forPreview: Bool
     let multipleEntriesPerVariant: Bool
     let showLastUpdatedStatus: Bool
+    let maxVariantsToShow: Int
 
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -19,14 +20,6 @@ struct WidgetStopView: View {
         return .default
     }
     
-    private var maxSchedules: Int {
-        if (multipleEntriesPerVariant) {
-            return getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: size, widgetSizeStringFormat: nil)
-        } else {
-            return  getMaxVariantsAllowed(widgetSizeSystemFormat: size, widgetSizeStringFormat: nil)
-        }
-    }
-
     
     
     var body: some View {
@@ -68,7 +61,7 @@ struct WidgetStopView: View {
                 
 
                 
-                ForEach(variants.prefix(maxSchedules).indices, id: \.self) { variantIndex in
+                ForEach(variants.prefix(maxVariantsToShow).indices, id: \.self) { variantIndex in
                     if let schedules = scheduleData {
                         
                         let matchingSchedules: [String] = {
@@ -105,7 +98,7 @@ struct WidgetStopView: View {
                             } else if (size == .systemMedium) {
                                 BusScheduleRow(schedule: schedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                                     .padding(.horizontal, 2)
-                                    .padding(.bottom, (variantIndex < variants.prefix(maxSchedules).count - 1 || scheduleIndex < schedulesToShow.count - 1) ? 3 : 0)
+                                    .padding(.bottom, (variantIndex < variants.prefix(maxVariantsToShow).count - 1 || scheduleIndex < schedulesToShow.count - 1) ? 3 : 0)
                             } else if (size == .accessoryRectangular) {
                                 BusScheduleRow(schedule: schedule, size: size, fullyLoaded: fullyLoaded, forPreview: forPreview)
                             } else if (size == .systemSmall) {

@@ -5,6 +5,24 @@ class VariantsCacheManager {
     private let defaults = UserDefaults.standard
     private let cacheKey = "transit_variants_cache"
     private let lastUpdateKey = "transit_variants_last_update"
+    private let timestampsKey = "transit_variants_cache_timestamps"
+    
+    private var timestamps: [String: Date] {
+        get {
+            guard let data = defaults.data(forKey: timestampsKey),
+                  let decodedTimestamps = try? JSONDecoder().decode([String: Date].self, from: data) else {
+                return [:]
+            }
+            
+            return decodedTimestamps
+        }
+        
+        set {
+            if let data = try? JSONEncoder().encode(newValue) {
+                defaults.set(data, forKey: timestampsKey)
+            }
+        }
+    }
     
     private var cache: [String: [Variant]] {
         get {
@@ -36,17 +54,31 @@ class VariantsCacheManager {
     }
     
     func getCachedVariants(for stopNumber: Int) -> [Variant]? {
-        return cache[String(stopNumber)]
+        let stopKey = String(stopNumber)
+        
+        guard let cachedAt = timestamps[stopKey],
+              Date().timeIntervalSince(cachedAt) < getVariantsCacheMaxAgeSeconds() else {
+            return nil
+        }
+        
+        return cache[stopKey]
     }
     
     func cacheVariants(_ variants: [Variant], for stopNumber: Int) {
+        let stopKey = String(stopNumber)
+        
         var currentCache = cache
-        currentCache[String(stopNumber)] = variants
+        currentCache[stopKey] = variants
         cache = currentCache
+        
+        var currentTimestamps = timestamps
+        currentTimestamps[stopKey] = Date()
+        timestamps = currentTimestamps
     }
     
     func clearAllCaches() {
         defaults.removeObject(forKey: cacheKey)
+        defaults.removeObject(forKey: timestampsKey)
         defaults.removeObject(forKey: lastUpdateKey)
     }
     

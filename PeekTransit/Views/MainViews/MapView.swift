@@ -20,6 +20,7 @@ struct MapView: View {
     @State private var navigateToFocusedStop: Bool = false
     @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.isBlockingLoadingPresented) private var isBlockingLoadingPresented
     @State private var isAppActive = true
     @State private var hasAttemptedInitialLoad = false
     @State private var initialLoadTimer: Timer?
@@ -125,7 +126,7 @@ struct MapView: View {
                     .zIndex(2)
                 }
                 
-                if stopsStore.isLoading && (isManualRefresh || currentlyAvailableStops.isEmpty) {
+                if stopsStore.isLoading && (isManualRefresh || currentlyAvailableStops.isEmpty) && !isBlockingLoadingPresented {
                     ProgressView()
                         .padding()
                         .background(Color(.systemBackground).opacity(1))

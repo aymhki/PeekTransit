@@ -166,6 +166,11 @@ class StopsDataStore: ObservableObject {
                        let index = self.stops.firstIndex(where: { ($0.number as? Int) == enrichedStop.number }) {
                         self.stops[index] = enrichedStop
                     }
+                    
+                    if enrichedStop.number != -1,
+                       let cachedIndex = self.cachedStops.firstIndex(where: { ($0.number as? Int) == enrichedStop.number }) {
+                        self.cachedStops[cachedIndex] = enrichedStop
+                    }
                 }
             }
         } catch {

@@ -4,6 +4,7 @@ struct VariantSelectionStep: View {
     let selectedStops: [Stop]
     @Binding var selectedVariants: [String: [Variant]]
     let maxVariantsPerStop: Int
+    let maxVariantsTotal: Int
     let settingNotification: Bool
     @Binding var stopsWithoutService: [Int]
     @Binding var showNoServiceAlert: Bool
@@ -112,6 +113,26 @@ struct VariantSelectionStep: View {
         } ?? false
     }
     
+    private var totalSelectedVariantsCount: Int {
+        return selectedVariants.values.reduce(0) { $0 + $1.count }
+    }
+    
+    private func canSelectAnotherVariant(stopNumber: Int) -> Bool {
+        let stopId = String(stopNumber)
+        let selectedInThisStop = selectedVariants[stopId]?.count ?? 0
+        
+        guard selectedInThisStop < maxVariantsPerStop else { return false }
+        
+        let remainingSlots = maxVariantsTotal - totalSelectedVariantsCount
+        let otherStopsWithoutVariants = selectedStops.filter { otherStop in
+            otherStop.number != -1 &&
+            otherStop.number != stopNumber &&
+            (selectedVariants[String(otherStop.number)]?.isEmpty ?? true)
+        }.count
+        
+        return remainingSlots - 1 >= otherStopsWithoutVariants
+    }
+    
     private func toggleVariantSelection(stopNumber: Int, variant: Variant) {
         let variantData: Variant = Variant(from:[
             "key": variant.key,
@@ -131,11 +152,11 @@ struct VariantSelectionStep: View {
                 } else {
                     selectedVariants[stopId] = stopVariants
                 }
-            } else if stopVariants.count < maxVariantsPerStop {
+            } else if canSelectAnotherVariant(stopNumber: stopNumber) {
                 stopVariants.append(variantData)
                 selectedVariants[stopId] = stopVariants
             }
-        } else {
+        } else if canSelectAnotherVariant(stopNumber: stopNumber) {
             selectedVariants[stopId] = [variantData]
         }
     }
@@ -206,6 +227,13 @@ struct VariantSelectionStep: View {
                         
                         if !noSelectedVariants || settingNotification {
                             
+                            if !settingNotification {
+                                Text("Selected variants: \(totalSelectedVariantsCount)/\(maxVariantsTotal) - up to \(maxVariantsPerStop) per stop")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal)
+                            }
+                            
                             ForEach(Array(selectedStops.enumerated()), id: \.offset) { index, stop in
                                 if let variants = stopSchedules[String(stop.number)] {
                                     StopScheduleSection(
@@ -213,6 +241,7 @@ struct VariantSelectionStep: View {
                                         variants: Array(variants),
                                         selectedVariants: selectedVariants[String(stop.number)] ?? [],
                                         maxVariants: maxVariantsPerStop,
+                                        canSelectMore: canSelectAnotherVariant(stopNumber: stop.number),
                                         onVariantSelect: { variant in
                                             withAnimation {
                                                 toggleVariantSelection(stopNumber: stop.number, variant: variant)

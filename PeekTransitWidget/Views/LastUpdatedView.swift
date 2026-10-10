@@ -7,6 +7,7 @@ struct LastUpdatedView: View {
     let isLoading: Bool
     let usingCached: Bool
     let forPreview: Bool
+    var reservedTrailingSpace: CGFloat = 0
     
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
@@ -19,14 +20,19 @@ struct LastUpdatedView: View {
     var body: some View {
         
         if (size == "lockscreen" || size == "small") {
-            Text("\(usingCached ? "" : " ")Updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "O." : "")" )
-                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "O." : "")", size: widgetSizeFromString(size), inPreview: forPreview)
+            Text(isLoading ? "Loading..." : "\(usingCached ? "" : " ")Updated at \(formattedTime)  \(usingCached ? "O." : "")" )
+                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)  \(usingCached ? "O." : "")", size: widgetSizeFromString(size), inPreview: forPreview)
+                .if(reservedTrailingSpace > 0) { view in
+                    view.lineLimit(1).minimumScaleFactor(0.6)
+                }
                 .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.trailing, reservedTrailingSpace)
                 .padding(.bottom, 2)
         } else {
-            Text("Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "Old." : "")" )
-                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime) \(isLoading ? "Updating..." : "") \(usingCached ? "Old." : "")", size: widgetSizeFromString(size), inPreview: forPreview)
+            Text(isLoading ? "Loading..." : "Last updated at \(formattedTime)  \(usingCached ? "Old." : "")" )
+                .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)  \(usingCached ? "Old." : "")", size: widgetSizeFromString(size), inPreview: forPreview)
                 .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.trailing, reservedTrailingSpace)
                 .padding(.bottom, 8)
         }
     }

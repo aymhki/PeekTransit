@@ -88,6 +88,7 @@ struct ContentView: View {
                     .tag(4)
                 }
                 .environmentObject(themeManager)
+                .environment(\.isBlockingLoadingPresented, isLoadingStop)
                 .preferredColorScheme(themeManager.currentTheme.preferredColorScheme)
                 .safeAreaInset(edge: .top) {
                     if shouldShowBanner && selection == 0 && !isSearchActive && !isLargeDevice() && !isDetailViewPresentedOnMap {
@@ -288,3 +289,14 @@ struct ContentView: View {
     }
 }
 
+
+private struct BlockingLoadingPresentedKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var isBlockingLoadingPresented: Bool {
+        get { self[BlockingLoadingPresentedKey.self] }
+        set { self[BlockingLoadingPresentedKey.self] = newValue }
+    }
+}

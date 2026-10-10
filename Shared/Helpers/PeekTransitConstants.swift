@@ -916,3 +916,70 @@ public func getVariantNameUnavailablePlaceHolderText() -> String {
 public func getVariantKeySeperator()-> String {
     return "-"
 }
+
+
+public func getShowRefreshButtonHitboxBorder() -> Bool {
+    return false
+}
+
+public func getRefreshButtonCooldownSeconds() -> TimeInterval {
+    return 30
+}
+
+public func getRefreshButtonPendingTimeoutSeconds() -> TimeInterval {
+    return 120
+}
+
+public func getVariantsCacheMaxAgeSeconds() -> TimeInterval {
+    return 12 * 60 * 60
+}
+
+public func getMaxVariantsAllowedPerSingleStop() -> Int {
+    return 2
+}
+
+public func getTotalVariantsAllowedInWidget(multipleEntriesPerVariant: Bool, widgetSizeSystemFormat: WidgetFamily?, widgetSizeStringFormat: String?) -> Int {
+    if (multipleEntriesPerVariant) {
+        return getMaxSopsAllowedForMultipleEntries(widgetSizeSystemFormat: widgetSizeSystemFormat, widgetSizeStringFormat: widgetSizeStringFormat)
+            * getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: widgetSizeSystemFormat, widgetSizeStringFormat: widgetSizeStringFormat)
+    }
+    
+    return getMaxSopsAllowed(widgetSizeSystemFormat: widgetSizeSystemFormat, widgetSizeStringFormat: widgetSizeStringFormat)
+        * getMaxVariantsAllowed(widgetSizeSystemFormat: widgetSizeSystemFormat, widgetSizeStringFormat: widgetSizeStringFormat)
+}
+
+public func getAllowedVariantCountsPerStop(selectedCounts: [Int], totalAllowed: Int) -> [Int] {
+    let perStopCap = getMaxVariantsAllowedPerSingleStop()
+    var remaining = totalAllowed
+    var allowedCounts: [Int] = []
+    
+    for (index, selectedCount) in selectedCounts.enumerated() {
+        let laterStopsNeedingASlot = selectedCounts.dropFirst(index + 1).filter { $0 > 0 }.count
+        let allowed = max(0, min(selectedCount, perStopCap, remaining - laterStopsNeedingASlot))
+        
+        allowedCounts.append(allowed)
+        remaining -= allowed
+    }
+    
+    return allowedCounts
+}
+
+public func getRefreshButtonDiameter(for family: WidgetFamily) -> CGFloat {
+    switch family {
+        case .systemLarge: return 44
+        case .systemMedium: return 24
+        case .systemSmall: return 22
+        default: return 22
+    }
+}
+
+public func getRefreshButtonInset(for family: WidgetFamily) -> CGFloat {
+    switch family {
+        case .systemLarge: return 10
+        default: return 6
+    }
+}
+
+public func getRefreshButtonReservedSpace(for family: WidgetFamily) -> CGFloat {
+    return getRefreshButtonDiameter(for: family) + getRefreshButtonInset(for: family) + 2
+}
