@@ -58,7 +58,7 @@ struct SizeSelectionStep: View {
                                     .stroke(Color.gray.opacity(0.5), lineWidth: 1)
                             )
                         
-                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize, "multipleEntriesPerVariant": multipleEntriesPerVariant, "showRefreshButton": showRefreshButton && selectedSize != "lockscreen"], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant,
+                        let (newSchedule, newWidgetData) = PreviewHelper.generatePreviewSchedule(from: ["size": selectedSize, "multipleEntriesPerVariant": multipleEntriesPerVariant, "showRefreshButton": showRefreshButton], noConfig: true, timeFormat: selectedTimeFormat, showLastUpdatedStatus: showLastUpdatedStatus, multipleEntriesPerVariant: multipleEntriesPerVariant,
                          showLateTextStatus: selectedSize == "small" || selectedSize == "lockscreen") ?? ([], [:])
 
                     
@@ -275,67 +275,70 @@ struct SizeSelectionStep: View {
                 
 
                 
-                if selectedSize != "lockscreen" {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Refresh Button")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        
-                        if showRefreshButton && selectedSize == "small" {
-                            Text("Showing the refresh button in the small sized widget could potentially hide part of the last updated time or the last bus arrival time due to the lack of space.")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                                .padding(.horizontal)
-                        }
-                        
-                        VStack(spacing: 12) {
-                            Button(action: {
-                                showRefreshButton = true
-                            }) {
-                                HStack(alignment: .center, spacing: 8) {
-                                    CircularCheckbox(isSelected: showRefreshButton == true)
-                                        .frame(width: 24)
-                                    
-                                    Text("Show Refresh Button")
-                                        .foregroundColor(.primary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .multilineTextAlignment(.leading)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding()
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .cornerRadius(10)
-                            }
-                            
-                            Button(action: {
-                                showRefreshButton = false
-                            }) {
-                                HStack(alignment: .center, spacing: 8) {
-                                    CircularCheckbox(isSelected: showRefreshButton == false)
-                                        .frame(width: 24)
-                                    
-                                    Text("Don't show Refresh Button")
-                                        .foregroundColor(.primary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .multilineTextAlignment(.leading)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding()
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .cornerRadius(10)
-                            }
-                        }
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(selectedSize == "lockscreen" ? "Tap To Refresh" : "Refresh Button")
+                        .font(.headline)
                         .padding(.horizontal)
+                    
+                    if selectedSize == "lockscreen" {
+                        Text("There is no button on the lock screen. Tapping the widget refreshes it, and tapping it again while the refresh is cooling down opens the stop. The device has to be unlocked for the refresh to run.")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                            .padding(.horizontal)
                     }
+                    
+                    if showRefreshButton && selectedSize == "small" {
+                        Text("Showing the refresh button in the small sized widget could potentially hide part of the last updated time or the last bus arrival time due to the lack of space.")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                            .padding(.horizontal)
+                    }
+                    
+                    VStack(spacing: 12) {
+                        Button(action: {
+                            showRefreshButton = true
+                        }) {
+                            HStack(alignment: .center, spacing: 8) {
+                                CircularCheckbox(isSelected: showRefreshButton == true)
+                                    .frame(width: 24)
+                                
+                                Text(selectedSize == "lockscreen" ? "Tap Widget To Refresh" : "Show Refresh Button")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
+                        
+                        Button(action: {
+                            showRefreshButton = false
+                        }) {
+                            HStack(alignment: .center, spacing: 8) {
+                                CircularCheckbox(isSelected: showRefreshButton == false)
+                                    .frame(width: 24)
+                                
+                                Text(selectedSize == "lockscreen" ? "Tap Widget Only Opens Stop" : "Don't show Refresh Button")
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal)
                 }
                 
                 Spacer(minLength: 50)
             }
         }
         .onChange(of: selectedSize) { newSize in
-            if newSize == "lockscreen" {
-                showRefreshButton = false
-            } else if !isEditing {
+            if !isEditing {
                 showRefreshButton = (newSize == "medium" || newSize == "large")
             }
         }

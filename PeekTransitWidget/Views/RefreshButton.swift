@@ -158,3 +158,45 @@ extension View {
         }
     }
 }
+
+
+private struct RefreshBusyKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+
+extension EnvironmentValues {
+    var refreshBusy: Bool {
+        get { self[RefreshBusyKey.self] }
+        set { self[RefreshBusyKey.self] = newValue }
+    }
+}
+
+
+struct LockscreenRefreshToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .environment(\.refreshBusy, configuration.isOn)
+            .opacity(configuration.isOn ? 0.45 : 1)
+            .contentShape(Rectangle())
+    }
+}
+
+
+extension View {
+    @ViewBuilder
+    func lockscreenRefreshable(widgetId: String?, isBusy: Bool, isEnabled: Bool) -> some View {
+        if #available(iOS 17.0, *) {
+            if isEnabled, let widgetId = widgetId, !widgetId.isEmpty {
+                Toggle(isOn: isBusy, intent: RefreshTimelineIntent(widgetId: widgetId)) {
+                    self.contentShape(Rectangle())
+                }
+                .toggleStyle(LockscreenRefreshToggleStyle())
+            } else {
+                self
+            }
+        } else {
+            self
+        }
+    }
+}

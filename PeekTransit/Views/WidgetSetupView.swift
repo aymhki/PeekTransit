@@ -71,7 +71,7 @@ struct WidgetSetupView: View {
         
         
         if isClosestStop {
-            return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status") - \(showRefreshButton && widgetSize != "lockscreen" ? "Show Refresh Button" : "Don't Show Refresh Button")"
+            return "Closest Stops \(selectedPerferredStopsInClosestStops ? "(With preferred stops)" : "") - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status") - \(showRefreshButton ? "Show Refresh Button" : "Don't Show Refresh Button")"
         } else {
             let stopNumbers = selectedStops.compactMap { stop -> String? in
                 guard  stop.number != -1 else { return nil }
@@ -93,7 +93,7 @@ struct WidgetSetupView: View {
                 variantKeys = "Up Coming Buses"
             }
             
-             return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status") - \(showRefreshButton && widgetSize != "lockscreen" ? "Show Refresh Button" : "Don't Show Refresh Button")"
+             return "\(stopNumbers) - \(variantKeys) - \(widgetSize) - \(multipleEntriesPerVariant ? "Mixed Time Format" : selectedTimeFormat.formattedValue) - \(multipleEntriesPerVariant ? "Multiple enteries per variant" : "Single entry per variant") - \(showLastUpdatedStatus ? "Show Last Updated Status" : "Don't Show Last Updated Status") - \(showRefreshButton ? "Show Refresh Button" : "Don't Show Refresh Button")"
             
             
         }
@@ -116,7 +116,7 @@ struct WidgetSetupView: View {
             "noSelectedVariants": noSelectedVariants,
             "multipleEntriesPerVariant": multipleEntriesPerVariant,
             "selectedPerferredStopsInClosestStops": selectedPerferredStopsInClosestStops,
-            "showRefreshButton": showRefreshButton && widgetSize != "lockscreen"
+            "showRefreshButton": showRefreshButton
         ]
         
         if isClosestStop {

@@ -112,6 +112,22 @@ struct DynamicWidgetView: View {
         return WidgetRefreshState.isCoolingDown(widgetId, now: updatedAt)
     }
     
+    private var lockscreenRefreshEnabledInConfig: Bool {
+        guard size == .accessoryRectangular else {
+            return false
+        }
+        
+        return (widgetData["showRefreshButton"] as? Bool) ?? (widgetDataToUse["showRefreshButton"] as? Bool) ?? false
+    }
+    
+    private var lockscreenRefreshIsInteractive: Bool {
+        guard lockscreenRefreshEnabledInConfig, !forPreview, let widgetId = widgetIdForRefresh, !widgetId.isEmpty else {
+            return false
+        }
+        
+        return !WidgetRefreshState.isCoolingDown(widgetId, now: updatedAt)
+    }
+    
     private var lastUpdatedReservedSpace: CGFloat {
         if showRefreshButton && (size == .systemSmall || size == .systemMedium) {
             return getRefreshButtonReservedSpace(for: size)
@@ -187,7 +203,7 @@ struct DynamicWidgetView: View {
                             }
                             
                             if (widgetDataToUse.isEmpty || scheduleDataToUse.isEmpty) && (cachedData == nil || (cachedData!.0?.isEmpty ?? true) || (cachedData!.1?.isEmpty ?? true)) && !forPreview {
-                                Text("Open app")
+                                Text("Allow Location Always")
                                     .foregroundStyle(.primary)
                                     .foregroundColor(.red)
                                     .font(.caption)
@@ -217,6 +233,7 @@ struct DynamicWidgetView: View {
                         .padding(EdgeInsets(top: 8, leading: 8, bottom: bottomContentPadding, trailing: 8))
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .ignoresSafeArea(.all)
+                        .lockscreenRefreshable(widgetId: widgetIdForRefresh, isBusy: isLoading, isEnabled: lockscreenRefreshIsInteractive)
                         
                         if showRefreshButton {
                             RefreshButtonOverlay(

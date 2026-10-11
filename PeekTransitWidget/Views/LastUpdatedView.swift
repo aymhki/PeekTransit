@@ -9,6 +9,12 @@ struct LastUpdatedView: View {
     let forPreview: Bool
     var reservedTrailingSpace: CGFloat = 0
     
+    @Environment(\.refreshBusy) private var refreshBusy
+    
+    private var showsLoading: Bool {
+        return isLoading || refreshBusy
+    }
+    
     private var currentTheme: StopViewTheme {
         if let savedTheme = SharedDefaults.userDefaults?.string(forKey: settingsUserDefaultsKeys.sharedStopViewTheme),
            let theme = StopViewTheme(rawValue: savedTheme) {
@@ -20,7 +26,7 @@ struct LastUpdatedView: View {
     var body: some View {
         
         if (size == "lockscreen" || size == "small") {
-            Text(isLoading ? "Loading..." : "\(usingCached ? "" : " ")Updated at \(formattedTime)  \(usingCached ? "O." : "")" )
+            Text(showsLoading ? "Loading..." : "\(usingCached ? "" : " ")Updated at \(formattedTime)  \(usingCached ? "O." : "")" )
                 .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)  \(usingCached ? "O." : "")", size: widgetSizeFromString(size), inPreview: forPreview)
                 .if(reservedTrailingSpace > 0) { view in
                     view.lineLimit(1).minimumScaleFactor(0.6)
@@ -29,7 +35,7 @@ struct LastUpdatedView: View {
                 .padding(.trailing, reservedTrailingSpace)
                 .padding(.bottom, 2)
         } else {
-            Text(isLoading ? "Loading..." : "Last updated at \(formattedTime)  \(usingCached ? "Old." : "")" )
+            Text(showsLoading ? "Loading..." : "Last updated at \(formattedTime)  \(usingCached ? "Old." : "")" )
                 .widgetTheme(currentTheme, text: "Last updated at \(formattedTime)  \(usingCached ? "Old." : "")", size: widgetSizeFromString(size), inPreview: forPreview)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.trailing, reservedTrailingSpace)
