@@ -208,10 +208,12 @@ struct WidgetSetupView: View {
             if currentStep == 2 {
                 if editingWidget != nil {
                     let stopKeys = selectedStops.filter { $0.number != -1 }.map { String($0.number) }
-                    let allowedCounts = getAllowedVariantCountsPerStop(
-                        selectedCounts: stopKeys.map { selectedVariants[$0]?.count ?? 0 },
-                        totalAllowed: maxVariantsTotal
-                    )
+                    let allowedCounts = usesPreferredStopsInClosestStops
+                        ? stopKeys.map { _ in maxVariantsPerStop }
+                        : getAllowedVariantCountsPerStop(
+                            selectedCounts: stopKeys.map { selectedVariants[$0]?.count ?? 0 },
+                            totalAllowed: maxVariantsTotal
+                        )
                     var newSelectedVariants = [String: [Variant]]()
                     for (index, key) in stopKeys.enumerated() {
                         if let values = selectedVariants[key], allowedCounts[index] > 0 {
@@ -291,8 +293,28 @@ struct WidgetSetupView: View {
         )
     }
     
+    private var usesPreferredStopsInClosestStops: Bool {
+        return isClosestStop && selectedPerferredStopsInClosestStops
+    }
+    
     private var maxVariantsPerStop: Int {
+        if usesPreferredStopsInClosestStops {
+            if multipleEntriesPerVariant {
+                return getMaxVariantsAllowedForMultipleEntries(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+            }
+            
+            return getMaxVariantsAllowed(widgetSizeSystemFormat: nil, widgetSizeStringFormat: widgetSize)
+        }
+        
         return min(getMaxVariantsAllowedPerSingleStop(), maxVariantsTotal)
+    }
+    
+    private var maxVariantsTotalForSelection: Int {
+        if usesPreferredStopsInClosestStops {
+            return maxVariantsPerStop * max(selectedStops.filter { $0.number != -1 }.count, 1)
+        }
+        
+        return maxVariantsTotal
     }
     
     var body: some View {
@@ -333,7 +355,7 @@ struct WidgetSetupView: View {
                                     selectedStops: selectedStops,
                                     selectedVariants: $selectedVariants,
                                     maxVariantsPerStop: maxVariantsPerStop,
-                                    maxVariantsTotal: maxVariantsTotal,
+                                    maxVariantsTotal: maxVariantsTotalForSelection,
                                     settingNotification: false,
                                     stopsWithoutService: $stopsWithoutService,
                                     showNoServiceAlert: $showNoServiceAlert,
